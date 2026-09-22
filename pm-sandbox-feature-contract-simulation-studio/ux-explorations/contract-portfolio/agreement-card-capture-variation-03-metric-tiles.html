@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agreement Capture Variation 03 — Metric Tiles</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="container">
+    <a class="mock-nav" href="./index.html">← Back to UX concepts</a>
+    <header class="header"><div><p class="mock-kicker">Agreement card redesign</p><h1 class="title">Variation 03 — Metric Tiles + Integrated Capture</h1><p class="subtitle">Uses three aligned summary tiles so each metric has its own boundary and the capture module feels intentional rather than appended.</p></div></header>
+    <div class="variation-note"><strong>UX intent:</strong> Best for scanability and alignment across repeated cards. The incentive tile is visually equal to Lives/Quality but wider to support the progress visual.</div>
+
+    <section class="mock-frame">
+      <article class="agreement-card">
+        <div class="agreement-button">
+          <div>
+            <h2 class="agreement-title">Medicare Advantage West Agreement</h2>
+            <div class="agreement-meta"><span class="pill info">MA</span><span class="pill">Multi-Payor</span><span class="pill">4 contracts</span></div>
+            <p class="agreement-payors">Aetna MA, Humana MA, UHC MA +1 more</p>
+          </div>
+          <div class="tile-row">
+            <div class="summary-tile"><div class="tile-label">Lives</div><div class="tile-value">28,470</div><div class="small">Attributed members</div></div>
+            <div class="summary-tile"><div class="tile-label">Quality Score</div><div class="tile-value stars">★★★★☆ <span class="small">4.1</span></div><div class="small">Domain-weighted stars</div></div>
+            <div class="summary-tile capture-tile" title="Total potential is the maximum incentive dollars available from domain incentives.">
+              <div class="capture-head"><span class="capture-label">Incentive Capture</span><span class="capture-percent">65%</span></div>
+              <div class="capture-line"><span class="capture-earned">$1.42M</span><span class="capture-potential">of $2.18M</span></div>
+              <div class="capture-track"><div class="capture-fill" style="width:65%"></div></div>
+              <div class="capture-foot"><span>captured</span><span>$760K remaining</span></div>
+            </div>
+            <span class="chevron">▸</span>
+          </div>
+        </div>
+        <div class="child-table-wrap">
+          <table class="child-table"><thead><tr><th>Contract</th><th>Lives</th><th>Quality Score</th><th>Incentive Capture</th><th></th></tr></thead><tbody>
+            <tr><td><span class="contract-name">Aetna MA West</span><span class="contract-sub">Medicare Advantage</span></td><td>9,200</td><td><span class="stars">★★★☆☆</span> 3.4</td><td><div class="capture-module compact"><div class="capture-line"><span class="capture-earned">$310K</span><span class="capture-potential">of $690K</span></div><div class="capture-track"><div class="capture-fill" style="width:45%"></div></div><div class="capture-foot"><span>45% captured</span><span>$380K left</span></div></div></td><td><a class="small" href="#">Scorecard →</a></td></tr>
+            <tr><td><span class="contract-name">Humana MA West</span><span class="contract-sub">Medicare Advantage</span></td><td>7,840</td><td><span class="stars">★★★★☆</span> 4.0</td><td><div class="capture-module compact"><div class="capture-line"><span class="capture-earned">$475K</span><span class="capture-potential">of $680K</span></div><div class="capture-track"><div class="capture-fill" style="width:70%"></div></div><div class="capture-foot"><span>70% captured</span><span>$205K left</span></div></div></td><td><a class="small" href="#">Scorecard →</a></td></tr>
+            <tr><td><span class="contract-name">UHC MA West</span><span class="contract-sub">Medicare Advantage</span></td><td>6,310</td><td><span class="stars">★★★★☆</span> 4.4</td><td><div class="capture-module compact"><div class="capture-line"><span class="capture-earned">$635K</span><span class="capture-potential">of $810K</span></div><div class="capture-track"><div class="capture-fill" style="width:78%"></div></div><div class="capture-foot"><span>78% captured</span><span>$175K left</span></div></div></td><td><a class="small" href="#">Scorecard →</a></td></tr>
+          </tbody></table>
+        </div>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

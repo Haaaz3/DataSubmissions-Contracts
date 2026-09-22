@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Concept 03 — Opportunity Prioritization Workbench</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="container">
+    <header class="header">
+      <div>
+        <h1 class="title">Contract Portfolio — Opportunity Workbench</h1>
+        <p class="subtitle">Concept 03 · Prioritize by impact, confidence, and effort</p>
+      </div>
+      <a class="small" href="./index.html">← Back to concepts</a>
+    </header>
+
+    <section class="grid g4">
+      <article class="card"><h3>Total Opportunity Pipeline</h3><p class="value">$6.2M</p><p class="small">Across 22 opportunities</p></article>
+      <article class="card"><h3>Top ROI Bucket</h3><p class="value">$2.1M</p><p class="small">Effort ≤4 and confidence high</p></article>
+      <article class="card"><h3>Execution Capacity</h3><p class="value">11 items</p><p class="small">Can be staffed this quarter</p></article>
+      <article class="card"><h3>Projected Net Improvement</h3><p class="value">+$1.7M</p><p class="small">If top 10 complete</p></article>
+    </section>
+
+    <h2 class="section-title">Prioritized Opportunity Queue</h2>
+    <section class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Rank</th><th>Opportunity</th><th>Agreement</th><th>Expected $</th><th>Confidence</th><th>Effort (0-10)</th><th>ROI Score</th><th>Time to Impact</th><th>Owner</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>ED diversion protocol</td><td>MSSP South</td><td>+$790K</td><td><span class="pill info">0.84</span></td><td>4</td><td>166</td><td>8 weeks</td><td>Care Ops</td></tr>
+          <tr><td>2</td><td>Medication adherence push</td><td>MA Midwest</td><td>+$420K</td><td><span class="pill info">0.88</span></td><td>2</td><td>185</td><td>6 weeks</td><td>Pharmacy</td></tr>
+          <tr><td>3</td><td>A1c gap closure sprint</td><td>Commercial East</td><td>+$610K</td><td><span class="pill warn">0.69</span></td><td>3</td><td>140</td><td>10 weeks</td><td>Quality</td></tr>
+          <tr><td>4</td><td>Readmit transition redesign</td><td>MA West</td><td>+$540K</td><td><span class="pill info">0.82</span></td><td>6</td><td>74</td><td>12 weeks</td><td>CMO Office</td></tr>
+          <tr><td>5</td><td>RAF recapture campaign</td><td>MA Enterprise</td><td>+$430K</td><td><span class="pill warn">0.62</span></td><td>5</td><td>53</td><td>14 weeks</td><td>Network Ops</td></tr>
+        </tbody>
+      </table>
+      <p class="small">ROI Score (exploration only): (Expected $ × Confidence) ÷ Effort.</p>
+    </section>
+
+    <div class="grid g2">
+      <section class="card">
+        <h3>Quick Filters</h3>
+        <div class="kpi"><span>Confidence ≥ 0.75</span><span class="pill info">12 items</span></div>
+        <div class="kpi"><span>Effort ≤ 4</span><span class="pill good">9 items</span></div>
+        <div class="kpi"><span>Impact ≥ $500K</span><span class="pill warn">7 items</span></div>
+        <div class="kpi"><span>Time to impact ≤ 8 weeks</span><span class="pill info">5 items</span></div>
+      </section>
+
+      <section class="card">
+        <h3>Resource Allocation Preview</h3>
+        <table class="tight">
+          <thead><tr><th>Team</th><th>Needed</th><th>Available</th><th>Gap</th></tr></thead>
+          <tbody>
+            <tr><td>Care Ops</td><td>6 squads</td><td>4 squads</td><td><span class="pill bad">-2</span></td></tr>
+            <tr><td>Quality Ops</td><td>4 pods</td><td>4 pods</td><td><span class="pill good">0</span></td></tr>
+            <tr><td>Analytics</td><td>5 analysts</td><td>3 analysts</td><td><span class="pill warn">-2</span></td></tr>
+            <tr><td>Clinical Programs</td><td>3 leads</td><td>3 leads</td><td><span class="pill good">0</span></td></tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

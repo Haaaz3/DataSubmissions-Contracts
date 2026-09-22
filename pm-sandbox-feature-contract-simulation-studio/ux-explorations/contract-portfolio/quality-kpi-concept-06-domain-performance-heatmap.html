@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Quality KPI Concept 06 — Domain Performance Heatmap</title><link rel="stylesheet" href="./styles.css" /></head>
+<body><main class="container">
+  <header class="header"><div><h1 class="title">Domain Performance Heatmap</h1><p class="subtitle">Concept 06 · Multi-KPI domain heatmap for quickly locating money, gaps, and confidence</p></div><a class="small" href="./index.html">← Back to concepts</a></header>
+  <section class="hero-panel hero-grid"><div><p class="hero-kicker">Payor slice · Quality economics by domain</p><h2 class="hero-title">Expose which KPI cells are clinically weak and financially material.</h2><p class="subtitle">Color intensity combines financial exposure, distance to next paid target, and confidence in the current measurement period.</p></div><div class="metric-card"><p class="label">Hot-zone exposure</p><p class="money bad-text">$2.1M</p><p class="small">6 KPI cells are high value and off target</p></div></section>
+  <section class="panel"><div class="panel-title"><div><h2>Multi-KPI financial heatmap</h2><p class="small">Each domain contains multiple KPIs; cell value shows next unlock or protected exposure.</p></div><span class="pill info">Sorted by $ exposure</span></div>
+    <div class="heatmap">
+      <div class="heatmap-cell head">Domain</div><div class="heatmap-cell head">KPI 1</div><div class="heatmap-cell head">KPI 2</div><div class="heatmap-cell head">KPI 3</div><div class="heatmap-cell head">KPI 4</div><div class="heatmap-cell head">KPI 5</div>
+      <div class="heatmap-cell domain">Utilization Efficiency<span class="cell-meta">$1.19M earned / $2.24M potential</span></div>
+      <div class="heatmap-cell high"><strong>ED visits / 1,000</strong><span class="heatmap-score">$330K</span><span class="small">307 vs 295 target</span></div>
+      <div class="heatmap-cell high"><strong>Readmissions</strong><span class="heatmap-score">$260K</span><span class="small">14.1% vs 13.5%</span></div>
+      <div class="heatmap-cell med"><strong>Avoidable admits</strong><span class="heatmap-score">$185K</span><span class="small">1 tier away</span></div>
+      <div class="heatmap-cell low"><strong>SNF days</strong><span class="heatmap-score">$72K</span><span class="small">On target</span></div>
+      <div class="heatmap-cell med"><strong>Post-acute leakage</strong><span class="heatmap-score">$140K</span><span class="small">Medium confidence</span></div>
+      <div class="heatmap-cell domain">Quality of Care<span class="cell-meta">$1.62M earned / $2.03M potential</span></div>
+      <div class="heatmap-cell med"><strong>A1c control</strong><span class="heatmap-score">$170K</span><span class="small">74% → 75%</span></div>
+      <div class="heatmap-cell low"><strong>Medication adherence</strong><span class="heatmap-score">$95K</span><span class="small">Stretch only</span></div>
+      <div class="heatmap-cell high"><strong>Preventive screening</strong><span class="heatmap-score">$150K</span><span class="small">Below floor</span></div>
+      <div class="heatmap-cell med"><strong>BP control</strong><span class="heatmap-score">$120K</span><span class="small">2 pts to target</span></div>
+      <div class="heatmap-cell low"><strong>Statin therapy</strong><span class="heatmap-score">$44K</span><span class="small">Earned</span></div>
+      <div class="heatmap-cell domain">Risk Adjustment<span class="cell-meta">$940K earned / $1.41M potential</span></div>
+      <div class="heatmap-cell med"><strong>RAF closure</strong><span class="heatmap-score">$240K</span><span class="small">410 gaps</span></div>
+      <div class="heatmap-cell low"><strong>Annual wellness</strong><span class="heatmap-score">$85K</span><span class="small">Near stretch</span></div>
+      <div class="heatmap-cell med"><strong>Suspect capture</strong><span class="heatmap-score">$145K</span><span class="small">Medium confidence</span></div>
+      <div class="heatmap-cell low"><strong>HCC recapture</strong><span class="heatmap-score">$60K</span><span class="small">Protected</span></div>
+      <div class="heatmap-cell med"><strong>Documentation timeliness</strong><span class="heatmap-score">$95K</span><span class="small">One sprint</span></div>
+    </div>
+  </section>
+  <section class="tradeoffs"><h2>Pros / Cons / Reasoning</h2><div class="tradeoff-grid"><div><h3>Pros</h3><ul><li>Beautiful, scannable pattern for many KPIs across domains.</li><li>Shows where financial exposure is concentrated without opening every card.</li><li>Works well for executive huddles and portfolio triage.</li></ul></div><div><h3>Cons</h3><ul><li>Color meaning must be clearly defined.</li><li>Not ideal for explaining detailed tier economics.</li><li>May need accessibility alternatives beyond color.</li></ul></div><div><h3>Reasoning</h3><ul><li>The current stacked view hides cross-domain hotspots.</li><li>Financial leaders can use this to ask targeted follow-up questions.</li><li>Best as a summary layer above detailed KPI drilldowns.</li></ul></div></div></section>
+</main></body></html>

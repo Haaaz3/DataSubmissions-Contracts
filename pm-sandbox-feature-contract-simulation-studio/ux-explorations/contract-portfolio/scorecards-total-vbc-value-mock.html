@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scorecards Financial Mock — Total Earned & Potential VBC Value</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <style>
+    .formula { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px; color:#334155; font-size:12px; line-height:1.55; }
+    .value-table th, .value-table td { white-space: nowrap; }
+    .value-table .primary-cell { min-width: 190px; white-space: normal; }
+    .amount { font-weight: 900; color:#0f172a; font-variant-numeric: tabular-nums; }
+    .positive { color:#047857; }
+    .negative { color:#b91c1c; }
+    .subtle { display:block; margin-top:3px; color:#64748b; font-size:11px; font-weight:600; }
+    .stack { display:grid; gap:8px; min-width:210px; }
+    .stack-line { display:flex; height:12px; overflow:hidden; border-radius:999px; background:#e2e8f0; }
+    .stack-earned { background:#059669; }
+    .stack-remaining { background:#a5b4fc; }
+    .stack-loss { background:#ef4444; }
+    .math-grid { display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
+    .calc-card { border:1px solid #e2e8f0; border-radius:16px; background:white; padding:14px; }
+    .calc-card h3 { margin:0 0 8px; color:#0f172a; font-size:15px; text-transform:none; letter-spacing:0; }
+    .calc-rows { display:grid; gap:7px; }
+    .calc-row { display:flex; justify-content:space-between; gap:12px; padding:7px 0; border-bottom:1px solid #f1f5f9; color:#475569; font-size:13px; }
+    .calc-row:last-child { border-bottom:0; }
+    .calc-row.total { margin-top:4px; padding:10px; border:1px solid #c7d2fe; border-radius:12px; background:#eef2ff; color:#312e81; font-weight:900; }
+    .waterfall2 { display:grid; gap:10px; }
+    .wf2-row { display:grid; grid-template-columns: 185px 1fr 100px; gap:12px; align-items:center; }
+    .wf2-track { height:28px; border-radius:10px; background:#e2e8f0; overflow:hidden; }
+    .wf2-fill { height:100%; border-radius:10px; }
+    .blue-fill { background:linear-gradient(90deg,#60a5fa,#4f46e5); }
+    .green-fill { background:linear-gradient(90deg,#34d399,#059669); }
+    .amber-fill { background:linear-gradient(90deg,#fbbf24,#f97316); }
+    .red-fill { background:linear-gradient(90deg,#fca5a5,#dc2626); }
+    .note-box { border:1px solid #bbf7d0; background:#f0fdf4; color:#166534; border-radius:14px; padding:12px; font-size:13px; line-height:1.5; }
+    @media (max-width: 900px) { .math-grid { grid-template-columns:1fr; } .value-table { font-size:12px; } }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header class="header">
+      <div>
+        <h1 class="title">Scorecards — Total Earned & Potential VBC Value</h1>
+        <p class="subtitle">Static UX mock · mathematically reconciled financial columns for the Scorecards payor table</p>
+      </div>
+      <a class="small" href="./index.html">← Back to concepts</a>
+    </header>
+
+    <section class="hero-panel">
+      <div class="hero-grid">
+        <div>
+          <p class="hero-kicker">Financial interpretation model</p>
+          <h2 class="hero-title">Separate cost under management from value earned.</h2>
+          <p class="subtitle" style="margin-top:10px;line-height:1.55;">The table below reframes Scorecards financials so every dollar has a clear source: spend, benchmark variance, shared savings/risk settlement, incentives, total earned value, and total potential value.</p>
+        </div>
+        <div class="card" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);color:white;">
+          <h3 style="color:#bfdbfe;">Core formula</h3>
+          <p class="value">Earned ÷ Potential</p>
+          <p class="small" style="color:#dbeafe;">Total Earned VBC Value = Net Settlement + Earned Incentives</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid g4">
+      <article class="metric-card emphasis"><p class="label">Annualized cost</p><p class="money info-text">$79.4M</p><p class="small">Aetna current PMPM × lives × 12</p></article>
+      <article class="metric-card success"><p class="label">Total earned VBC value</p><p class="money good-text">$2.16M</p><p class="small">$559K settlement + $1.60M incentives</p></article>
+      <article class="metric-card warning"><p class="label">Total potential VBC value</p><p class="money warn-text">$3.36M</p><p class="small">$1.26M max settlement + $2.10M incentives</p></article>
+      <article class="metric-card success"><p class="label">VBC capture rate</p><p class="money good-text">64%</p><p class="small">$2.16M / $3.36M</p></article>
+    </section>
+
+    <h2 class="section-title">Recommended Scorecards table columns</h2>
+    <section class="card" style="overflow-x:auto;">
+      <table class="value-table">
+        <thead>
+          <tr>
+            <th>Payor</th>
+            <th>Lives</th>
+            <th>Annualized Cost</th>
+            <th>Gross Savings / Loss</th>
+            <th>Total Earned VBC Value</th>
+            <th>Total Potential VBC Value</th>
+            <th>Capture</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="primary-cell"><strong>Aetna</strong><span class="subtle">2 contracts · MA + Commercial</span></td>
+            <td>7,270</td>
+            <td><span class="amount">$79.4M</span><span class="subtle">current PMPM × lives × 12</span></td>
+            <td><span class="amount positive">+$1.07M</span><span class="subtle">$80.4M benchmark - $79.4M actual</span></td>
+            <td><span class="amount positive">$2.16M</span><span class="subtle">$559K settlement + $1.60M incentives</span></td>
+            <td><span class="amount">$3.36M</span><span class="subtle">$1.26M max settlement + $2.10M incentives</span></td>
+            <td>
+              <div class="stack"><strong>64%</strong><div class="stack-line"><span class="stack-earned" style="width:64%"></span><span class="stack-remaining" style="width:36%"></span></div></div>
+            </td>
+          </tr>
+          <tr>
+            <td class="primary-cell"><strong>Humana</strong><span class="subtle">2 contracts · upside performing</span></td>
+            <td>11,940</td>
+            <td><span class="amount">$148.6M</span></td>
+            <td><span class="amount positive">+$2.40M</span></td>
+            <td><span class="amount positive">$2.40M</span><span class="subtle">$1.10M settlement + $1.30M incentives</span></td>
+            <td><span class="amount">$3.80M</span><span class="subtle">$2.00M max settlement + $1.80M incentives</span></td>
+            <td><div class="stack"><strong>63%</strong><div class="stack-line"><span class="stack-earned" style="width:63%"></span><span class="stack-remaining" style="width:37%"></span></div></div></td>
+          </tr>
+          <tr>
+            <td class="primary-cell"><strong>CMS</strong><span class="subtle">MSSP / ACO portfolio</span></td>
+            <td>18,650</td>
+            <td><span class="amount">$211.5M</span></td>
+            <td><span class="amount negative">-$1.50M</span></td>
+            <td><span class="amount positive">$1.60M</span><span class="subtle">-$600K settlement + $2.20M incentives</span></td>
+            <td><span class="amount">$6.50M</span><span class="subtle">$3.50M max settlement + $3.00M incentives</span></td>
+            <td><div class="stack"><strong>25%</strong><div class="stack-line"><span class="stack-earned" style="width:25%"></span><span class="stack-remaining" style="width:75%"></span></div></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <h2 class="section-title">Aetna expanded math — auditable rollup</h2>
+    <section class="math-grid">
+      <article class="calc-card">
+        <h3>Aetna Medicare Select — West Coast</h3>
+        <div class="calc-rows">
+          <div class="calc-row"><span>Lives</span><strong>5,120</strong></div>
+          <div class="calc-row"><span>Benchmark spend</span><strong>5,120 × $1,120 × 12 = $68.81M</strong></div>
+          <div class="calc-row"><span>Actual annualized cost</span><strong>5,120 × $1,090 × 12 = $66.97M</strong></div>
+          <div class="calc-row"><span>Gross savings</span><strong class="positive">+$1.84M</strong></div>
+          <div class="calc-row"><span>Net settlement</span><strong class="positive">$1.84M × 45% = +$829K</strong></div>
+          <div class="calc-row"><span>Earned incentives</span><strong class="positive">+$1.15M of $1.45M</strong></div>
+          <div class="calc-row total"><span>Earned VBC value</span><strong>$1.98M</strong></div>
+        </div>
+      </article>
+      <article class="calc-card">
+        <h3>Aetna Commercial ACO — Large Employer</h3>
+        <div class="calc-rows">
+          <div class="calc-row"><span>Lives</span><strong>2,150</strong></div>
+          <div class="calc-row"><span>Benchmark spend</span><strong>2,150 × $450 × 12 = $11.61M</strong></div>
+          <div class="calc-row"><span>Actual annualized cost</span><strong>2,150 × $480 × 12 = $12.38M</strong></div>
+          <div class="calc-row"><span>Gross loss</span><strong class="negative">-$774K</strong></div>
+          <div class="calc-row"><span>Net settlement</span><strong class="negative">-$774K × 35% = -$271K</strong></div>
+          <div class="calc-row"><span>Earned incentives</span><strong class="positive">+$450K of $650K</strong></div>
+          <div class="calc-row total"><span>Earned VBC value</span><strong>$179K</strong></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="brief" style="margin-top:14px;">
+      <h2>Aetna rollup reconciliation</h2>
+      <div class="formula">
+        Benchmark Spend = $68.81M + $11.61M = $80.42M<br />
+        Annualized Cost = $66.97M + $12.38M = $79.35M<br />
+        Gross Savings = $80.42M - $79.35M = +$1.07M<br />
+        Net Settlement = +$829K - $271K = +$559K<br />
+        Earned Incentives = $1.15M + $450K = $1.60M<br />
+        <strong>Total Earned VBC Value = $559K + $1.60M = $2.16M</strong><br />
+        Potential Settlement = $1.16M Medicare stretch + $103K Commercial stretch = $1.26M<br />
+        Potential Incentives = $1.45M + $650K = $2.10M<br />
+        <strong>Total Potential VBC Value = $1.26M + $2.10M = $3.36M</strong><br />
+        <strong>Capture Rate = $2.16M / $3.36M = 64%</strong>
+      </div>
+    </section>
+
+    <section class="grid g3" style="margin-top:14px;">
+      <article class="card">
+        <h3>Annualized Cost</h3>
+        <p class="value">Spend context</p>
+        <p class="small">This is not value earned. It is current medical cost under management: current PMPM × lives × 12.</p>
+      </article>
+      <article class="card">
+        <h3>Total Earned VBC Value</h3>
+        <p class="value good-text" style="color:#047857;">Settlement + incentives</p>
+        <p class="small">This is the primary earned value metric if incentives are separate from the shared savings settlement.</p>
+      </article>
+      <article class="card">
+        <h3>Total Potential VBC Value</h3>
+        <p class="value" style="color:#b45309;">Max settlement + potential incentives</p>
+        <p class="small">This is the denominator for VBC capture rate and should be auditable from contract terms.</p>
+      </article>
+    </section>
+
+    <section class="tradeoffs">
+      <h2>Implementation implication</h2>
+      <div class="note-box">If the live app adds Total Earned VBC Value and Total Potential VBC Value, it should also store whether quality incentives are <strong>separate</strong>, <strong>embedded as settlement modifiers</strong>, or <strong>hybrid</strong>. Otherwise, Settlement + Incentives could accidentally double count for contracts where quality dollars are already embedded in settlement.</div>
+    </section>
+  </main>
+</body>
+</html>

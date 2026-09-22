@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portfolio Scorecard Mock 01 — Risk Composition Command Center</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="container">
+    <header class="header">
+      <div>
+        <h1 class="title">Portfolio Scorecards — Risk Composition Command Center</h1>
+        <p class="subtitle">Mock 01 · Starts with portfolio shape: lives, dollars, risk category, and enterprise concentration</p>
+      </div>
+      <a class="small" href="./index.html">← Back to concepts</a>
+    </header>
+
+    <section class="hero-panel">
+      <div class="hero-grid">
+        <div>
+          <p class="hero-kicker">Executive readout</p>
+          <h2 class="hero-title">2.35M lives under VBC contracts; 54% sit in two-sided or full-risk arrangements.</h2>
+          <p class="subtitle" style="margin-top:10px;line-height:1.55;">Shared Risk and Capitation represent a minority of contracts but the majority of downside exposure. Strategy should prioritize risk-bearing segments where revenue concentration and variance to target overlap.</p>
+        </div>
+        <div class="card" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);color:white;">
+          <h3 style="color:#bfdbfe;">Highest material concern</h3>
+          <p class="value">Shared Risk</p>
+          <p class="small" style="color:#dbeafe;">36% of lives · 48% of downside exposure · -$4.2M variance</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid g4">
+      <article class="metric-card"><p class="label">Enterprise VBC lives</p><p class="money info-text">2.35M</p><p class="small">Across 142 active contracts</p></article>
+      <article class="metric-card success"><p class="label">Revenue under management</p><p class="money good-text">$4.8B</p><p class="small">Annualized premium / contract revenue</p></article>
+      <article class="metric-card risk"><p class="label">Downside exposure</p><p class="money bad-text">$86.4M</p><p class="small">61% in top 10 payors</p></article>
+      <article class="metric-card warning"><p class="label">Variance to target</p><p class="money warn-text">-$37.2M</p><p class="small">Current PMPM vs target PMPM annualized</p></article>
+    </section>
+
+    <h2 class="section-title">Lives and Dollars by Risk Category</h2>
+    <section class="grid g2">
+      <article class="panel">
+        <div class="panel-title"><div><h2>Risk category composition</h2><p class="small">Population concentration across financial-risk arrangements</p></div><span class="pill info">Lives</span></div>
+        <div class="variance-strip">
+          <div class="variance-row"><strong>Pay for Performance</strong><div class="progress-track"><div class="progress-fill good" style="width:13%"></div></div><span>304K · 13%</span></div>
+          <div class="variance-row"><strong>Shared Savings</strong><div class="progress-track"><div class="progress-fill" style="width:33%"></div></div><span>775K · 33%</span></div>
+          <div class="variance-row"><strong>Shared Risk</strong><div class="progress-track"><div class="progress-fill warn" style="width:36%"></div></div><span>846K · 36%</span></div>
+          <div class="variance-row"><strong>Full Risk / Cap</strong><div class="progress-track"><div class="progress-fill warn" style="width:18%"></div></div><span>423K · 18%</span></div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-title"><div><h2>Dollar exposure by risk category</h2><p class="small">Risk-bearing contracts carry disproportionate exposure</p></div><span class="pill bad">Dollars</span></div>
+        <table>
+          <thead><tr><th>Risk category</th><th>Revenue</th><th>Downside</th><th>Variance</th><th>Strategic read</th></tr></thead>
+          <tbody>
+            <tr><td>Pay for Performance</td><td>$412M</td><td>$0.6M</td><td>+$1.8M</td><td><span class="pill good">Stable</span></td></tr>
+            <tr><td>Shared Savings</td><td>$1.3B</td><td>$12.8M</td><td>-$8.5M</td><td><span class="pill warn">Quality unlock</span></td></tr>
+            <tr><td>Shared Risk</td><td>$1.9B</td><td>$41.7M</td><td>-$18.9M</td><td><span class="pill bad">Mitigate</span></td></tr>
+            <tr><td>Full Risk / Cap</td><td>$1.2B</td><td>$31.3M</td><td>-$11.6M</td><td><span class="pill bad">Margin control</span></td></tr>
+          </tbody>
+        </table>
+      </article>
+    </section>
+
+    <h2 class="section-title">Leadership Implications</h2>
+    <section class="grid g3">
+      <article class="card"><h3>Concentration</h3><p class="value">54%</p><p class="small">of lives are in contracts with downside exposure; not enough to manage by contract count alone.</p></article>
+      <article class="card"><h3>Strategy signal</h3><p class="value">3 segments</p><p class="small">Commercial full risk, MA shared risk, and Medicaid shared savings explain 72% of negative variance.</p></article>
+      <article class="card"><h3>Next action</h3><p class="value">Review top 12</p><p class="small">Top contracts represent $51M of downside exposure and should be the next scorecard drilldown.</p></article>
+    </section>
+  </main>
+</body>
+</html>

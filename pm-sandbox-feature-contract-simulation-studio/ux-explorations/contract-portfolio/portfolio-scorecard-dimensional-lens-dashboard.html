@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portfolio Scorecard Mock 02 — Dimensional Lens Dashboard</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="container">
+    <header class="header">
+      <div>
+        <h1 class="title">Portfolio Scorecards — Dimensional Lens Dashboard</h1>
+        <p class="subtitle">Mock 02 · A scalable report model: switch dimension and metric without creating one-off dashboards</p>
+      </div>
+      <a class="small" href="./index.html">← Back to concepts</a>
+    </header>
+
+    <div class="banner">Selected lens: <strong>Insurance Segment</strong> · Selected metric: <strong>Lives</strong> · Alternate dimensions: Risk Type, Payor, Market, Region · Alternate metrics: Target Revenue, Revenue %, Variance, Downside, Net Settlement</div>
+
+    <section class="grid g4">
+      <article class="card"><h3>Selected population</h3><p class="value">2.35M</p><p class="small">100% of enterprise VBC lives</p></article>
+      <article class="card"><h3>Largest segment</h3><p class="value">Commercial</p><p class="small">905K lives · 38.5%</p></article>
+      <article class="card"><h3>Largest revenue segment</h3><p class="value">MA</p><p class="small">$1.44B annualized</p></article>
+      <article class="card"><h3>Most negative variance</h3><p class="value">Medicaid</p><p class="small">-$12.4M vs target</p></article>
+    </section>
+
+    <h2 class="section-title">Reusable Lens Controls</h2>
+    <section class="card">
+      <div class="chart-legend" style="margin-top:0;">
+        <span class="pill info">Risk Type</span><span class="pill info">Payor</span><span class="pill bad">Insurance Segment</span><span class="pill info">Market</span><span class="pill info">Region</span>
+      </div>
+      <div class="chart-legend">
+        <span class="pill bad">Lives</span><span class="pill info">Target Revenue</span><span class="pill info">Revenue %</span><span class="pill info">Variance to Target</span><span class="pill info">Downside Exposure</span><span class="pill info">Net Settlement</span>
+      </div>
+    </section>
+
+    <div class="grid g2" style="margin-top:14px;">
+      <section class="panel">
+        <div class="panel-title"><div><h2>Lives by Insurance Segment</h2><p class="small">Same component can render any dimension + metric combination</p></div><span class="pill info">Bar view</span></div>
+        <div class="variance-strip">
+          <div class="variance-row"><strong>Commercial</strong><div class="progress-track"><div class="progress-fill" style="width:100%"></div></div><span>905,081</span></div>
+          <div class="variance-row"><strong>Medicaid</strong><div class="progress-track"><div class="progress-fill" style="width:58%"></div></div><span>523,293</span></div>
+          <div class="variance-row"><strong>MA</strong><div class="progress-track"><div class="progress-fill" style="width:40%"></div></div><span>361,745</span></div>
+          <div class="variance-row"><strong>ACA</strong><div class="progress-track"><div class="progress-fill" style="width:35%"></div></div><span>318,648</span></div>
+          <div class="variance-row"><strong>Medicare</strong><div class="progress-track"><div class="progress-fill" style="width:27%"></div></div><span>239,906</span></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title"><div><h2>Segment scorecard table</h2><p class="small">One ranked table, sortable by all measures</p></div><span class="pill warn">Strategy view</span></div>
+        <table>
+          <thead><tr><th>Segment</th><th>Lives</th><th>Revenue</th><th>Variance</th><th>Risk mix</th></tr></thead>
+          <tbody>
+            <tr><td>Commercial</td><td>905K</td><td>$1.28B</td><td>-$9.8M</td><td><span class="pill warn">Hybrid</span></td></tr>
+            <tr><td>Medicaid</td><td>523K</td><td>$690M</td><td>-$12.4M</td><td><span class="pill bad">Two-sided</span></td></tr>
+            <tr><td>MA</td><td>362K</td><td>$1.44B</td><td>-$7.1M</td><td><span class="pill bad">Full risk</span></td></tr>
+            <tr><td>ACA</td><td>319K</td><td>$510M</td><td>-$3.2M</td><td><span class="pill warn">Shared savings</span></td></tr>
+            <tr><td>Medicare</td><td>240K</td><td>$880M</td><td>-$4.7M</td><td><span class="pill info">Upside only</span></td></tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+
+    <h2 class="section-title">Target Revenue Report Mode</h2>
+    <div class="banner">Selected metric: <strong>Target Revenue</strong> · Same reusable lens controls now render the pop health leader revenue report across Market, Insurance Segment, Risk Category, and Payor concentration.</div>
+
+    <section class="grid g4">
+      <article class="card"><h3>Enterprise target revenue</h3><p class="value">$304.6M</p><p class="small">100% of target VBC revenue in scope</p></article>
+      <article class="card"><h3>Top market</h3><p class="value">IL</p><p class="small">$120.6M · 39.6% of enterprise</p></article>
+      <article class="card"><h3>Top segment</h3><p class="value">MA</p><p class="small">$130.4M · 42.8% of enterprise</p></article>
+      <article class="card"><h3>Top risk category</h3><p class="value">Shared Risk</p><p class="small">$140.9M · 46.3% of enterprise</p></article>
+    </section>
+
+    <div class="grid g2" style="margin-top:14px;">
+      <section class="panel">
+        <div class="panel-title"><div><h2>Target Revenue by Market</h2><p class="small">Revenue concentration by operating market</p></div><span class="pill info">Market</span></div>
+        <div class="variance-strip">
+          <div class="variance-row"><strong>IL</strong><div class="progress-track"><div class="progress-fill" style="width:100%"></div></div><span>$120.6M</span></div>
+          <div class="variance-row"><strong>GCM</strong><div class="progress-track"><div class="progress-fill" style="width:53%"></div></div><span>$63.9M</span></div>
+          <div class="variance-row"><strong>WI</strong><div class="progress-track"><div class="progress-fill" style="width:51%"></div></div><span>$61.0M</span></div>
+          <div class="variance-row"><strong>NWNC</strong><div class="progress-track"><div class="progress-fill" style="width:35%"></div></div><span>$42.6M</span></div>
+          <div class="variance-row"><strong>MACON</strong><div class="progress-track"><div class="progress-fill" style="width:12%"></div></div><span>$14.7M</span></div>
+          <div class="variance-row"><strong>ROME</strong><div class="progress-track"><div class="progress-fill" style="width:1%"></div></div><span>$0.4M</span></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title"><div><h2>Target Revenue by Insurance Segment</h2><p class="small">Revenue concentration by line of business</p></div><span class="pill info">Segment</span></div>
+        <div class="variance-strip">
+          <div class="variance-row"><strong>MA</strong><div class="progress-track"><div class="progress-fill" style="width:100%"></div></div><span>$130.4M</span></div>
+          <div class="variance-row"><strong>Medicaid</strong><div class="progress-track"><div class="progress-fill" style="width:50%"></div></div><span>$65.4M</span></div>
+          <div class="variance-row"><strong>Medicare</strong><div class="progress-track"><div class="progress-fill" style="width:49%"></div></div><span>$64.0M</span></div>
+          <div class="variance-row"><strong>ACA</strong><div class="progress-track"><div class="progress-fill" style="width:19%"></div></div><span>$24.7M</span></div>
+          <div class="variance-row"><strong>Commercial</strong><div class="progress-track"><div class="progress-fill" style="width:15%"></div></div><span>$19.1M</span></div>
+        </div>
+      </section>
+    </div>
+
+    <div class="grid g2" style="margin-top:14px;">
+      <section class="panel">
+        <div class="panel-title"><div><h2>Target Revenue by Risk Category</h2><p class="small">Shows revenue tied to increasingly complex financial-risk arrangements</p></div><span class="pill bad">Risk</span></div>
+        <table>
+          <thead><tr><th>Risk category</th><th>Target revenue</th><th>Enterprise %</th><th>Strategy cue</th></tr></thead>
+          <tbody>
+            <tr><td>PMPM</td><td>$7.4M</td><td>2.4%</td><td><span class="pill good">Low risk</span></td></tr>
+            <tr><td>P4P or P4P w/PMPM</td><td>$48.8M</td><td>16.0%</td><td><span class="pill info">Quality incentive</span></td></tr>
+            <tr><td>Shared Savings hybrid</td><td>$70.6M</td><td>23.2%</td><td><span class="pill warn">Upside unlock</span></td></tr>
+            <tr><td>Shared Risk hybrid</td><td>$140.9M</td><td>46.3%</td><td><span class="pill bad">Downside materiality</span></td></tr>
+            <tr><td>Capitation hybrid</td><td>$35.8M</td><td>11.8%</td><td><span class="pill bad">Margin management</span></td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title"><div><h2>Top Payors Target Revenue & Enterprise %</h2><p class="small">Revenue concentration complements the lives concentration view</p></div><span class="pill warn">Top 10</span></div>
+        <table class="tight">
+          <thead><tr><th>Payor</th><th>Target revenue</th><th>Enterprise %</th></tr></thead>
+          <tbody>
+            <tr><td>Payor 1</td><td>$64.0M</td><td>21.0%</td></tr>
+            <tr><td>Payor 2</td><td>$63.1M</td><td>20.7%</td></tr>
+            <tr><td>Payor 3</td><td>$63.2M</td><td>20.7%</td></tr>
+            <tr><td>Payor 4</td><td>$25.7M</td><td>8.4%</td></tr>
+            <tr><td>Payor 5</td><td>$15.5M</td><td>5.1%</td></tr>
+            <tr><td>Payor 6</td><td>$14.3M</td><td>4.7%</td></tr>
+            <tr><td>Payor 7</td><td>$13.8M</td><td>4.5%</td></tr>
+            <tr><td>Payor 8</td><td>$13.8M</td><td>4.5%</td></tr>
+            <tr><td>Payor 9</td><td>$11.6M</td><td>3.8%</td></tr>
+            <tr><td>Payor 10</td><td>$7.0M</td><td>2.3%</td></tr>
+            <tr><td><strong>All Others</strong></td><td>$12.7M</td><td>4.2%</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+
+    <section class="tradeoffs">
+      <h2>Why the revenue mode matters</h2>
+      <div class="tradeoff-grid">
+        <div><h3>Concentration</h3><ul><li>Top 3 payors represent 62.4% of target revenue.</li><li>IL alone represents nearly 40% of enterprise target revenue.</li></ul></div>
+        <div><h3>Risk alignment</h3><ul><li>Shared Risk hybrid contracts carry the largest target revenue base.</li><li>Revenue exposure should be paired with downside and variance views.</li></ul></div>
+        <div><h3>Scorecard action</h3><ul><li>Select “Target Revenue” to re-rank the same scorecard table by financial materiality.</li><li>Click market, segment, risk category, or payor to drill into the filtered portfolio.</li></ul></div>
+      </div>
+    </section>
+
+    <h2 class="section-title">How this fits Scorecards</h2>
+    <section class="grid g3">
+      <article class="card"><h3>Before the table</h3><p class="small">Use this module above the current performance table to orient leaders before drilldown.</p></article>
+      <article class="card"><h3>Same measures</h3><p class="small">Lives, revenue, variance, downside, upside, and net settlement are reusable across every lens.</p></article>
+      <article class="card"><h3>Drilldown path</h3><p class="small">Clicking a segment filters the existing scorecard child table and opens contract-level review.</p></article>
+    </section>
+  </main>
+</body>
+</html>

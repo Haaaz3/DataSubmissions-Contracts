@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contracts Page Mockup (App Styled)</title>
+  <style>
+    :root {
+      --bg: #f5f3f1;
+      --text: #1f1b18;
+      --muted: #6b7280;
+      --line: #e3deda;
+      --card: #ffffff;
+      --indigo: #4f46e5;
+      --good: #047857;
+      --warn: #b45309;
+      --bad: #b91c1c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    .shell { max-width: 1280px; margin: 0 auto; padding: 24px 24px 80px; }
+    .header { display:flex; justify-content:space-between; align-items:flex-end; gap:16px; margin-bottom:18px; }
+    .title { margin:0; font-size:30px; font-weight:800; color:#0f172a; }
+    .subtitle { margin:6px 0 0; font-size:14px; color:#64748b; }
+    .link { color:#4f46e5; text-decoration:none; font-size:12px; font-weight:700; }
+    .chipbar { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+    .chip { border:1px solid #d6d3d1; background:#fff; border-radius:999px; padding:5px 10px; font-size:11px; color:#57534e; font-weight:600; }
+
+    .grid { display:grid; gap:12px; }
+    .g2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .g3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
+    .g4 { grid-template-columns: repeat(4, minmax(0,1fr)); }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 1px 2px rgba(15,23,42,0.05);
+      padding: 14px;
+    }
+    .klabel { margin:0; font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:#64748b; font-weight:700; }
+    .kval { margin:6px 0 0; font-size:30px; font-weight:800; color:#0f172a; }
+    .kmeta { margin:4px 0 0; font-size:12px; color:#6b7280; }
+    .section { margin-top:16px; }
+    .section h2 { margin:0 0 8px; font-size:17px; color:#0f172a; }
+
+    .pill { display:inline-flex; border-radius:999px; padding:3px 8px; font-size:11px; font-weight:700; }
+    .good { background:#dcfce7; color:#047857; }
+    .warn { background:#fef3c7; color:#b45309; }
+    .bad { background:#fee2e2; color:#b91c1c; }
+    .info { background:#e0e7ff; color:#3730a3; }
+
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    th, td { text-align:left; padding:10px 8px; border-bottom:1px solid #f1f5f9; vertical-align:top; }
+    th { font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:#64748b; }
+
+    .row { display:flex; justify-content:space-between; gap:10px; padding:8px 0; border-top:1px solid #f1f5f9; }
+    .row:first-child { border-top:0; }
+    .muted { color:#6b7280; font-size:12px; }
+
+    @media (max-width: 980px) {
+      .g4, .g3, .g2 { grid-template-columns: 1fr; }
+      .header { flex-direction:column; align-items:flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="header">
+      <div>
+        <h1 class="title">Contracts</h1>
+        <p class="subtitle">Strategic Command Center mockup aligned to recent user feedback</p>
+      </div>
+      <a class="link" href="./index.html">← Back to UX concepts</a>
+    </header>
+
+    <div class="chipbar">
+      <span class="chip">Scope: Portfolio</span>
+      <span class="chip">Timeframe: Quarter (Annualized)</span>
+      <span class="chip">Data refreshed: 2 days ago</span>
+      <span class="chip">Confidence coverage (High/Medium): 85%</span>
+    </div>
+
+    <section class="grid g4">
+      <article class="card"><p class="klabel">Projected Net Settlement</p><p class="kval">-$3.8M</p><p class="kmeta"><span class="pill bad">↓ $640K</span> vs last review</p></article>
+      <article class="card"><p class="klabel">Downside Exposure</p><p class="kval">$8.9M</p><p class="kmeta">71% concentrated in top 3 agreements</p></article>
+      <article class="card"><p class="klabel">Recoverable Upside</p><p class="kval">$5.1M</p><p class="kmeta">If top 8 interventions execute</p></article>
+      <article class="card"><p class="klabel">High-Confidence Actionable Value</p><p class="kval">$3.4M</p><p class="kmeta">Can be acted on now</p></article>
+    </section>
+
+    <section class="section grid g2">
+      <article class="card">
+        <h2>Executive Narrative</h2>
+        <p class="muted" style="line-height:1.5;margin:0;">
+          Portfolio performance worsened due to MA West readmissions and MSSP South ED utilization. Downside is concentrated and mostly confidence-qualified. Recovery depends on immediate resource shifts and focused execution against top opportunities.
+        </p>
+      </article>
+      <article class="card">
+        <h2>What Changed Since Last Review</h2>
+        <div class="row"><span>Net settlement movement</span><span class="pill bad">-$640K</span></div>
+        <div class="row"><span>Biggest worsening area</span><strong>MA West readmissions</strong></div>
+        <div class="row"><span>Biggest improving area</span><strong>MA Midwest adherence</strong></div>
+        <div class="row"><span>New risk</span><strong>Commercial East quality gate drift</strong></div>
+      </article>
+    </section>
+
+    <section class="section">
+      <article class="card">
+        <h2>Leadership Decisions This Cycle</h2>
+        <table>
+          <thead><tr><th>Decision</th><th>Why now</th><th>Impact</th><th>Resource ask</th><th>Confidence</th><th>Owner</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Shift +8 care FTE to MA West</td><td>Largest leakage cluster</td><td>+$1.2M</td><td>Care Ops reallocation</td><td><span class="pill info">High</span></td><td>VP Care Mgmt</td><td><span class="pill info">Approve</span></td></tr>
+            <tr><td>Fund MSSP South ED diversion</td><td>Fastest payback path</td><td>+$790K</td><td>$420K program budget</td><td><span class="pill warn">Medium</span></td><td>Population Health COO</td><td><span class="pill info">Approve</span></td></tr>
+            <tr><td>Delay RAF expansion</td><td>Low evidence strength</td><td>Avoid misallocation</td><td>None</td><td><span class="pill bad">Low</span></td><td>Finance + Analytics</td><td><span class="pill warn">Defer</span></td></tr>
+          </tbody>
+        </table>
+      </article>
+    </section>
+
+    <section class="section">
+      <article class="card">
+        <h2>Materiality & Exposure Board</h2>
+        <table>
+          <thead><tr><th>Agreement</th><th>Net exposure</th><th>Confidence</th><th>Priority</th><th>Top driver</th><th>Recommended action</th><th>Trend</th></tr></thead>
+          <tbody>
+            <tr><td>MA Value West</td><td>-$1.6M</td><td><span class="pill info">High</span></td><td>Financial recovery</td><td>Readmissions</td><td>Deploy transition-care pod</td><td>↓</td></tr>
+            <tr><td>MSSP South Network</td><td>-$0.7M</td><td><span class="pill warn">Medium</span></td><td>Operational turnaround</td><td>ED utilization</td><td>Fund diversion pilot</td><td>↓</td></tr>
+            <tr><td>Commercial Enterprise East</td><td>-$1.1M</td><td><span class="pill warn">Medium</span></td><td>Quality gate unlock</td><td>A1c threshold</td><td>Targeted gap closure</td><td>→</td></tr>
+          </tbody>
+        </table>
+      </article>
+    </section>
+
+    <section class="section grid g2">
+      <article class="card">
+        <h2>Top 3 KPI → $ Drivers</h2>
+        <div class="row"><span><strong>ED / 1,000</strong> 307 vs 280 target (+27)</span><span class="pill bad">-$1.2M</span></div>
+        <div class="row"><span><strong>Readmissions</strong> 14.1% vs 12.3% (+1.8)</span><span class="pill bad">-$860K</span></div>
+        <div class="row"><span><strong>A1c Control</strong> 71% vs next threshold 75%</span><span class="pill warn">+$540K unlock</span></div>
+      </article>
+      <article class="card">
+        <h2>Tradeoffs & Resource Allocation</h2>
+        <table>
+          <thead><tr><th>Move</th><th>Gain</th><th>Tradeoff</th></tr></thead>
+          <tbody>
+            <tr><td>+8 Care FTE to MA West</td><td>Readmit recovery acceleration</td><td>Delays lower-priority outreach</td></tr>
+            <tr><td>+3 Analysts to MSSP South</td><td>Faster validation + iteration</td><td>Quality analytics backlog +2 weeks</td></tr>
+            <tr><td>Shift quality ops to Aetna East</td><td>Threshold unlock potential</td><td>Reduced support for stable MA Midwest</td></tr>
+          </tbody>
+        </table>
+      </article>
+    </section>
+
+    <section class="section grid g2">
+      <article class="card">
+        <h2>Opportunity Prioritization</h2>
+        <table>
+          <thead><tr><th>Opportunity</th><th>Expected $</th><th>Effort</th><th>Time</th><th>Owner</th></tr></thead>
+          <tbody>
+            <tr><td>ED diversion protocol</td><td>+$790K</td><td>4/10</td><td>8 weeks</td><td>Care Ops</td></tr>
+            <tr><td>A1c closure sprint</td><td>+$610K</td><td>3/10</td><td>10 weeks</td><td>Quality</td></tr>
+            <tr><td>Readmit redesign</td><td>+$540K</td><td>6/10</td><td>12 weeks</td><td>CMO Office</td></tr>
+          </tbody>
+        </table>
+      </article>
+      <article class="card">
+        <h2>Confidence & Accountability</h2>
+        <div class="row"><span>Coverage (full / partial / proxy)</span><strong>54% / 31% / 15%</strong></div>
+        <div class="row"><span>Blocked decisions</span><span class="pill warn">3</span></div>
+        <div class="row"><span>Top initiative owner</span><strong>VP Care Mgmt</strong></div>
+        <div class="row"><span>Next executive review</span><strong>May 6</strong></div>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

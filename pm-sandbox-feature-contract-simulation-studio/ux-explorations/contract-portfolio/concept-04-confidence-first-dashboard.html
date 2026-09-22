@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Concept 04 — Confidence-First Dashboard</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="container">
+    <header class="header">
+      <div>
+        <h1 class="title">Contract Portfolio — Confidence-First View</h1>
+        <p class="subtitle">Concept 04 · Data coverage and reliability lead the story</p>
+      </div>
+      <a class="small" href="./index.html">← Back to concepts</a>
+    </header>
+
+    <div class="banner">Coverage snapshot: Full claims 54% of lives · Partial claims 31% · Proxy/inferred 15% · Last refresh: 2 days ago</div>
+
+    <section class="grid g4">
+      <article class="card"><h3>High-Confidence Net Settlement</h3><p class="value">-$2.1M</p><p class="small">54% of covered lives</p></article>
+      <article class="card"><h3>Medium-Confidence Exposure</h3><p class="value">$1.9M</p><p class="small">Partial claims segments</p></article>
+      <article class="card"><h3>Low-Confidence Exposure</h3><p class="value">$0.8M</p><p class="small">Proxy-based estimates</p></article>
+      <article class="card"><h3>Data Quality Risk Flag</h3><p class="value">3 payors</p><p class="small">Missing complete cost feeds</p></article>
+    </section>
+
+    <div class="grid g2">
+      <section class="card">
+        <h3>Insights by Confidence Tier</h3>
+        <table class="tight">
+          <thead><tr><th>Tier</th><th># Insights</th><th>Total $ Impact</th><th>Action policy</th></tr></thead>
+          <tbody>
+            <tr><td><span class="pill info">High</span></td><td>14</td><td>$3.4M</td><td>Prioritize for execution</td></tr>
+            <tr><td><span class="pill warn">Medium</span></td><td>11</td><td>$2.0M</td><td>Execute with monitoring</td></tr>
+            <tr><td><span class="pill bad">Low</span></td><td>7</td><td>$1.1M</td><td>Validate before major investment</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="card">
+        <h3>Data Coverage Gaps</h3>
+        <table class="tight">
+          <thead><tr><th>Payor / Segment</th><th>Gap</th><th>Impact</th><th>Mitigation</th></tr></thead>
+          <tbody>
+            <tr><td>Commercial Aetna East</td><td>Missing monthly claims lag</td><td>Medium confidence scoring</td><td>Backfill from payer feed</td></tr>
+            <tr><td>MA Regional West</td><td>No pharmacy detail</td><td>Adherence estimates inferred</td><td>Integrate PBM extract</td></tr>
+            <tr><td>MSSP Partner North</td><td>Inconsistent TIN mapping</td><td>Attribution drift risk</td><td>Provider roster reconciliation</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+
+    <h2 class="section-title">Top Opportunities (Confidence-Qualified)</h2>
+    <section class="card">
+      <table>
+        <thead><tr><th>Opportunity</th><th>Expected $</th><th>Confidence</th><th>Evidence Basis</th><th>Recommendation</th></tr></thead>
+        <tbody>
+          <tr><td>Readmit reduction (MA West)</td><td>+$540K</td><td><span class="pill info">High</span></td><td>12 months complete claims</td><td>Execute now</td></tr>
+          <tr><td>A1c threshold push (Comm East)</td><td>+$610K</td><td><span class="pill warn">Medium</span></td><td>Partial claims + quality registry</td><td>Pilot in 2 regions</td></tr>
+          <tr><td>ED diversion (MSSP South)</td><td>+$790K</td><td><span class="pill warn">Medium</span></td><td>Claims lag + utilization proxy</td><td>Stage-gate release</td></tr>
+          <tr><td>RAF recapture campaign</td><td>+$430K</td><td><span class="pill bad">Low</span></td><td>Benchmark inference only</td><td>Validate before scaling</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+</body>
+</html>
