@@ -92,3 +92,7 @@ See [validation results](docs/VALIDATION.md) and [migration details](docs/MIGRAT
 ## Git destination
 
 This repository is hosted at [Haaaz3/DataSubmissions-Contracts](https://github.com/Haaaz3/DataSubmissions-Contracts). The local `cerner` remote also retains the original destination, `https://github.cerner.com/AD2005431/Austin-CI-Proto.git`. Source archives contain no original Git history. See `docs/VALIDATION.md` for verified checks and remote-access status. After authenticating with your approved Cerner Git credentials, inspect the remote before pushing; do not force-push over existing work.
+
+## Keeping both repositories in sync
+
+Future prototype updates should be committed once and published to both GitHub.com and Cerner Git using `pnpm publish:repos`. The script verifies that both `main` branches match and stops on conflicting changes or missing authentication. See [the publishing workflow](docs/REPOSITORY-SYNC.md).

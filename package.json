@@ -11,7 +11,9 @@
     "test": "pnpm --filter @austin/pm-sandbox test && pnpm --filter @austin/design-criteria test",
     "typecheck": "pnpm --filter @austin/pm-sandbox exec tsc --noEmit",
     "lint": "pnpm --filter @austin/pm-sandbox lint && pnpm --filter hdids-design-lab-prototype check && node --check apps/data-submissions/outputs/ohds-prototype/union-bridge.js",
-    "test:browser": "node scripts/browser-test.mjs"
+    "test:browser": "node scripts/browser-test.mjs",
+    "publish:repos": "node scripts/publish-repos.mjs",
+    "test:publish": "node --test scripts/publish-repos.test.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0"
