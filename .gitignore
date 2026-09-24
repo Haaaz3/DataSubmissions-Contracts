@@ -1,0 +1,12 @@
+node_modules/
+.next/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.DS_Store
+playwright-report/
+test-results/
+apps/pm-sandbox/public/data-submissions/

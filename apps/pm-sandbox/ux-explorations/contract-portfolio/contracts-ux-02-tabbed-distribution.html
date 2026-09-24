@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contracts UX 02 — Tabbed Distribution</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <style>
+    .mock-shell { display:grid; gap:16px; }
+    .topbar { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:14px; }
+    .back { color:#4f46e5; font-size:12px; font-weight:800; text-decoration:none; }
+    .hero-clean { border:1px solid #e2e8f0; background:linear-gradient(135deg,#ffffff,#f8fafc); border-radius:22px; padding:22px; box-shadow:0 14px 34px rgba(15,23,42,.06); }
+    .hero-clean h1 { margin:0; font-size:30px; letter-spacing:-.04em; }
+    .hero-clean p { margin:8px 0 0; color:#64748b; line-height:1.5; }
+    .kpi-row { display:grid; grid-template-columns:1.35fr 1fr 1fr; gap:12px; }
+    .kpi-lite { background:white; border:1px solid #e2e8f0; border-radius:18px; padding:16px; box-shadow:0 8px 20px rgba(15,23,42,.045); }
+    .kpi-lite.primary { background:#eef2ff; border-color:#c7d2fe; }
+    .kpi-lite .label { margin:0 0 8px; font-size:11px; color:#64748b; text-transform:uppercase; letter-spacing:.08em; font-weight:900; }
+    .kpi-lite .num { margin:0; font-size:34px; font-weight:950; letter-spacing:-.05em; color:#0f172a; }
+    .kpi-lite .hint { margin:5px 0 0; color:#64748b; font-size:12px; }
+    .layout-rail { display:grid; grid-template-columns:minmax(0,1fr) 330px; gap:16px; align-items:start; }
+    .panel-soft { background:white; border:1px solid #e2e8f0; border-radius:20px; padding:16px; box-shadow:0 8px 22px rgba(15,23,42,.045); }
+    .panel-soft h2 { margin:0 0 4px; font-size:18px; letter-spacing:-.02em; }
+    .panel-soft .desc { margin:0 0 14px; color:#64748b; font-size:13px; }
+    .agreement-list { display:grid; gap:10px; }
+    .agreement-row { display:grid; grid-template-columns:1.4fr .65fr .75fr .75fr auto; gap:14px; align-items:center; padding:14px; border:1px solid #e2e8f0; border-radius:16px; background:#fff; }
+    .agreement-row strong { color:#0f172a; }
+    .meta { color:#64748b; font-size:12px; }
+    .metric { text-align:right; }
+    .metric span { display:block; color:#64748b; font-size:11px; }
+    .metric strong { display:block; margin-top:3px; font-size:14px; }
+    .action { color:#4f46e5; font-size:12px; font-weight:800; text-decoration:none; }
+    .tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+    .tab { border:1px solid #e2e8f0; background:#fff; color:#475569; border-radius:999px; padding:7px 12px; font-size:12px; font-weight:800; }
+    .tab.active { border-color:#c7d2fe; background:#eef2ff; color:#3730a3; }
+    .chart-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
+    .chart-card { background:white; border:1px solid #e2e8f0; border-radius:16px; padding:14px; min-height:180px; }
+    .chart-card h3 { margin:0; font-size:14px; color:#0f172a; text-transform:none; letter-spacing:0; }
+    .bar { height:10px; border-radius:999px; background:#e2e8f0; overflow:hidden; margin-top:9px; }
+    .fill { height:100%; border-radius:999px; background:linear-gradient(90deg,#60a5fa,#4f46e5); }
+    .fill.green { background:linear-gradient(90deg,#34d399,#059669); }
+    .fill.amber { background:linear-gradient(90deg,#fbbf24,#f97316); }
+    .mini-row2 { display:flex; justify-content:space-between; gap:8px; margin-top:11px; font-size:12px; color:#475569; }
+    .summary-cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+    .decision { display:grid; gap:10px; }
+    .decision-item { border:1px solid #e2e8f0; border-radius:16px; padding:13px; background:#f8fafc; }
+    .decision-item strong { display:block; margin-bottom:4px; }
+    .pill2 { display:inline-flex; border-radius:999px; padding:3px 8px; font-size:11px; font-weight:800; background:#eef2ff; color:#3730a3; }
+    .collapse-row { border:1px solid #e2e8f0; border-radius:16px; background:white; padding:14px; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+    .rail-card { border:1px solid #e2e8f0; border-radius:18px; padding:14px; background:#fff; }
+    .rail-card + .rail-card { margin-top:12px; }
+    .rail-card h3 { margin:0 0 8px; font-size:14px; color:#0f172a; text-transform:none; letter-spacing:0; }
+    @media(max-width:1050px) { .kpi-row,.summary-cards,.chart-grid,.layout-rail { grid-template-columns:1fr; } .agreement-row { grid-template-columns:1fr; } .metric { text-align:left; } }
+  </style>
+</head>
+<body>
+  <main class="container mock-shell">
+    <div class="topbar">
+      <div class="hero-clean" style="flex:1">
+        <h1>Contracts UX 02 — Tabbed Distribution</h1>
+        <p>Keeps the analytics but shows only one measure at a time: Lives, Earned Value, or Cost.</p>
+      </div>
+      <a class="back" href="./index.html">← Back to explorations</a>
+    </div>
+    <section class="kpi-row">
+  <article class="kpi-lite primary"><p class="label">Earned VBC Value</p><p class="num">$14.8M</p><p class="hint">Settlement + earned incentives</p></article>
+  <article class="kpi-lite"><p class="label">Potential VBC Value</p><p class="num">$23.6M</p><p class="hint">63% portfolio capture</p></article>
+  <article class="kpi-lite"><p class="label">Total Lives</p><p class="num">76.4K</p><p class="hint">16 active contracts</p></article>
+</section>
+<section class="panel-soft"><h2>Portfolio Distribution</h2><p class="desc">Tabs reduce the visible chart count from 12 to 4 while preserving all lenses.</p><div class="tabs"><span class="tab active">Lives</span><span class="tab">Earned Value</span><span class="tab">Cost</span></div><div class="chart-grid">
+  <article class="chart-card"><h3>Lives by Market</h3><div class="mini-row2"><span>Wisconsin</span><strong>16.0K</strong></div><div class="bar"><div class="fill" style="width:100%"></div></div><div class="mini-row2"><span>Greater Macon</span><strong>12.3K</strong></div><div class="bar"><div class="fill" style="width:77%"></div></div></article>
+  <article class="chart-card"><h3>Risk Model Mix</h3><div class="mini-row2"><span>Shared Savings</span><strong>38%</strong></div><div class="bar"><div class="fill" style="width:38%"></div></div><div class="mini-row2"><span>Shared Risk</span><strong>31%</strong></div><div class="bar"><div class="fill" style="width:31%"></div></div></article>
+  <article class="chart-card"><h3>Insurance Segment</h3><div class="mini-row2"><span>MA</span><strong>33.1K</strong></div><div class="bar"><div class="fill" style="width:100%"></div></div><div class="mini-row2"><span>Commercial</span><strong>24.6K</strong></div><div class="bar"><div class="fill" style="width:74%"></div></div></article>
+  <article class="chart-card"><h3>Top Payors</h3><div class="mini-row2"><span>CMS</span><strong>18.6K</strong></div><div class="bar"><div class="fill" style="width:100%"></div></div><div class="mini-row2"><span>Humana</span><strong>11.9K</strong></div><div class="bar"><div class="fill" style="width:64%"></div></div></article>
+</div></section>
+<section class="panel-soft"><h2>Agreements</h2><p class="desc">Inventory follows the analytics in this dashboard-oriented version.</p><div class="agreement-list">
+  <div class="agreement-row"><div><strong>Wisconsin Value Alliance</strong><div class="meta">BlueCross, Humana · 4 contracts</div></div><div class="metric"><span>Lives</span><strong>16.0K</strong></div><div class="metric"><span>Earned</span><strong>$3.4M</strong></div><div class="metric"><span>Quality</span><strong>4.4 ★</strong></div><a class="action" href="#">Review →</a></div>
+  <div class="agreement-row"><div><strong>Greater Macon Collaborative</strong><div class="meta">CMS, Aetna · 3 contracts</div></div><div class="metric"><span>Lives</span><strong>12.3K</strong></div><div class="metric"><span>Earned</span><strong>$2.7M</strong></div><div class="metric"><span>Quality</span><strong>4.1 ★</strong></div><a class="action" href="#">Review →</a></div>
+  <div class="agreement-row"><div><strong>Northwest North Carolina ACO</strong><div class="meta">CMS · 2 contracts</div></div><div class="metric"><span>Lives</span><strong>8.4K</strong></div><div class="metric"><span>Earned</span><strong>$1.6M</strong></div><div class="metric"><span>Quality</span><strong>3.8 ★</strong></div><a class="action" href="#">Review →</a></div>
+</div></section>
+  </main>
+</body>
+</html>

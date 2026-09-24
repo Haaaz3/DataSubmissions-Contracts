@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contracts Page Mock — 3×4 Portfolio Visual Grid</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <style>
+    .visual-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+    .viz-card { min-height: 252px; display: flex; flex-direction: column; }
+    .viz-head { display: flex; align-items: start; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+    .viz-head h3 { margin: 0; color: #0f172a; font-size: 13px; letter-spacing: .02em; text-transform: none; }
+    .viz-total { margin-top: 2px; font-size: 11px; color: #64748b; }
+    .mini-bars { display: grid; gap: 8px; margin-top: 4px; }
+    .mini-row { display: grid; grid-template-columns: 76px 1fr 64px; gap: 8px; align-items: center; font-size: 11px; }
+    .mini-row strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #334155; }
+    .mini-row span:last-child { color: #475569; font-weight: 800; text-align: right; font-variant-numeric: tabular-nums; }
+    .mini-track { height: 9px; overflow: hidden; border-radius: 999px; background: #e2e8f0; }
+    .mini-fill-blue { height: 100%; border-radius: inherit; background: linear-gradient(90deg, #60a5fa, #4f46e5); }
+    .mini-fill-green { height: 100%; border-radius: inherit; background: linear-gradient(90deg, #34d399, #059669); }
+    .mini-fill-amber { height: 100%; border-radius: inherit; background: linear-gradient(90deg, #fbbf24, #f97316); }
+    .donut-row { display: grid; grid-template-columns: 116px 1fr; gap: 14px; align-items: center; margin-top: 4px; }
+    .donut { width: 112px; height: 112px; border-radius: 999px; background: conic-gradient(var(--a) 0 var(--p1), var(--b) var(--p1) var(--p2), var(--c) var(--p2) var(--p3), var(--d) var(--p3) 100%); position: relative; }
+    .donut::after { content: ""; position: absolute; inset: 24px; border-radius: 999px; background: white; box-shadow: inset 0 0 0 1px #e2e8f0; }
+    .donut-center { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 1; font-size: 16px; font-weight: 900; color: #0f172a; }
+    .legend-stack { display: grid; gap: 7px; }
+    .legend-line { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 11px; color: #475569; }
+    .legend-line span:first-child { display: inline-flex; align-items: center; gap: 6px; }
+    .swatch { width: 9px; height: 9px; border-radius: 999px; display: inline-block; }
+    .viz-note { margin-top: auto; border-top: 1px solid #f1f5f9; padding-top: 9px; color: #64748b; font-size: 11px; line-height: 1.35; }
+    .row-brief { margin: 10px 0 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .row-brief p { margin: 0; color: #475569; font-size: 13px; }
+    @media (max-width: 1100px) { .visual-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 720px) { .visual-grid { grid-template-columns: 1fr; } .donut-row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header class="header">
+      <div>
+        <h1 class="title">Contracts Page — Portfolio Visual Grid</h1>
+        <p class="subtitle">Static UX mock · Replaces three large visuals with three rows of four compact distribution charts</p>
+      </div>
+      <a class="small" href="./index.html">← Back to concepts</a>
+    </header>
+
+    <section class="hero-panel">
+      <div class="hero-grid">
+        <div>
+          <p class="hero-kicker">Contracts portfolio view</p>
+          <h2 class="hero-title">Show lives, achieved value, and cost using the same business lenses.</h2>
+          <p class="subtitle" style="margin-top:10px;line-height:1.55;">This mock organizes the Contracts page visuals into a repeatable 3×4 grid: rows are measures, columns are dimensions. Leaders can quickly compare whether scale, value capture, and cost concentrate in the same markets, contract types, segments, and payors.</p>
+        </div>
+        <div class="card" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);color:white;">
+          <h3 style="color:#bfdbfe;">Grid logic</h3>
+          <p class="value">3 measures × 4 lenses</p>
+          <p class="small" style="color:#dbeafe;">Lives · Achieved Value · Cost by Market, Contract Type, Segment, and Payor</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid g4">
+      <article class="metric-card emphasis"><p class="label">Lives</p><p class="money info-text">76.4K</p><p class="small">Portfolio population in scope</p></article>
+      <article class="metric-card success"><p class="label">Achieved value</p><p class="money good-text">$14.5M</p><p class="small">74% of max captured</p></article>
+      <article class="metric-card warning"><p class="label">Cost</p><p class="money warn-text">$812M</p><p class="small">Annualized cost under management</p></article>
+      <article class="metric-card risk"><p class="label">Concentration signal</p><p class="money bad-text">IL / MA</p><p class="small">Largest market and segment intersections</p></article>
+    </section>
+
+    <div class="row-brief">
+      <div><h2 class="section-title" style="margin:18px 0 0;">Row 1 — Lives Distribution</h2><p>Population concentration: where members sit before considering value or cost.</p></div>
+      <span class="pill info">Measure: Lives</span>
+    </div>
+    <section class="visual-grid">
+      <article class="card viz-card">
+        <div class="viz-head"><div><h3>Lives by Market</h3><p class="viz-total">Total 76.4K lives</p></div><span class="pill info">Market</span></div>
+        <div class="mini-bars">
+          <div class="mini-row"><strong>IL</strong><div class="mini-track"><div class="mini-fill-blue" style="width:100%"></div></div><span>24.6K</span></div>
+          <div class="mini-row"><strong>GCM</strong><div class="mini-track"><div class="mini-fill-blue" style="width:82%"></div></div><span>20.2K</span></div>
+          <div class="mini-row"><strong>WI</strong><div class="mini-track"><div class="mini-fill-blue" style="width:67%"></div></div><span>16.5K</span></div>
+          <div class="mini-row"><strong>NWNC</strong><div class="mini-track"><div class="mini-fill-blue" style="width:39%"></div></div><span>9.7K</span></div>
+          <div class="mini-row"><strong>MACON</strong><div class="mini-track"><div class="mini-fill-blue" style="width:17%"></div></div><span>4.1K</span></div>
+          <div class="mini-row"><strong>ROME</strong><div class="mini-track"><div class="mini-fill-blue" style="width:5%"></div></div><span>1.3K</span></div>
+        </div>
+        <p class="viz-note">IL and GCM carry the largest operating scale and should anchor market-level drilldowns.</p>
+      </article>
+
+      <article class="card viz-card">
+        <div class="viz-head"><div><h3>Lives by Contract Type</h3><p class="viz-total">VBC financial model mix</p></div><span class="pill info">Type</span></div>
+        <div class="donut-row">
+          <div class="donut" style="--a:#4f46e5;--b:#06b6d4;--c:#f59e0b;--d:#10b981;--p1:42%;--p2:73%;--p3:91%;"><span class="donut-center">76K</span></div>
+          <div class="legend-stack">
+            <div class="legend-line"><span><i class="swatch" style="background:#4f46e5"></i>Shared Risk</span><strong>42%</strong></div>
+            <div class="legend-line"><span><i class="swatch" style="background:#06b6d4"></i>Shared Savings</span><strong>31%</strong></div>
+            <div class="legend-line"><span><i class="swatch" style="background:#f59e0b"></i>Pay for Performance</span><strong>18%</strong></div>
+            <div class="legend-line"><span><i class="swatch" style="background:#10b981"></i>Full Risk</span><strong>9%</strong></div>
+          </div>
+        </div>
+        <p class="viz-note">Shared Risk contracts represent the largest lives share and should be paired with cost and downside views.</p>
+      </article>
+
+      <article class="card viz-card">
+        <div class="viz-head"><div><h3>Lives by Insurance Segment</h3><p class="viz-total">Line-of-business mix</p></div><span class="pill info">Segment</span></div>
+        <div class="mini-bars">
+          <div class="mini-row"><strong>Commercial</strong><div class="mini-track"><div class="mini-fill-blue" style="width:100%"></div></div><span>29.5K</span></div>
+          <div class="mini-row"><strong>Medicaid</strong><div class="mini-track"><div class="mini-fill-blue" style="width:72%"></div></div><span>21.2K</span></div>
+          <div class="mini-row"><strong>MA</strong><div class="mini-track"><div class="mini-fill-blue" style="width:54%"></div></div><span>16.0K</span></div>
+          <div class="mini-row"><strong>ACA</strong><div class="mini-track"><div class="mini-fill-blue" style="width:23%"></div></div><span>6.8K</span></div>
+          <div class="mini-row"><strong>Medicare</strong><div class="mini-track"><div class="mini-fill-blue" style="width:10%"></div></div><span>2.9K</span></div>
+        </div>
+        <p class="viz-note">Commercial leads by lives, but achieved value and cost may tell a different story.</p>
+      </article>
+
+      <article class="card viz-card">
+        <div class="viz-head"><div><h3>Top Payor Lives</h3><p class="viz-total">Top payor concentration</p></div><span class="pill info">Payor</span></div>
+        <div class="mini-bars">
+          <div class="mini-row"><strong>Payor 1</strong><div class="mini-track"><div class="mini-fill-blue" style="width:100%"></div></div><span>14.7K</span></div>
+          <div class="mini-row"><strong>Payor 2</strong><div class="mini-track"><div class="mini-fill-blue" style="width:84%"></div></div><span>12.4K</span></div>
+          <div class="mini-row"><strong>Payor 3</strong><div class="mini-track"><div class="mini-fill-blue" style="width:69%"></div></div><span>10.1K</span></div>
+          <div class="mini-row"><strong>Payor 4</strong><div class="mini-track"><div class="mini-fill-blue" style="width:48%"></div></div><span>7.0K</span></div>
+          <div class="mini-row"><strong>All others</strong><div class="mini-track"><div class="mini-fill-blue" style="width:92%"></div></div><span>13.5K</span></div>
+        </div>
+        <p class="viz-note">Top three payors represent nearly half the lives and deserve portfolio-level relationship review.</p>
+      </article>
+    </section>
+
+    <div class="row-brief">
+      <div><h2 class="section-title" style="margin:18px 0 0;">Row 2 — Achieved Value Distribution</h2><p>Captured value: where quality and financial performance are already producing dollars.</p></div>
+      <span class="pill good">Measure: Achieved</span>
+    </div>
+    <section class="visual-grid">
+      <article class="card viz-card">
+        <div class="viz-head"><div><h3>Achieved Value by Market</h3><p class="viz-total">Total $14.5M achieved</p></div><span class="pill good">Market</span></div>
+        <div class="mini-bars">
+          <div class="mini-row"><strong>IL</strong><div class="mini-track"><div class="mini-fill-green" style="width:100%"></div></div><span>$4.8M</span></div>
+          <div class="mini-row"><strong>GCM</strong><div class="mini-track"><div class="mini-fill-green" style="width:77%"></div></div><span>$3.7M</span></div>
+          <div class="mini-row"><strong>WI</strong><div class="mini-track"><div class="mini-fill-green" style="width:63%"></div></div><span>$3.0M</span></div>
+          <div class="mini-row"><strong>NWNC</strong><div class="mini-track"><div class="mini-fill-green" style="width:31%"></div></div><span>$1.5M</span></div>
+          <div class="mini-row"><strong>MACON</strong><div class="mini-track"><div class="mini-fill-green" style="width:19%"></div></div><span>$0.9M</span></div>
+          <div class="mini-row"><strong>ROME</strong><div class="mini-track"><div class="mini-fill-green" style="width:13%"></div></div><span>$0.6M</span></div>
+        </div>
+        <p class="viz-note">IL leads achieved value; compare against cost to determine margin quality.</p>
+      </article>
+
+      <article class="card viz-card">
+        <div class="viz-head"><div><h3>Achieved Value by Contract Type</h3><p class="viz-total">Captured dollars by risk model</p></div><span class="pill good">Type</span></div>
+        <div class="donut-row">
+          <div class="donut" style="--a:#059669;--b:#22c55e;--c:#84cc16;--d:#94a3b8;--p1:48%;--p2:76%;--p3:93%;"><span class="donut-center">$14.5M</span></div>
+          <div class="legend-stack">
+            <div class="legend-line"><span><i class="swatch" style="background:#059669"></i>Shared Risk</span><strong>48%</strong></div>
+            <div class="legend-line"><span><i class="swatch" style="background:#22c55e"></i>Shared Savings</span><strong>28%</strong></div>
+            <div class="legend-line"><span><i class="swatch" style="background:#84cc16"></i>Pay for Performance</span><strong>17%</strong></div>
+            <div class="legend-line"><span><i class="swatch" style="background:#94a3b8"></i>Full Risk</span><strong>7%</strong></div>
+          </div>
+        </div>
+        <p class="viz-note">Shared Risk produces a larger achieved-value share than lives share, suggesting higher financial leverage.</p>
+      </article>
+
+      <article class="card viz-card">
+        <div class="viz-head"><div><h3>Achieved Value by Insurance Segment</h3><p class="viz-total">Value capture by segment</p></div><span class="pill good">Segment</span></div>
+        <div class="mini-bars">
+          <div class="mini-row"><strong>MA</strong><div class="mini-track"><div class="mini-fill-green" style="width:100%"></div></div><span>$6.2M</span></div>
+          <div class="mini-row"><strong>Medicare</strong><div class="mini-track"><div class="mini-fill-green" style="width:52%"></div></div><span>$3.2M</span></div>
+          <div class="mini-row"><strong>Medicaid</strong><div class="mini-track"><div class="mini-fill-green" style="width:45%"></div></div><span>$2.8M</span></div>
+          <div class="mini-row"><strong>Commercial</strong><div class="mini-track"><div class="mini-fill-green" style="width:27%"></div></div><span>$1.7M</span></div>
+          <div class="mini-row"><strong>ACA</strong><div class="mini-track"><div class="mini-fill-green" style="width:10%"></div></div><span>$0.6M</span></div>
+        </div>
+        <p class="viz-note">MA leads achieved dollars even though Commercial leads lives, revealing value density differences.</p>
+      </article>
+
+      <article class="card viz-card">
+        <div class="viz-head"><div><h3>Achieved Value by Payor</h3><p class="viz-total">Top captured value sources</p></div><span class="pill good">Payor</span></div>
+        <div class="mini-bars">
+          <div class="mini-row"><strong>Payor 1</strong><div class="mini-track"><div class="mini-fill-green" style="width:100%"></div></div><span>$3.1M</span></div>
+          <div class="mini-row"><strong>Payor 2</strong><div class="mini-track"><div class="mini-fill-green" style="width:90%"></div></div><span>$2.8M</span></div>
+          <div class="mini-row"><strong>Payor 3</strong><div class="mini-track"><div class="mini-fill-green" style="width:84%"></div></div><span>$2.6M</span></div>
+          <div class="mini-row"><strong>Payor 4</strong><div class="mini-track"><div class="mini-fill-green" style="width:48%"></div></div><span>$1.5M</span></div>
+          <div class="mini-row"><strong>All others</strong><div class="mini-track"><div class="mini-fill-green" style="width:71%"></div></div><span>$2.2M</span></div>
+        </div>
+        <p class="viz-note">Top payors drive both lives and achieved value; use this to prioritize payor scorecard review.</p>
+      </article>
+    </section>
+
+    <div class="row-brief">
+      <div><h2 class="section-title" style="margin:18px 0 0;">Row 3 — Cost Distribution</h2><p>Cost concentration: where spend pressure is concentrated across the same lenses.</p></div>
+      <span class="pill warn">Measure: Cost</span>
+    </div>
+    <section class="visual-grid">
+      <article class="card viz-card">
+        <div class="viz-head"><div><h3>Cost by Market</h3><p class="viz-total">Annualized cost $812M</p></div><span class="pill warn">Market</span></div>
+        <div class="mini-bars">
+          <div class="mini-row"><strong>IL</strong><div class="mini-track"><div class="mini-fill-amber" style="width:100%"></div></div><span>$262M</span></div>
+          <div class="mini-row"><strong>GCM</strong><div class="mini-track"><div class="mini-fill-amber" style="width:71%"></div></div><span>$186M</span></div>
+          <div class="mini-row"><strong>WI</strong><div class="mini-track"><div class="mini-fill-amber" style="width:64%"></div></div><span>$168M</span></div>
+          <div class="mini-row"><strong>NWNC</strong><div class="mini-track"><div class="mini-fill-amber" style="width:35%"></div></div><span>$92M</span></div>
+          <div class="mini-row"><strong>MACON</strong><div class="mini-track"><div class="mini-fill-amber" style="width:17%"></div></div><span>$45M</span></div>
+          <div class="mini-row"><strong>ROME</strong><div class="mini-track"><div class="mini-fill-amber" style="width:4%"></div></div><span>$11M</span></div>
+        </div>
+        <p class="viz-note">Cost follows lives in IL, but WI cost appears high relative to achieved value.</p>
+      </article>
+
+      <article class="card viz-card">
+        <div class="viz-head"><div><h3>Cost by Contract Type</h3><p class="viz-total">Cost by risk model</p></div><span class="pill warn">Type</span></div>
+        <div class="donut-row">
+          <div class="donut" style="--a:#f97316;--b:#f59e0b;--c:#eab308;--d:#94a3b8;--p1:51%;--p2:79%;--p3:94%;"><span class="donut-center">$812M</span></div>
+          <div class="legend-stack">
+            <div class="legend-line"><span><i class="swatch" style="background:#f97316"></i>Shared Risk</span><strong>51%</strong></div>
+            <div class="legend-line"><span><i class="swatch" style="background:#f59e0b"></i>Shared Savings</span><strong>28%</strong></div>
+            <div class="legend-line"><span><i class="swatch" style="background:#eab308"></i>Pay for Performance</span><strong>15%</strong></div>
+            <div class="legend-line"><span><i class="swatch" style="background:#94a3b8"></i>Full Risk</span><strong>6%</strong></div>
+          </div>
+        </div>
+        <p class="viz-note">Shared Risk has the highest cost share, making unit-cost and utilization controls material.</p>
+      </article>
+
+      <article class="card viz-card">
+        <div class="viz-head"><div><h3>Cost by Insurance Segment</h3><p class="viz-total">Segment cost footprint</p></div><span class="pill warn">Segment</span></div>
+        <div class="mini-bars">
+          <div class="mini-row"><strong>MA</strong><div class="mini-track"><div class="mini-fill-amber" style="width:100%"></div></div><span>$318M</span></div>
+          <div class="mini-row"><strong>Medicaid</strong><div class="mini-track"><div class="mini-fill-amber" style="width:66%"></div></div><span>$211M</span></div>
+          <div class="mini-row"><strong>Commercial</strong><div class="mini-track"><div class="mini-fill-amber" style="width:43%"></div></div><span>$136M</span></div>
+          <div class="mini-row"><strong>Medicare</strong><div class="mini-track"><div class="mini-fill-amber" style="width:38%"></div></div><span>$121M</span></div>
+          <div class="mini-row"><strong>ACA</strong><div class="mini-track"><div class="mini-fill-amber" style="width:8%"></div></div><span>$26M</span></div>
+        </div>
+        <p class="viz-note">MA cost is disproportionate to lives, highlighting financial risk and opportunity density.</p>
+      </article>
+
+      <article class="card viz-card">
+        <div class="viz-head"><div><h3>Cost by Payor Population</h3><p class="viz-total">Payor cost concentration</p></div><span class="pill warn">Payor</span></div>
+        <div class="mini-bars">
+          <div class="mini-row"><strong>Payor 1</strong><div class="mini-track"><div class="mini-fill-amber" style="width:100%"></div></div><span>$176M</span></div>
+          <div class="mini-row"><strong>Payor 2</strong><div class="mini-track"><div class="mini-fill-amber" style="width:89%"></div></div><span>$156M</span></div>
+          <div class="mini-row"><strong>Payor 3</strong><div class="mini-track"><div class="mini-fill-amber" style="width:78%"></div></div><span>$137M</span></div>
+          <div class="mini-row"><strong>Payor 4</strong><div class="mini-track"><div class="mini-fill-amber" style="width:47%"></div></div><span>$82M</span></div>
+          <div class="mini-row"><strong>All others</strong><div class="mini-track"><div class="mini-fill-amber" style="width:92%"></div></div><span>$162M</span></div>
+        </div>
+        <p class="viz-note">Top payors remain the major cost levers; pair with achieved value to see value/cost alignment.</p>
+      </article>
+    </section>
+
+    <section class="brief" style="margin-top:18px;">
+      <h2>How this replaces the current three large visuals</h2>
+      <p class="quote">The grid gives leaders the same visual grammar across all measures: population scale, value capture, and cost pressure.</p>
+      <p>In the live Contracts page, each chart could become clickable. Selecting a market, contract type, segment, or payor would filter the agreements table below and preserve the current drilldown path into Agreement and Contract Scorecards.</p>
+    </section>
+  </main>
+</body>
+</html>

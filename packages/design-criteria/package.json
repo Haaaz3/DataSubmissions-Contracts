@@ -1,0 +1,22 @@
+{
+  "name": "@austin/design-criteria",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./adapters": "./src/adapters.ts",
+    "./submission-scenarios": "./src/submission-scenarios.json"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "idb": "8.0.3",
+    "zod": "4.3.6"
+  },
+  "devDependencies": {
+    "vitest": "4.0.18",
+    "fake-indexeddb": "^6.2.0"
+  }
+}

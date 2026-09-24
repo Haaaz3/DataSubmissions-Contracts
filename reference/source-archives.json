@@ -1,0 +1,14 @@
+[
+  {
+    "archive": "Data-Submissions-main.zip",
+    "sha256": "dffb557b05d264ac34c622bbbaf16064f616f58821345ef4cc015e9859fdd2e8"
+  },
+  {
+    "archive": "pm-sandbox-main.zip",
+    "sha256": "4522d36f5886bc650a7efb2e0647873ab2dc99c289b695a3b45194c6ceba7177"
+  },
+  {
+    "archive": "pm-sandbox-feature-contract-simulation-studio.zip",
+    "sha256": "597a0cd25d638dcfb6222f749552d496882a51064dcc2b4183aa203c723104bd"
+  }
+]

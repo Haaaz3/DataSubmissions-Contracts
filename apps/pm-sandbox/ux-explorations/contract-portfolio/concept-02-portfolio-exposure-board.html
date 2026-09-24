@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Concept 02 — Portfolio Exposure Board</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="container">
+    <header class="header">
+      <div>
+        <h1 class="title">Contract Portfolio — Exposure Board</h1>
+        <p class="subtitle">Concept 02 · Exposure management across agreements and payors</p>
+      </div>
+      <a class="small" href="./index.html">← Back to concepts</a>
+    </header>
+
+    <div class="banner">Primary decision: where to allocate people, operating attention, and investment based on concentrated downside exposure.</div>
+
+    <section class="grid g3">
+      <article class="card"><h3>Total Downside Exposure</h3><p class="value">$8.9M</p><p class="small">Portfolio annualized</p></article>
+      <article class="card"><h3>Top 3 Agreement Share</h3><p class="value">71%</p><p class="small">Exposure concentration</p></article>
+      <article class="card"><h3>Exposure with High Confidence</h3><p class="value">$5.4M</p><p class="small">Data-complete segments</p></article>
+    </section>
+
+    <h2 class="section-title">Agreement Exposure Heatmap Table</h2>
+    <section class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Agreement</th><th>Payor</th><th>Lives</th><th>Status</th><th>Downside</th><th>Upside</th><th>Net</th><th>Top Driver</th><th>Confidence</th><th>Recommended Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>MA Value West</td><td>Humana</td><td>38,200</td><td><span class="pill bad">Off Track</span></td><td>$2.3M</td><td>$0.7M</td><td>-$1.6M</td><td>Readmissions</td><td><span class="pill info">High</span></td><td>Deploy transition-care pod</td></tr>
+          <tr><td>MSSP South Network</td><td>CMS</td><td>31,900</td><td><span class="pill warn">Needs Attention</span></td><td>$1.8M</td><td>$1.1M</td><td>-$0.7M</td><td>ED utilization</td><td><span class="pill warn">Medium</span></td><td>Fund urgent care diversion model</td></tr>
+          <tr><td>Commercial Enterprise East</td><td>Aetna</td><td>22,400</td><td><span class="pill bad">Off Track</span></td><td>$1.6M</td><td>$0.5M</td><td>-$1.1M</td><td>Quality gate miss</td><td><span class="pill warn">Medium</span></td><td>Target gap closure sprint</td></tr>
+          <tr><td>MA Compass Midwest</td><td>United</td><td>19,300</td><td><span class="pill good">On Track</span></td><td>$0.5M</td><td>$1.2M</td><td>+$0.7M</td><td>Adherence gains</td><td><span class="pill info">High</span></td><td>Preserve and replicate playbook</td></tr>
+          <tr><td>Commercial Public Sector</td><td>BCBS</td><td>18,100</td><td><span class="pill warn">Needs Attention</span></td><td>$1.1M</td><td>$0.4M</td><td>-$0.7M</td><td>A1c threshold gap</td><td><span class="pill warn">Medium</span></td><td>Reallocate outreach FTEs</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <div class="grid g2">
+      <section class="card">
+        <h3>Resource Allocation Recommendation</h3>
+        <table class="tight">
+          <thead><tr><th>Area</th><th>Current</th><th>Proposed</th><th>Rationale</th></tr></thead>
+          <tbody>
+            <tr><td>Care managers</td><td>42 FTE</td><td>+8 to MA West</td><td>Highest high-confidence leakage</td></tr>
+            <tr><td>Quality ops</td><td>18 FTE</td><td>+4 to Aetna East</td><td>Quality gate unlock potential</td></tr>
+            <tr><td>Analytics support</td><td>12 FTE</td><td>+3 to MSSP South</td><td>Medium confidence opportunity validation</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="card">
+        <h3>Exposure by Status (Dollar)</h3>
+        <table class="tight">
+          <thead><tr><th>Status</th><th>Exposure</th><th>% of total downside</th></tr></thead>
+          <tbody>
+            <tr><td>Off Track</td><td>$5.8M</td><td>65%</td></tr>
+            <tr><td>Needs Attention</td><td>$2.6M</td><td>29%</td></tr>
+            <tr><td>On Track</td><td>$0.5M</td><td>6%</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Oracle Health Data Submissions Prototype</title>
+    <link rel="stylesheet" href="styles.css?v=53" />
+  </head>
+  <body class="oj-web-applayout-body oj-redwood">
+    <section class="lab-bar" aria-label="HDIDS Design Lab controls">
+      <div class="lab-title">
+        <strong>HDIDS Design Lab</strong>
+        <span>Oracle Health Data Submissions prototypes · v53</span>
+      </div>
+      <label>
+        View
+        <select id="labModeSelect">
+          <option value="vision">Vision Platform: Quality Operating System</option>
+          <option value="production">Production Today</option>
+          <option value="variantA">Variant A: Customer Command Center</option>
+          <option value="variantB">Variant B: Submission Pathway Hub</option>
+          <option value="smart">Variant C: Smart Guided Submission</option>
+          <option value="compare">Side-by-Side Compare</option>
+        </select>
+      </label>
+      <label>
+        Scenario
+        <select id="scenarioSelect">
+          <option value="mvp-zmvp4">MVP ZzMVP4 Score Details</option>
+          <option value="appplus-score">APP Plus APM Entity Score</option>
+          <option value="mips-performance">MIPS Customer Performance</option>
+          <option value="mvp-individual">MVP Individual Submission Search</option>
+          <option value="qrda-export">QRDA Export Package</option>
+          <option value="new-submission">Create Submission Draft</option>
+        </select>
+      </label>
+      <details class="prototype-faq-menu" id="prototypeFaqMenu">
+        <summary>FAQ</summary>
+        <div class="prototype-faq-panel">
+          <button type="button" data-global-faq="current">
+            <strong>Current Phase FAQ</strong>
+            <span>Inputs, rules, rationale, and assumptions.</span>
+          </button>
+          <button type="button" data-global-faq="strategy">
+            <strong>Strategy Inputs</strong>
+            <span>How recommendations use enabled measures, specialty mix, and performance.</span>
+          </button>
+          <button type="button" data-global-faq="submit">
+            <strong>Submission Rules</strong>
+            <span>CMS QPP OAuth, validation, export, and receipt context.</span>
+          </button>
+        </div>
+      </details>
+      <button class="lab-btn" id="runScenarioButton">Run Scenario</button>
+    </section>
+    <div class="app-shell">
+      <header class="topbar">
+        <button class="brand" data-action="home">Oracle Health Data Submissions</button>
+        <div class="topbar-controls">
+          <label for="programSelect">Select Program:</label>
+          <select id="programSelect" aria-label="Select Program">
+            <option value="MIPS">MIPS</option>
+            <option value="MVP">MVP Submission</option>
+            <option value="APPPLUS">APP Plus</option>
+            <option value="QRDA">QRDA</option>
+          </select>
+          <span class="divider"></span>
+          <button class="account">austin.dobson@oracle.com</button>
+        </div>
+      </header>
+
+      <div class="body-grid">
+        <aside class="sidebar" id="sidebar"></aside>
+        <main class="content" id="content" tabindex="-1"></main>
+      </div>
+
+      <footer class="footer">
+        <div class="oracle-wordmark">ORACLE</div>
+        <div class="footer-copy">Copyright © 2013, 2026, Oracle and/or its affiliates. Prototype v53.</div>
+        <div class="footer-powered">
+          <span>Powered by</span>
+          <strong>Oracle Health Data Intelligence</strong>
+        </div>
+      </footer>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="app.js?v=53"></script>
+    <script src="union-bridge.js"></script>
+  </body>
+</html>

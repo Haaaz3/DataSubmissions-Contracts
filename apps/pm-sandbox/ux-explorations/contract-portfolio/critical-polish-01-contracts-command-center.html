@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Critical Polish 01 — Contracts Portfolio Command Center</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <style>
+    :root{--navy:#0f172a;--brand:#005a74;--brand2:#0e7490;--indigo:#4f46e5;--green:#047857;--amber:#b45309;--red:#b91c1c;--muted:#475569;--line:#e2e8f0;--soft:#f8fafc}
+    body{background:#f5f3f1}.mock{display:grid;gap:20px}.top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}.back{font-size:12px;font-weight:850;color:#005a74;text-decoration:none;white-space:nowrap}.hero{border-radius:28px;background:linear-gradient(135deg,#073b4c 0%,#005a74 52%,#312e81 100%);color:white;padding:26px;box-shadow:0 24px 54px rgba(15,23,42,.2)}.hero-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(330px,.75fr);gap:22px}.eyebrow{margin:0 0 8px;color:#a7f3d0;font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:900}.hero h1{margin:0;font-size:38px;line-height:1.02;letter-spacing:-.055em}.hero-copy{max-width:760px;margin:12px 0 0;color:#dff7fb;font-size:15px;line-height:1.55}.hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;padding:10px 14px;font-size:13px;font-weight:900;text-decoration:none;border:1px solid rgba(255,255,255,.32)}.btn.primary{background:white;color:#084e63}.btn.secondary{background:rgba(255,255,255,.1);color:white}.value-card{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.24);border-radius:22px;padding:18px}.value-card .label{margin:0;color:#bae6fd;font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:900}.value-card .num{margin:8px 0 0;font-size:48px;font-weight:950;letter-spacing:-.07em}.capture-track{height:12px;border-radius:999px;background:rgba(255,255,255,.23);overflow:hidden;margin:12px 0 8px}.capture-fill{height:100%;width:63%;background:linear-gradient(90deg,#34d399,#d1fae5);border-radius:999px}.formula{margin-top:10px;border-radius:14px;background:rgba(15,23,42,.22);padding:10px;color:#e0f2fe;font-size:12px;line-height:1.5}.metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}.metric-card{background:white;border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 8px 22px rgba(15,23,42,.05)}.metric-card h3{margin:0;color:#64748b;font-size:12px;letter-spacing:.08em;text-transform:uppercase}.metric-card strong{display:block;margin-top:8px;font-size:28px;letter-spacing:-.045em;color:#0f172a}.metric-card p{margin:4px 0 0;color:#64748b;font-size:13px;line-height:1.4}.metric-card.good strong{color:#047857}.metric-card.warn strong{color:#b45309}.metric-card.bad strong{color:#b91c1c}.section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:14px}.section-head h2{margin:0;font-size:22px;letter-spacing:-.035em}.section-head p{margin:4px 0 0;color:#64748b;font-size:14px}.panel{background:white;border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 10px 26px rgba(15,23,42,.05)}.lever-grid{display:grid;grid-template-columns:1.3fr .7fr;gap:14px}.lever-list{display:grid;gap:10px}.lever{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;border:1px solid #e2e8f0;border-radius:16px;padding:14px;background:#fff}.rank{width:30px;height:30px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;background:#005a74;color:white;font-weight:950}.lever h3{margin:0;font-size:15px}.lever p{margin:4px 0 0;color:#64748b;font-size:13px}.money{font-weight:950;font-size:18px;color:#047857;white-space:nowrap}.insight{border-radius:18px;border:1px solid #fde68a;background:#fffbeb;padding:16px}.insight h3{margin:0;color:#92400e;font-size:15px}.insight p{color:#78350f;font-size:13px;line-height:1.55}.definitions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.def{border:1px solid #dbeafe;background:#eff6ff;border-radius:16px;padding:13px}.def strong{display:block;color:#1e3a8a;font-size:13px}.def span{display:block;margin-top:5px;color:#334155;font-size:12px;line-height:1.45}.preview{display:grid;grid-template-columns:1fr 1fr;gap:14px}.todo-list{display:grid;gap:10px}.todo{display:flex;justify-content:space-between;gap:12px;border:1px solid #e2e8f0;border-radius:14px;padding:12px}.pill{display:inline-flex;border-radius:999px;padding:4px 9px;font-size:12px;font-weight:850}.pill.good{background:#dcfce7;color:#047857}.pill.warn{background:#fef3c7;color:#b45309}.pill.bad{background:#fee2e2;color:#b91c1c}.analytics-strip{border:1px dashed #cbd5e1;border-radius:18px;background:#f8fafc;padding:16px;display:flex;justify-content:space-between;gap:12px;color:#475569;font-size:14px}.link{color:#005a74;font-weight:900;text-decoration:none}@media(max-width:1050px){.hero-grid,.metrics,.lever-grid,.definitions,.preview{grid-template-columns:1fr}.top,.section-head{flex-direction:column;align-items:flex-start}}
+  </style>
+</head>
+<body>
+  <main class="container mock">
+    <div class="top"><a class="back" href="./index.html">← Back to explorations</a></div>
+    <section class="hero">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">Critical polish mock 01 · Portfolio command center</p>
+          <h1>Contracts should open with value, risk, and the next best action.</h1>
+          <p class="hero-copy">This version fixes the first-impression problem: it clarifies that Contracts is the portfolio operating center, moves recommendations above secondary analytics, and gives users one clear primary action.</p>
+          <div class="hero-actions"><a class="btn primary" href="#levers">Review top value levers</a><a class="btn secondary" href="#agreements">Open agreement workbench</a><a class="btn secondary" href="#defs">View metric definitions</a></div>
+        </div>
+        <aside class="value-card">
+          <p class="label">Earned VBC value</p><p class="num">$14.8M</p><p class="small">of $23.6M total potential · 63% captured</p><div class="capture-track"><div class="capture-fill"></div></div><p class="small">$10.2M net settlement + $4.6M earned incentives</p>
+          <div class="formula"><strong>Formula:</strong> Earned VBC Value = Net Settlement + Earned Incentives. Potential VBC Value = Max Settlement + Potential Incentives.</div>
+        </aside>
+      </div>
+    </section>
+    <section class="metrics" aria-label="Portfolio summary metrics">
+      <article class="metric-card"><h3>Portfolio health</h3><strong>Watch</strong><p>3 agreements need attention this month</p></article>
+      <article class="metric-card"><h3>Total lives</h3><strong>76.4K</strong><p>16 contracts · 7 agreements</p></article>
+      <article class="metric-card good"><h3>Earned value</h3><strong>$14.8M</strong><p>Settlement + earned incentives</p></article>
+      <article class="metric-card warn"><h3>Uncaptured value</h3><strong>$8.8M</strong><p>Largest gap: NWNC ACO</p></article>
+      <article class="metric-card bad"><h3>Quality blocked</h3><strong>$840K</strong><p>Gated by 2 quality thresholds</p></article>
+    </section>
+    <section class="lever-grid" id="levers">
+      <div class="panel">
+        <div class="section-head"><div><h2>Top value levers</h2><p>Ranked by financial impact, confidence, and urgency.</p></div><a class="link" href="#">View all →</a></div>
+        <div class="lever-list" style="margin-top:14px">
+          <div class="lever"><span class="rank">1</span><div><h3>NWNC ED diversion program</h3><p>ED visits are 27 / 1,000 above target; intervention confidence medium-high.</p></div><span class="money">+$740K</span></div>
+          <div class="lever"><span class="rank">2</span><div><h3>Wisconsin readmission recovery</h3><p>Readmission follow-up measure is one tier below incentive unlock.</p></div><span class="money">+$420K</span></div>
+          <div class="lever"><span class="rank">3</span><div><h3>Macon quality gate remediation</h3><p>Chronic control quality gate blocks otherwise positive settlement.</p></div><span class="money">+$310K</span></div>
+        </div>
+      </div>
+      <aside class="insight"><h3>Recommended focus today</h3><p><strong>Open Northwest North Carolina ACO.</strong> It has the highest uncaptured value, worsening PMPM trend, and a quality rating below peer average. The next action is to review the scorecard and launch an ED diversion project.</p><a class="btn primary" style="background:#005a74;color:white;border-color:#005a74" href="#">Open NWNC scorecard</a></aside>
+    </section>
+    <section class="panel" id="defs">
+      <div class="section-head"><div><h2>Financial definitions are visible by default</h2><p>Critical fix: every executive metric includes an auditable source.</p></div></div>
+      <div class="definitions" style="margin-top:14px">
+        <div class="def"><strong>Annualized cost</strong><span>Current PMPM × attributed lives × 12. Spend context, not value earned.</span></div>
+        <div class="def"><strong>Gross savings / loss</strong><span>Benchmark spend − actual annualized cost before sharing terms.</span></div>
+        <div class="def"><strong>Net settlement</strong><span>Gross savings/loss × shared terms, subject to thresholds, quality gates, and caps.</span></div>
+        <div class="def"><strong>Earned VBC value</strong><span>Net settlement + earned incentives. This is the primary value capture metric.</span></div>
+      </div>
+    </section>
+    <section class="preview" id="agreements">
+      <article class="panel"><div class="section-head"><div><h2>Agreements needing attention</h2><p>Only the highest-priority work appears before full analytics.</p></div></div><div class="todo-list" style="margin-top:14px"><div class="todo"><div><strong>Northwest North Carolina ACO</strong><div class="small">$1.4M uncaptured · 3.8★ quality</div></div><span class="pill bad">Review today</span></div><div class="todo"><div><strong>Greater Macon Collaborative</strong><div class="small">$310K quality blocked</div></div><span class="pill warn">Gate risk</span></div><div class="todo"><div><strong>Wisconsin Value Alliance</strong><div class="small">$420K recovery opportunity</div></div><span class="pill good">Improving</span></div></div></article>
+      <article class="panel"><div class="section-head"><div><h2>Secondary analytics are progressive</h2><p>Charts are still available, but not the first thing users must parse.</p></div></div><div class="analytics-strip" style="margin-top:14px"><strong>Portfolio composition preview</strong><span>MA drives 43% of cost · CMS has largest lives concentration · Wisconsin drives 22% of earned value</span><a class="link" href="#">Expand charts ▾</a></div></article>
+    </section>
+  </main>
+</body>
+</html>

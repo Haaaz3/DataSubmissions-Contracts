@@ -1,0 +1,41 @@
+{
+  "name": "@austin/pm-sandbox",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "dev:clean": "npm run clean:next && next dev -p 3000",
+    "dev:stable": "npm run clean:next && next dev -p 3000",
+    "clean": "npm run clean:next",
+    "clean:next": "node ./scripts/clean-next.mjs",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint . --ext .ts,.tsx --ignore-pattern next-env.d.ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "framer-motion": "12.35.2",
+    "idb": "8.0.3",
+    "next": "15.5.12",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-simple-maps": "3.0.0",
+    "recharts": "3.8.0",
+    "uuid": "13.0.0",
+    "zod": "4.3.6",
+    "@austin/design-criteria": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "20.19.37",
+    "@types/react": "18.3.28",
+    "@types/react-dom": "18.3.7",
+    "@vitest/ui": "4.0.18",
+    "autoprefixer": "10.4.27",
+    "eslint": "8.57.1",
+    "eslint-config-next": "15.5.12",
+    "postcss": "8.5.8",
+    "tailwindcss": "3.4.19",
+    "typescript": "5.9.3",
+    "vitest": "4.0.18"
+  }
+}

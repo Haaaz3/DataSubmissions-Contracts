@@ -1,0 +1,8 @@
+.DS_Store
+node_modules/
+hdids-design-lab-prototype.tar.gz
+*.log
+work/
+outputs/ohds-prototype/video-review/
+outputs/ohds-prototype/pdf-review/
+outputs/ohds-prototype/screenshots/

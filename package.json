@@ -1,0 +1,19 @@
+{
+  "name": "austin-ci-proto",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "pnpm@11.19.0",
+  "scripts": {
+    "prepare:submissions": "node scripts/prepare-submissions.mjs",
+    "dev": "pnpm prepare:submissions && pnpm --filter @austin/pm-sandbox dev",
+    "build": "pnpm prepare:submissions && pnpm --filter @austin/pm-sandbox build",
+    "start": "pnpm --filter @austin/pm-sandbox start",
+    "test": "pnpm --filter @austin/pm-sandbox test && pnpm --filter @austin/design-criteria test",
+    "typecheck": "pnpm --filter @austin/pm-sandbox exec tsc --noEmit",
+    "lint": "pnpm --filter @austin/pm-sandbox lint && pnpm --filter hdids-design-lab-prototype check && node --check apps/data-submissions/outputs/ohds-prototype/union-bridge.js",
+    "test:browser": "node scripts/browser-test.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0"
+  }
+}

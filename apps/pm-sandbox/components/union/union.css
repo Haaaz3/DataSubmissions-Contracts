@@ -1,0 +1,54 @@
+.union-root [hidden] { display: none !important; }
+.union-bar { background:#213a40; color:#fff; min-height:78px; padding:14px 28px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px; border-bottom:3px solid #bda47a; }
+.union-brand { display:flex; align-items:center; gap:12px; }
+.union-brand strong { font-size:18px; letter-spacing:.02em; }
+.union-brand small { display:block; color:#d1dedd; font-size:12px; }
+.union-mark { display:grid; place-items:center; width:38px; height:38px; border:1px solid #bdc9c7; border-radius:8px; font-weight:700; }
+.union-products { display:flex; gap:4px; padding:4px; background:#142b31; border-radius:9px; }
+.union-products button,.union-criteria-button { padding:9px 16px; border-radius:6px; font-size:14px; font-weight:600; }
+.union-products button[aria-pressed=true] { background:#faf7f0; color:#213a40; box-shadow:0 1px 4px #0003; }
+.union-criteria-button { border:1px solid #9bb1b5; }
+.union-root button:focus-visible,.union-root input:focus-visible,.union-root select:focus-visible,.union-root textarea:focus-visible,.union-root summary:focus-visible { outline:3px solid #c48d33; outline-offset:3px; }
+.union-submissions iframe { width:100%; height:100dvh; min-height:620px; border:0; display:block; background:#f4f3ef; }
+.union-criteria { max-width:1440px; margin:auto; padding:32px; color:#273c40; }
+.union-criteria-title { display:flex; align-items:center; justify-content:space-between; gap:20px; }
+.union-criteria h1 { font-size:32px; font-weight:650; letter-spacing:-.025em; }
+.union-criteria h2 { font-size:19px; font-weight:650; }
+.union-criteria h3 { font-size:14px; font-weight:650; margin-top:14px; }
+.union-criteria p { line-height:1.6; }
+.union-eyebrow { font-size:11px; letter-spacing:.13em; color:#66786c; font-weight:700; }
+.union-note { margin:18px 0; padding:12px 16px; background:#e9eeea; border-radius:6px; font-size:13px; }
+.union-criteria button,.union-file { padding:8px 13px; border:1px solid #bcc8c4; background:#fff; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; }
+.union-criteria button:hover { background:#edf3f1; }
+.union-criteria button:disabled { opacity:.5; cursor:wait; }
+.union-criteria .union-primary { background:#285954; color:white; border-color:#285954; }
+.union-toolbar { display:flex; flex-wrap:wrap; align-items:end; gap:10px; margin:14px 0; }
+.union-file input { display:block; max-width:235px; font-weight:400; font-size:12px; margin-top:5px; }
+.union-columns { display:grid; grid-template-columns:300px minmax(0,1fr); gap:28px; align-items:start; }
+.union-sources { padding:20px; border:1px solid #d3ddd7; background:#edf1ed; border-radius:10px; }
+.union-sources > p,.union-sources article p { font-size:13px; margin:8px 0; }
+.union-sources label { margin:16px 0; }
+.union-sources article { border-top:1px solid #c9d5ce; padding:12px 0; }
+.union-criteria label { display:block; font-size:13px; font-weight:600; }
+.union-criteria input:not([type=file]),.union-criteria select,.union-criteria textarea { display:block; margin-top:5px; padding:9px 10px; color:#213a40; border:1px solid #b9c8c3; border-radius:5px; background:#fff; width:100%; font:inherit; }
+.union-editor { padding:22px; background:#f3f5ef; border:1px solid #9aad9e; border-radius:10px; margin:18px 0; }
+.union-editor label { margin-top:12px; }
+.union-editor textarea { min-height:90px; }
+.union-record { padding:22px; background:#fff; border:1px solid #d5ded9; border-radius:10px; margin:12px 0; box-shadow:0 2px 4px #203a4006; }
+.union-record h2 { margin:8px 0; }
+.union-record-meta { display:flex; justify-content:space-between; gap:12px; color:#62746c; font-size:12px; }
+.union-record-use { margin-top:16px; color:#286559; font-size:13px; font-weight:600; }
+.union-record details { font-size:12px; color:#61736d; margin-top:12px; }
+.union-record summary { cursor:pointer; }
+.union-record li { padding:8px 0; border-top:1px solid #dde3df; }
+.union-source-path { overflow-wrap:anywhere; }
+.union-preserve { white-space:pre-wrap; overflow-wrap:anywhere; }
+.union-empty { padding:45px 25px; border:1px dashed #bdccc3; border-radius:10px; background:#fafbf8; }
+.union-count { color:#718178; font-size:13px; }
+.union-error { background:#fae9e5; border:1px solid #deae9e; color:#843322; border-radius:6px; padding:12px; overflow-wrap:anywhere; }
+.union-status { min-height:28px; font-size:13px; color:#285954; }
+.union-sr { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); }
+@media(max-width:760px) { .union-bar { padding:12px; } .union-brand small { display:none; } .union-products button { padding:8px; } .union-criteria { padding:18px; } .union-columns { grid-template-columns:1fr; } .union-criteria-title { align-items:start; flex-direction:column; } .union-submissions iframe { height:100dvh; } }
+
+.union-products { align-items:center; }
+.union-products select { padding:8px; border-radius:5px; background:#fff; color:#213a40; font:inherit; }

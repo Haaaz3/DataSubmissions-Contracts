@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portfolio Scorecard Mock 05 — Market & Segment Variance Review</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="container">
+    <header class="header">
+      <div>
+        <h1 class="title">Portfolio Scorecards — Market & Segment Variance Review</h1>
+        <p class="subtitle">Mock 05 · Shows where PMPM performance is above or below target by market and insurance segment</p>
+      </div>
+      <a class="small" href="./index.html">← Back to concepts</a>
+    </header>
+
+    <section class="hero-panel">
+      <div class="hero-grid">
+        <div>
+          <p class="hero-kicker">Variance-to-target story</p>
+          <h2 class="hero-title">IL and WI create 64% of negative variance despite only 57% of lives.</h2>
+          <p class="subtitle" style="margin-top:10px;line-height:1.55;">The highest-value intervention path is market-specific: reduce inpatient leakage in IL, address ED utilization in WI, and protect positive performance in GCM.</p>
+        </div>
+        <div class="card" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);color:white;">
+          <h3 style="color:#bfdbfe;">Portfolio variance</h3>
+          <p class="value">-$37.2M</p>
+          <p class="small" style="color:#dbeafe;">Annualized current PMPM vs target PMPM</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid g3">
+      <article class="metric-card risk"><p class="label">Worst market</p><p class="money bad-text">IL</p><p class="small">-$13.1M variance · 840K lives</p></article>
+      <article class="metric-card warning"><p class="label">Worst segment</p><p class="money warn-text">Medicaid</p><p class="small">-$12.4M variance · 523K lives</p></article>
+      <article class="metric-card success"><p class="label">Positive contributor</p><p class="money good-text">GCM</p><p class="small">+$2.7M variance · protect current model</p></article>
+    </section>
+
+    <div class="grid g2" style="margin-top:14px;">
+      <section class="panel">
+        <div class="panel-title"><div><h2>Variance by Market</h2><p class="small">Annualized current PMPM minus target PMPM</p></div><span class="pill bad">Market</span></div>
+        <table>
+          <thead><tr><th>Market</th><th>Lives</th><th>Variance</th><th>Primary driver</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td>IL</td><td>840K</td><td><span class="pill bad">-$13.1M</span></td><td>Inpatient leakage</td><td>Network steerage</td></tr>
+            <tr><td>WI</td><td>494K</td><td><span class="pill bad">-$10.7M</span></td><td>ED utilization</td><td>Diversion protocol</td></tr>
+            <tr><td>NWNC</td><td>247K</td><td><span class="pill warn">-$4.3M</span></td><td>Specialist spend</td><td>Referral management</td></tr>
+            <tr><td>MACON</td><td>83K</td><td><span class="pill warn">-$1.8M</span></td><td>Quality gate drift</td><td>Gap closure sprint</td></tr>
+            <tr><td>GCM</td><td>675K</td><td><span class="pill good">+$2.7M</span></td><td>Primary care access</td><td>Scale model</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title"><div><h2>Variance by Insurance Segment</h2><p class="small">Segment-level view for strategy and operating model</p></div><span class="pill info">Segment</span></div>
+        <div class="variance-strip">
+          <div class="variance-row"><strong>Medicaid</strong><div class="progress-track"><div class="progress-fill warn" style="width:100%"></div></div><span>-$12.4M</span></div>
+          <div class="variance-row"><strong>Commercial</strong><div class="progress-track"><div class="progress-fill warn" style="width:79%"></div></div><span>-$9.8M</span></div>
+          <div class="variance-row"><strong>MA</strong><div class="progress-track"><div class="progress-fill warn" style="width:57%"></div></div><span>-$7.1M</span></div>
+          <div class="variance-row"><strong>Medicare</strong><div class="progress-track"><div class="progress-fill warn" style="width:38%"></div></div><span>-$4.7M</span></div>
+          <div class="variance-row"><strong>ACA</strong><div class="progress-track"><div class="progress-fill warn" style="width:26%"></div></div><span>-$3.2M</span></div>
+        </div>
+      </section>
+    </div>
+
+    <h2 class="section-title">Where to Intervene</h2>
+    <section class="grid g3">
+      <article class="card"><h3>1 · IL Shared Risk</h3><p class="value">$8.4M</p><p class="small">Recoverable variance from inpatient leakage and readmission reduction.</p></article>
+      <article class="card"><h3>2 · WI Medicaid</h3><p class="value">$5.6M</p><p class="small">ED diversion and care navigation opportunity across high-frequency utilizers.</p></article>
+      <article class="card"><h3>3 · Commercial NWNC</h3><p class="value">$2.9M</p><p class="small">Specialist referral and imaging utilization management opportunity.</p></article>
+    </section>
+  </main>
+</body>
+</html>

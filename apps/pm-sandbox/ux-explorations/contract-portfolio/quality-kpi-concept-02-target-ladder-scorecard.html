@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quality KPI Concept 02 — Target Ladder Scorecard</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="container">
+    <header class="header"><div><h1 class="title">KPI Target Ladder Scorecard</h1><p class="subtitle">Concept 02 · Makes multiple targets and incentive amounts explicit for each KPI</p></div><a class="small" href="./index.html">← Back to concepts</a></header>
+
+    <section class="hero-panel">
+      <p class="hero-kicker">Quality of Care · Multi-target contract measures</p>
+      <h2 class="hero-title">Show the leader exactly which tier is earned, which tier is next, and how much each step is worth.</h2>
+      <p class="subtitle">Each row behaves like a settlement ladder: floor, target, stretch, and bonus tiers can carry different incentive amounts for the same KPI.</p>
+    </section>
+
+    <section class="target-ladder">
+      <article class="ladder-row">
+        <div><strong>A1c control</strong><p class="small">Current 74% · higher is better</p><span class="current-marker"><span class="dot"></span> Between floor and target</span></div>
+        <div class="ladder-rail"><div class="tier earned"><span class="tier-label">Floor</span><span class="tier-value">70%</span><span class="tier-money">$240K earned</span></div><div class="tier next"><span class="tier-label">Target</span><span class="tier-value">75%</span><span class="tier-money">+$170K</span></div><div class="tier"><span class="tier-label">Stretch</span><span class="tier-value">80%</span><span class="tier-money">+$210K</span></div><div class="tier"><span class="tier-label">Bonus</span><span class="tier-value">83%</span><span class="tier-money">+$95K</span></div></div>
+        <div><span class="pill warn">Next unlock $170K</span><p class="small">+1.0 pts needed</p></div>
+      </article>
+      <article class="ladder-row">
+        <div><strong>Readmissions</strong><p class="small">Current 14.1% · lower is better</p><span class="current-marker"><span class="dot"></span> Missed target</span></div>
+        <div class="ladder-rail"><div class="tier earned"><span class="tier-label">Floor</span><span class="tier-value">≤14.5%</span><span class="tier-money">$180K earned</span></div><div class="tier next"><span class="tier-label">Target</span><span class="tier-value">≤13.5%</span><span class="tier-money">+$260K</span></div><div class="tier"><span class="tier-label">Stretch</span><span class="tier-value">≤12.8%</span><span class="tier-money">+$190K</span></div><div class="tier blocked"><span class="tier-label">Gate</span><span class="tier-value">≤15.0%</span><span class="tier-money">Protect $420K</span></div></div>
+        <div><span class="pill bad">Gate sensitive</span><p class="small">0.6 pts to target</p></div>
+      </article>
+      <article class="ladder-row">
+        <div><strong>Preventive screening</strong><p class="small">Current 68% · higher is better</p><span class="current-marker"><span class="dot"></span> Not yet at floor</span></div>
+        <div class="ladder-rail"><div class="tier next"><span class="tier-label">Floor</span><span class="tier-value">70%</span><span class="tier-money">+$150K</span></div><div class="tier"><span class="tier-label">Target</span><span class="tier-value">74%</span><span class="tier-money">+$225K</span></div><div class="tier"><span class="tier-label">Stretch</span><span class="tier-value">78%</span><span class="tier-money">+$149K</span></div><div class="tier blocked"><span class="tier-label">Blocked</span><span class="tier-value">Current</span><span class="tier-money">$524K unearned</span></div></div>
+        <div><span class="pill warn">Fast win</span><p class="small">2 pts to first $150K</p></div>
+      </article>
+    </section>
+
+    <section class="tradeoffs"><h2>Pros / Cons / Reasoning</h2><div class="tradeoff-grid"><div><h3>Pros</h3><ul><li>Best at explaining multiple targets per KPI.</li><li>Shows incremental value of each tier, not just total potential.</li><li>Easy to spot next attainable unlocks.</li></ul></div><div><h3>Cons</h3><ul><li>Can become vertically long with many metrics.</li><li>Requires careful handling of higher-is-better vs lower-is-better.</li><li>Less suited to portfolio-wide scanning.</li></ul></div><div><h3>Reasoning</h3><ul><li>The screenshot’s table collapses target complexity into one target column.</li><li>Financial leaders need to see tier economics before choosing interventions.</li><li>Use inside expanded domain cards or KPI detail panels.</li></ul></div></div></section>
+  </main>
+</body>
+</html>

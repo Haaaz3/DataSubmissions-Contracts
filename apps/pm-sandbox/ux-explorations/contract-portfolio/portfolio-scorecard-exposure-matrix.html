@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portfolio Scorecard Mock 03 — Exposure Matrix</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="container">
+    <header class="header">
+      <div>
+        <h1 class="title">Portfolio Scorecards — Exposure Matrix</h1>
+        <p class="subtitle">Mock 03 · Dense executive matrix connecting lives, revenue, variance, downside exposure, and top contributors</p>
+      </div>
+      <a class="small" href="./index.html">← Back to concepts</a>
+    </header>
+
+    <section class="brief">
+      <h2>Exposure matrix narrative</h2>
+      <p class="quote">Shared Risk, Commercial, IL, and Payor 1 are the four concentration points that explain most enterprise downside. The portfolio is not uniformly risky — risk is concentrated in a small number of dimensions.</p>
+      <p>This layout is best when leaders need a single board that reveals where business scale and financial risk overlap before deciding where to drill in.</p>
+    </section>
+
+    <h2 class="section-title">Portfolio Exposure Matrix</h2>
+    <section class="card">
+      <table>
+        <thead><tr><th>Lens</th><th>Top contributor</th><th>Lives</th><th>Revenue</th><th>Variance to target</th><th>Downside exposure</th><th>Upside opportunity</th><th>Decision signal</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Risk Type</strong></td><td>Shared Risk</td><td>846K</td><td>$1.9B</td><td><span class="pill bad">-$18.9M</span></td><td>$41.7M</td><td>$22.5M</td><td>Mitigate downside first</td></tr>
+          <tr><td><strong>Payor</strong></td><td>Payor 1</td><td>452K</td><td>$940M</td><td><span class="pill bad">-$8.6M</span></td><td>$19.2M</td><td>$7.4M</td><td>Executive sponsor review</td></tr>
+          <tr><td><strong>Insurance Segment</strong></td><td>Commercial</td><td>905K</td><td>$1.28B</td><td><span class="pill warn">-$9.8M</span></td><td>$18.7M</td><td>$10.1M</td><td>Target high-cost markets</td></tr>
+          <tr><td><strong>Market</strong></td><td>IL</td><td>840K</td><td>$1.52B</td><td><span class="pill bad">-$13.1M</span></td><td>$26.3M</td><td>$8.9M</td><td>Market turnaround plan</td></tr>
+          <tr><td><strong>Region</strong></td><td>Midwest</td><td>1.18M</td><td>$2.11B</td><td><span class="pill bad">-$15.4M</span></td><td>$34.8M</td><td>$13.5M</td><td>Portfolio risk committee</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <div class="grid g2" style="margin-top:14px;">
+      <section class="panel">
+        <div class="panel-title"><div><h2>Exposure concentration</h2><p class="small">Top contributors by downside exposure share</p></div><span class="pill bad">Risk</span></div>
+        <div class="variance-strip">
+          <div class="variance-row"><strong>Shared Risk</strong><div class="progress-track"><div class="progress-fill warn" style="width:48%"></div></div><span>48%</span></div>
+          <div class="variance-row"><strong>Midwest</strong><div class="progress-track"><div class="progress-fill warn" style="width:40%"></div></div><span>40%</span></div>
+          <div class="variance-row"><strong>IL Market</strong><div class="progress-track"><div class="progress-fill warn" style="width:30%"></div></div><span>30%</span></div>
+          <div class="variance-row"><strong>Payor 1</strong><div class="progress-track"><div class="progress-fill warn" style="width:22%"></div></div><span>22%</span></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title"><div><h2>Recommended scorecard actions</h2><p class="small">Action list generated from matrix collisions</p></div><span class="pill info">Next best view</span></div>
+        <ul class="insight-list">
+          <li><span class="rank">1</span><div><strong>Open IL Shared Risk scorecard</strong><br /><span class="small">Largest intersection of lives, downside exposure, and negative variance.</span></div></li>
+          <li><span class="rank">2</span><div><strong>Review Payor 1 contract cluster</strong><br /><span class="small">Top payor concentration creates negotiation and operating leverage.</span></div></li>
+          <li><span class="rank">3</span><div><strong>Segment Commercial by market</strong><br /><span class="small">Commercial is high-revenue but variance is concentrated in two markets.</span></div></li>
+        </ul>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,38 @@
+[
+  {
+    "key": "mvp-zmvp4",
+    "label": "MVP ZzMVP4 Score Details",
+    "goal": "Inspect an MVP subgroup scorecard, confirm measure details, and export results.",
+    "signal": "Can a user get from customer context to the correct MVP subgroup without losing program/year context?"
+  },
+  {
+    "key": "appplus-score",
+    "label": "APP Plus APM Entity Score",
+    "goal": "Review APP Plus APM Entity quality performance and export score data.",
+    "signal": "Can APP Plus feel like one micro-app among peers while still showing APM-specific scope?"
+  },
+  {
+    "key": "mips-performance",
+    "label": "MIPS Customer Performance",
+    "goal": "Check customer-level MIPS performance and provider count.",
+    "signal": "Can the user understand they are looking at one customer across submission pathways?"
+  },
+  {
+    "key": "mvp-individual",
+    "label": "MVP Individual Submission Search",
+    "goal": "Find individual MVP submissions using subgroup and eligible clinician filters.",
+    "signal": "Can required filters and disabled dependent fields be understood quickly?"
+  },
+  {
+    "key": "qrda-export",
+    "label": "QRDA Export Package",
+    "goal": "Generate a QRDA I or QRDA III package for the selected program and scope.",
+    "signal": "Can QRDA be treated as a submission pathway rather than a disconnected utility?"
+  },
+  {
+    "key": "new-submission",
+    "label": "Create Submission Draft",
+    "goal": "Create a pathway-specific draft submission and understand what supplemental data is missing.",
+    "signal": "Can draft creation expose Quality, PI, IA, and package readiness without extra navigation?"
+  }
+]
