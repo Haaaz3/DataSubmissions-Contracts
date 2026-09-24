@@ -1,4 +1,4 @@
-# Austin CI Proto
+# Data Submissions + Contracts
 
 A connected workspace for **Data Submissions** and **PM Sandbox**, built from the supplied Data Submissions and PM feature-branch archives. The PM feature-contract-simulation-studio branch is the running application; PM main was used only as a reference during the earlier integration draft.
 
@@ -91,4 +91,4 @@ See [validation results](docs/VALIDATION.md) and [migration details](docs/MIGRAT
 
 ## Git destination
 
-The local repository targets `https://github.cerner.com/AD2005431/Austin-CI-Proto.git`. Source archives contain no original Git history. See `docs/VALIDATION.md` for verified checks and remote-access status. After authenticating with your approved Cerner Git credentials, inspect the remote before pushing; do not force-push over existing work.
+This repository is hosted at [Haaaz3/DataSubmissions-Contracts](https://github.com/Haaaz3/DataSubmissions-Contracts). The local `cerner` remote also retains the original destination, `https://github.cerner.com/AD2005431/Austin-CI-Proto.git`. Source archives contain no original Git history. See `docs/VALIDATION.md` for verified checks and remote-access status. After authenticating with your approved Cerner Git credentials, inspect the remote before pushing; do not force-push over existing work.

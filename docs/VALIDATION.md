@@ -12,9 +12,9 @@ Validated locally on macOS with Node 24.19.0 and pnpm 11.19.0.
 
 Dependencies were reused from the existing local integration draft. For this relocated dependency tree, checks used `pnpm_config_verify_deps_before_run=false` to bypass pnpm's stale location metadata. No dependency verification was disabled in the delivered configuration. A new install from the network was not tested in this turn; use `pnpm install --frozen-lockfile` after extracting the source archive.
 
-## Remote status
+## Original Cerner remote status
 
-The local Git repository is configured for:
+The original integration targeted:
 
 `https://github.cerner.com/AD2005431/Austin-CI-Proto.git`
 
@@ -27,3 +27,7 @@ Data Submissions remains its original static prototype, isolated in a same-origi
 ## Source package
 
 The ZIP contains tracked source, documentation, screenshots and the workspace lockfile. It excludes node_modules, generated Next output, generated public copies and Git internals. The accompanying local folder is initialized as one Git repository; source ZIPs do not preserve the upstream repositories' commit histories.
+
+## GitHub destination
+
+This checkout uses `https://github.com/Haaaz3/DataSubmissions-Contracts.git` as its origin. The Cerner authentication limitation above describes the original destination and does not apply to GitHub Desktop’s separate GitHub.com account.
