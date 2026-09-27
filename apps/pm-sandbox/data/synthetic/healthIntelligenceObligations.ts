@@ -156,7 +156,7 @@ export const hdiObligations: HdiObligation[] = [
 export const hdiCrossProgramOpportunities: HdiCrossProgramOpportunity[] = [
   {
     id: "transitions-readmissions",
-    title: "One transitions-of-care intervention can move four obligations",
+    title: "Transitions of care",
     thesis: "The same discharge cohort is being measured through different program lenses. A coordinated follow-up and medication-reconciliation workflow can improve the shared readmission outcome family without creating four separate queues.",
     relationship: "Shared measure family",
     measureSet: [
@@ -173,7 +173,7 @@ export const hdiCrossProgramOpportunities: HdiCrossProgramOpportunity[] = [
   },
   {
     id: "medication-continuity",
-    title: "Medication continuity is a shared operating lever",
+    title: "Medication continuity",
     thesis: "Medication reconciliation after discharge and medication adherence are not the same measure, but they rely on overlapping pharmacy, care-management, and patient outreach workflows. Fixing the handoff creates lift across quality and contract performance.",
     relationship: "Related opportunity",
     measureSet: [
@@ -190,7 +190,7 @@ export const hdiCrossProgramOpportunities: HdiCrossProgramOpportunity[] = [
   },
   {
     id: "ed-follow-up",
-    title: "ED follow-up connects contract leakage to quality gaps",
+    title: "ED follow-up",
     thesis: "Avoidable ED use, timely follow-up, and chronic-condition management are measured separately, but the intervention is shared: identify the rising-risk patient, close the appointment loop, and return the outcome to both the contract and quality forecast.",
     relationship: "Related opportunity",
     measureSet: [
@@ -207,7 +207,7 @@ export const hdiCrossProgramOpportunities: HdiCrossProgramOpportunity[] = [
   },
   {
     id: "digital-evidence",
-    title: "Evidence reuse is the reporting opportunity",
+    title: "Evidence reuse",
     thesis: "The same clinical event and structured evidence can support MIPS/MVP, hospital quality, state programs, and payer contracts when the denominator, timing, and provenance are made explicit.",
     relationship: "Evidence reuse",
     measureSet: [
