@@ -14,8 +14,16 @@ try {
   await page.goto(base);
   const initialDs = page.frameLocator('iframe[title="Data Submissions"]');
   await expect(initialDs.locator('#labModeSelect')).toBeVisible();
+  await expect(initialDs.locator('#labModeSelect option')).toHaveCount(4);
+  const viewOptions = await initialDs.locator('#labModeSelect option').evaluateAll(options => options.map(option => option.value));
+  expect(viewOptions).toEqual(['vision', 'production', 'pm-sandbox', 'hdi-command-center']);
   await initialDs.locator('#labModeSelect').selectOption('pm-sandbox');
   await expect(page.getByLabel('Select product', { exact: true })).toHaveValue('pm-sandbox');
+  await page.getByLabel('Select product', { exact: true }).selectOption('data-submissions');
+  await expect(initialDs.locator('#labModeSelect')).toHaveValue('vision');
+  await initialDs.locator('#labModeSelect').selectOption('hdi-command-center');
+  await expect(page.getByLabel('Select product', { exact: true })).toHaveValue('hdi-command-center');
+  await expect(page.getByRole('heading', { name: 'HDI Command Center', exact: true })).toBeVisible();
   await page.getByLabel('Select product', { exact: true }).selectOption('data-submissions');
   await expect(initialDs.locator('#labModeSelect')).toHaveValue('vision');
   await initialDs.locator('#labModeSelect').selectOption('production');

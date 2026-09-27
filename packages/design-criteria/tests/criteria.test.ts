@@ -35,6 +35,13 @@ describe('canonical design criteria', () => {
     const saved = await db.list(); expect(saved).toHaveLength(1); expect(saved[0].usedBy).toHaveLength(2);
     expect(saved[0].revision).toBe(2);
   });
+  it('shares a criterion with the HDI Command Center', async () => {
+    const db = repo(); const initial = await db.create(draft, 'pm-sandbox');
+    await db.use(initial.id, 'data-submissions');
+    await db.use(initial.id, 'hdi-command-center');
+    const saved = await db.list();
+    expect(saved[0].usedBy).toEqual(['pm-sandbox', 'data-submissions', 'hdi-command-center']);
+  });
   it('round-trips exports while reporting conflicts without overwriting', async () => {
     const db = repo(); const initial = await db.create(draft, 'pm-sandbox');
     const bundle = exportBundle(await db.list()); const target = repo();

@@ -1,9 +1,13 @@
 import { z } from 'zod';
 import { openDB, type DBSchema } from 'idb';
 
-export const productSchema = z.enum(['data-submissions', 'pm-sandbox']);
+export const productSchema = z.enum(['data-submissions', 'pm-sandbox', 'hdi-command-center']);
 export type Product = z.infer<typeof productSchema>;
-export const productNames: Record<Product, string> = { 'data-submissions': 'Data Submissions', 'pm-sandbox': 'PM Sandbox' };
+export const productNames: Record<Product, string> = {
+  'data-submissions': 'Data Submissions',
+  'pm-sandbox': 'PM Sandbox',
+  'hdi-command-center': 'HDI Command Center',
+};
 const text = z.string().trim().min(1).max(8000);
 export const sourceSchema = z.object({
   product: productSchema, key: z.string().min(1).max(200),
@@ -18,7 +22,7 @@ export type CriterionDraft = z.infer<typeof draftSchema>;
 const revisionSchema = draftSchema.extend({ revision: z.number().int().positive(), at: z.string().datetime(), editor: productSchema });
 export const criterionSchema = draftSchema.extend({
   id: z.string().min(1).max(240), origin: productSchema, source: sourceSchema.optional(),
-  usedBy: z.array(productSchema).min(1).max(2).refine(a => new Set(a).size === a.length),
+  usedBy: z.array(productSchema).min(1).max(3).refine(a => new Set(a).size === a.length),
   revision: z.number().int().positive(), createdAt: z.string().datetime(), updatedAt: z.string().datetime(),
   history: z.array(revisionSchema).max(100),
 });

@@ -1,6 +1,6 @@
 # Data Submissions + Contracts
 
-A connected workspace for **Data Submissions** and **PM Sandbox**, built from the supplied Data Submissions and PM feature-branch archives. The PM feature-contract-simulation-studio branch is the running application; PM main was used only as a reference during the earlier integration draft.
+A connected workspace for **Data Submissions**, **PM Sandbox**, and the **HDI Command Center**, built from the supplied Data Submissions and PM feature-branch archives. The PM feature-contract-simulation-studio branch is the running application; PM main was used only as a reference during the earlier integration draft.
 
 ## Run the combined application
 
@@ -11,10 +11,11 @@ pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Open **http://localhost:3000**. Data Submissions opens by default. Choose **PM Sandbox** in its existing **View** dropdown (or **Select Program** in Production Today). In PM Sandbox, use the **Product** dropdown to return to Data Submissions. Switching preserves both mounted products and their current state.
+Open **http://localhost:3000**. Data Submissions opens by default. Use the shared **Product** dropdown to switch to **PM Sandbox** or the **HDI Command Center**. In Data Submissions, the existing **View** dropdown (or **Select Program** in Production Today) still controls its internal experience. Switching preserves both mounted products and their current state.
 
 - **PM Sandbox:** original routes, navigation, themes, contracts, scenario studio, scorecards, population insights, cohorts, projects, and SynapseAI demos.
-- **Data Submissions:** original v53 interface, production/vision/variant views, six review scenarios, program selection, validation, submission and QRDA workflows.
+- **Data Submissions:** original v53 interface, Vision Platform and Production Today views, six review scenarios, program selection, validation, submission and QRDA workflows.
+- **HDI Command Center:** an enterprise obligation view across CMS TEAM, VBC contracts, MIPS/MVP, Medicare Advantage Stars, Medicaid VBP, and hospital quality, with forecast-to-worklist-to-action drill-downs.
 - Direct link to Data Submissions: `http://localhost:3000/?product=data-submissions`.
 - Existing PM URLs remain available. For example, `/contracts/mssp-001` opens the contract scenario demonstration.
 

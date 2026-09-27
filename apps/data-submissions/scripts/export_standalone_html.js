@@ -25,8 +25,8 @@ const exported = html
 <!--
   Oracle Health Data Submissions editable standalone export.
   Generated from outputs/ohds-prototype/index.html, styles.css, and app.js.
-  This single file contains the full clickable prototype, including all production,
-  variant, strategy, performance, validation, submission, QRDA, and audit screens.
+  This single file contains the full clickable prototype, including Vision Platform,
+  Production Today, strategy, performance, validation, submission, QRDA, and audit screens.
 -->`,
   )
   .replace(

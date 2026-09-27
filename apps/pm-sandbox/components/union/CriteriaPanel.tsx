@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CriteriaRepository, exportBundle, productNames, type Criterion, type CriterionDraft, type Product, type SourceCriterion } from '@austin/design-criteria';
-import { pmAdapter, submissionsAdapter } from '@austin/design-criteria/adapters';
+import { hdiAdapter, pmAdapter, submissionsAdapter } from '@austin/design-criteria/adapters';
 import scenarios from '@austin/design-criteria/submission-scenarios';
 
 const repository = new CriteriaRepository();
@@ -37,15 +37,19 @@ export default function CriteriaPanel({ product, liveScenarios, onClose }: { pro
     catch (e) { setError(e instanceof Error ? e.message : 'The change could not be saved.'); }
     finally { setBusy(false); }
   }
-  const sources = sourceProduct === 'pm-sandbox' ? pmAdapter() : liveScenarios ?? submissionsAdapter(scenarios);
+  const sources = sourceProduct === 'pm-sandbox'
+    ? pmAdapter()
+    : sourceProduct === 'hdi-command-center'
+      ? hdiAdapter()
+      : liveScenarios ?? submissionsAdapter(scenarios);
   const visible = records.filter(c => (filter === 'all' || c.usedBy.includes(product)) && `${c.title} ${c.description} ${c.acceptance}`.toLowerCase().includes(query.toLowerCase()));
   function startEdit(record: Criterion | 'new') { setEditing(record); setDraft(record === 'new' ? { ...blank } : { title: record.title, description: record.description, acceptance: record.acceptance, category: record.category, status: record.status }); setError(''); }
   return <section className="union-criteria" aria-labelledby="criteria-heading">
     <div className="union-criteria-title">
-      <div><p className="union-eyebrow">AUSTIN CI · SHARED LIBRARY</p><h1 id="criteria-heading" ref={heading} tabIndex={-1}>Design criteria</h1><p>Refine once. Use across both products.</p></div>
+      <div><p className="union-eyebrow">AUSTIN CI · SHARED LIBRARY</p><h1 id="criteria-heading" ref={heading} tabIndex={-1}>Design criteria</h1><p>Refine once. Use across connected products.</p></div>
       <button onClick={onClose}>Return to {productNames[product]}</button>
     </div>
-    <p className="union-note">Working in <strong>{productNames[product]}</strong>. Changes to a shared criterion are visible in both products. Design criteria do not change clinical rules or simulation calculations.</p>
+    <p className="union-note">Working in <strong>{productNames[product]}</strong>. Changes to a shared criterion are visible across connected products. Design criteria do not change clinical rules or simulation calculations.</p>
     <div className="union-toolbar">
       <button disabled={!ready || busy} onClick={() => startEdit('new')}>New criterion</button>
       <button disabled={!ready || busy} onClick={() => {

@@ -24,3 +24,22 @@ export function pmAdapter(): SourceCriterion[] {
     draft: { title, description, acceptance, category, status: 'proposed' },
   }));
 }
+
+const hdiRequirements = [
+  ['insight-to-action', 'Connect enterprise exposure to a tactical action', 'Every high-level forecast should name its material driver and route users to the operational worklist that can change the outcome.', 'Users can move from an at-risk obligation to its driver, filtered worklist, accountable owner, and proposed action without losing context.', 'workflow'],
+  ['forecast-confidence', 'Make forecast confidence and assumptions visible', 'Forecasts are synthetic decision support and must communicate data freshness, confidence, and the assumptions behind modeled value at risk.', 'Every forecasted financial or performance value identifies its confidence level, data freshness, and synthetic/demo status.', 'explainability'],
+  ['persona-handoff', 'Support finance and quality handoffs', 'The command center serves finance, contracting, and quality leaders; each action should make the next operational owner and destination explicit.', 'Actions display an owner, due date, expected impact, and a clear handoff to the appropriate workflow or project.', 'interaction'],
+  ['obligation-portfolio', 'Present obligations as one enterprise portfolio', 'Regulatory, payer, state, and reporting commitments should be comparable without implying they use identical payment rules.', 'The overview distinguishes programs, scopes, deadlines, and modeled exposures while preserving each obligation’s governing context.', 'visual'],
+] as const;
+
+export function hdiAdapter(): SourceCriterion[] {
+  return hdiRequirements.map(([key, title, description, acceptance, category]) => ({
+    source: {
+      product: 'hdi-command-center',
+      key,
+      document: 'apps/pm-sandbox/components/health-intelligence/HealthDataIntelligenceCommandPlane.tsx',
+      original: `${description}\n${acceptance}`,
+    },
+    draft: { title, description, acceptance, category, status: 'proposed' },
+  }));
+}
