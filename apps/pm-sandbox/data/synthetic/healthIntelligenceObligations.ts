@@ -1,4 +1,4 @@
-export type HdiObligationId = "cms-team" | "vbc-contracts" | "mips-mvp" | "ma-stars" | "medicaid-vbp" | "hospital-quality";
+export type HdiObligationId = "cms-team" | "vbc-contracts" | "mips-mvp" | "ma-stars" | "medicaid-vbp" | "hospital-quality" | "ambulatory-specialty-model";
 
 export interface HdiWorkItem {
   id: string;
@@ -51,17 +51,17 @@ export const hdiObligations: HdiObligation[] = [
     sponsor: "CMS",
     category: "Episode-based payment",
     scope: "2 hospitals · 5 surgical episode categories",
-    lives: 184200,
-    providers: 1260,
-    atRiskDollars: 4280000,
-    recoverableDollars: 1960000,
+    lives: 118000,
+    providers: 820,
+    atRiskDollars: 2750000,
+    recoverableDollars: 1100000,
     deadline: "PY 2026 reconciliation",
     forecast: { current: 68, target: 82, projected: 74, unit: "% quality score" },
     workItems: [
-      { id: "team-readmit-1", title: "Close post-discharge follow-up gap", practice: "Northstar Medical Group", market: "Mid-Atlantic", owner: "Care Management", dueInDays: 12, impact: 740000, driver: "CHF readmissions", evidence: "412 discharges lack a documented 7-day follow-up appointment.", actionLabel: "Review patient worklist", actionType: "Worklist" },
-      { id: "team-readmit-2", title: "Resolve medication reconciliation backlog", practice: "Lakeside Physicians", market: "Mid-Atlantic", owner: "Quality Operations", dueInDays: 19, impact: 420000, driver: "COPD readmissions", evidence: "Medication reconciliation is missing for 28% of high-risk discharges.", actionLabel: "Assign review queue", actionType: "Review" },
-      { id: "team-readmit-3", title: "Approve transition-of-care protocol", practice: "Summit Family Health", market: "Southeast", owner: "Medical Director", dueInDays: 27, impact: 310000, driver: "All-cause readmissions", evidence: "A new protocol is modeled to reduce avoidable readmissions by 6.4%.", actionLabel: "Open approval brief", actionType: "Approval" },
-      { id: "team-readmit-4", title: "Launch high-risk discharge project", practice: "Riverbend Hospitalists", market: "Southeast", owner: "Transformation Office", dueInDays: 34, impact: 210000, driver: "High-risk discharge cohort", evidence: "Pilot roster is ready with 186 attributed patients and named owners.", actionLabel: "Create project brief", actionType: "Project" },
+      { id: "team-readmit-1", title: "Close post-discharge follow-up gap", practice: "Northstar Medical Group", market: "Mid-Atlantic", owner: "Care Management", dueInDays: 12, impact: 460000, driver: "CHF readmissions", evidence: "412 discharges lack a documented 7-day follow-up appointment.", actionLabel: "Review patient worklist", actionType: "Worklist" },
+      { id: "team-readmit-2", title: "Resolve medication reconciliation backlog", practice: "Lakeside Physicians", market: "Mid-Atlantic", owner: "Quality Operations", dueInDays: 19, impact: 270000, driver: "COPD readmissions", evidence: "Medication reconciliation is missing for 28% of high-risk discharges.", actionLabel: "Assign review queue", actionType: "Review" },
+      { id: "team-readmit-3", title: "Approve transition-of-care protocol", practice: "Summit Family Health", market: "Southeast", owner: "Medical Director", dueInDays: 27, impact: 200000, driver: "All-cause readmissions", evidence: "A new protocol is modeled to reduce avoidable readmissions by 6.4%.", actionLabel: "Open approval brief", actionType: "Approval" },
+      { id: "team-readmit-4", title: "Launch high-risk discharge project", practice: "Riverbend Hospitalists", market: "Southeast", owner: "Transformation Office", dueInDays: 34, impact: 130000, driver: "High-risk discharge cohort", evidence: "Pilot roster is ready with 186 attributed patients and named owners.", actionLabel: "Create project brief", actionType: "Project" },
     ],
   },
   {
@@ -151,6 +151,23 @@ export const hdiObligations: HdiObligation[] = [
       { id: "hqrda-1", title: "Clear emergency department validation queue", practice: "Riverbend Hospital", market: "Southeast", owner: "Hospital Quality", dueInDays: 31, impact: 140000, driver: "QRDA validation", evidence: "18 files need a final validation review before the next package generation.", actionLabel: "Open validation queue", actionType: "Worklist" },
     ],
   },
+  {
+    id: "ambulatory-specialty-model",
+    title: "Ambulatory Specialty Model",
+    shortTitle: "AMBULATORY SPECIALTY",
+    sponsor: "Specialty network partners",
+    category: "Ambulatory model",
+    scope: "8 specialty practices · 18,400 covered lives",
+    lives: 18400,
+    providers: 164,
+    atRiskDollars: 420000,
+    recoverableDollars: 150000,
+    deadline: "Jan 31, 2027",
+    forecast: { current: 74, target: 80, projected: 77, unit: "% performance readiness" },
+    workItems: [
+      { id: "asm-follow-up-1", title: "Close specialty follow-up gaps", practice: "Northstar Specialty Network", market: "Mid-Atlantic", owner: "Ambulatory Operations", dueInDays: 29, impact: 110000, driver: "Specialty follow-up", evidence: "18,400 covered lives are concentrated across eight specialty practices with uneven post-visit follow-up.", actionLabel: "Open specialty worklist", actionType: "Worklist" },
+    ],
+  },
 ];
 
 export const hdiCrossProgramOpportunities: HdiCrossProgramOpportunity[] = [
@@ -199,7 +216,7 @@ export const hdiCrossProgramOpportunities: HdiCrossProgramOpportunity[] = [
       "VBC · ED utilization and total cost of care",
       "Medicaid VBP · access and follow-up measures",
     ],
-    obligationIds: ["vbc-contracts", "mips-mvp", "ma-stars", "medicaid-vbp"],
+    obligationIds: ["vbc-contracts", "mips-mvp", "ma-stars", "medicaid-vbp", "ambulatory-specialty-model"],
     sharedEvidence: ["ED visit", "High-risk condition", "7-day follow-up appointment", "Primary-care connection"],
     action: "Open a rising-risk ED cohort and assign follow-up by practice",
     recoverableDollars: 940000,
@@ -216,7 +233,7 @@ export const hdiCrossProgramOpportunities: HdiCrossProgramOpportunity[] = [
       "Medicaid state measure extracts",
       "VBC contract quality exhibits",
     ],
-    obligationIds: ["mips-mvp", "hospital-quality", "medicaid-vbp", "vbc-contracts"],
+    obligationIds: ["mips-mvp", "hospital-quality", "medicaid-vbp", "vbc-contracts", "ambulatory-specialty-model"],
     sharedEvidence: ["Patient-level numerator / denominator", "Source system and timestamp", "Exception reason", "Submission-ready artifact"],
     action: "Resolve one evidence exception queue and publish program-specific outputs",
     recoverableDollars: 760000,
@@ -225,10 +242,10 @@ export const hdiCrossProgramOpportunities: HdiCrossProgramOpportunity[] = [
 ];
 
 export const hdiExecutiveMetrics = {
-  obligations: 18,
-  programs: 6,
-  atRiskDollars: 12330000,
-  recoverableDollars: 5330000,
+  obligations: 20,
+  programs: 7,
+  atRiskDollars: 10930000,
+  recoverableDollars: 4490000,
   deadlinesIn30Days: 7,
   forecastCoverage: 86,
 };
