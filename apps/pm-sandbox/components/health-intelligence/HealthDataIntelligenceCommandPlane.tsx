@@ -42,6 +42,62 @@ function Metric({ label, value, detail, tone = "text-slate-900" }: { label: stri
   </div>;
 }
 
+function trajectory(obligation: HdiObligation) {
+  const delta = obligation.forecast.projected - obligation.forecast.current;
+  return [
+    obligation.forecast.current - Math.round(delta * 0.7),
+    obligation.forecast.current - Math.round(delta * 0.4),
+    obligation.forecast.current - Math.round(delta * 0.2),
+    obligation.forecast.current,
+    obligation.forecast.current + Math.round(delta * 0.55),
+    obligation.forecast.projected,
+  ];
+}
+
+function MiniTrend({ values, target, label = "Directional trajectory" }: { values: number[]; target?: number; label?: string }) {
+  const width = 150;
+  const height = 38;
+  const allValues = target === undefined ? values : [...values, target];
+  const min = Math.min(...allValues);
+  const max = Math.max(...allValues);
+  const range = Math.max(1, max - min);
+  const points = values.map((value, index) => `${(index / Math.max(1, values.length - 1)) * (width - 8) + 4},${height - 5 - ((value - min) / range) * (height - 12)}`).join(" ");
+  const targetY = target === undefined ? undefined : height - 5 - ((target - min) / range) * (height - 12);
+  return <svg viewBox={`0 0 ${width} ${height}`} className="h-10 w-full" role="img" aria-label={label}>
+    {targetY !== undefined && <line x1="4" x2={width - 4} y1={targetY} y2={targetY} stroke="#cbd5e1" strokeDasharray="3 3" />}
+    <polyline points={points} fill="none" stroke="#5270e8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    {values.slice(-1).map((value, index) => <circle key={`${value}-${index}`} cx={width - 4} cy={height - 5 - ((value - min) / range) * (height - 12)} r="3.5" fill="#5270e8" stroke="white" strokeWidth="1.5" />)}
+  </svg>;
+}
+
+function GoalRing({ projected, target }: { projected: number; target: number }) {
+  const attainment = Math.min(100, Math.max(0, (projected / Math.max(1, target)) * 100));
+  const color = projected >= target ? "#2d8a78" : "#ed9b3b";
+  return <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full" style={{ background: `conic-gradient(${color} ${attainment}%, #e8edf2 0)` }} aria-label={`${Math.round(attainment)} percent of target`}>
+    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[11px] font-bold text-slate-700">{projected}%</div>
+  </div>;
+}
+
+function ContractReconciliation({ onOpenWorklist }: { onOpenWorklist: (id: HdiObligationId) => void }) {
+  const contract = hdiObligations.find((obligation) => obligation.id === "vbc-contracts") ?? hdiObligations[0];
+  const steps = [
+    { label: "Benchmark spend", value: "$337.2M", detail: "Target PMPM × lives" },
+    { label: "Actual spend", value: "$325.3M", detail: "12.0M below benchmark" },
+    { label: "Gross savings", value: "$11.9M", detail: "3.0% of benchmark" },
+    { label: "Quality share", value: "40%", detail: "2 of 6 gates met" },
+    { label: "Expected recovery", value: money(contract.recoverableDollars), detail: "Current VBC forecast" },
+  ];
+  return <section className="rounded-2xl border border-[#e2e7ee] bg-white p-5 shadow-sm sm:p-6">
+    <div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-[0.12em] text-[#28737a]">Contract economics</p><h3 className="mt-1 text-xl font-bold tracking-tight text-slate-900">VBC reconciliation signal</h3></div><button type="button" onClick={() => onOpenWorklist("vbc-contracts")} className="text-xs font-semibold text-[#176b75] hover:underline">Open contract detail →</button></div>
+    <div className="mt-5 grid gap-5 lg:grid-cols-[180px_minmax(0,1fr)]"><div className="rounded-xl bg-[#f5fbf8] p-4"><p className="text-[10px] font-bold uppercase tracking-wide text-[#28737a]">Estimate</p><p className="mt-2 text-3xl font-bold tracking-tight text-emerald-700">{money(contract.recoverableDollars)}</p><p className="mt-1 text-xs text-slate-500">forecast recoverable</p><div className="mt-4 border-t border-[#dbe9e4] pt-3"><p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Potential at risk</p><p className="mt-1 text-lg font-bold text-amber-700">{money(contract.atRiskDollars)}</p></div></div><div className="relative overflow-x-auto"><div className="min-w-[620px]"><div className="absolute left-7 right-7 top-8 h-px bg-[#b5d1ca]" /><div className="relative grid grid-cols-5 gap-3">{steps.map((step, index) => <button type="button" key={step.label} onClick={() => onOpenWorklist("vbc-contracts")} className="group text-left"><div className="flex items-center gap-2"><span className="relative z-10 flex h-7 w-7 items-center justify-center rounded-full border-4 border-white bg-[#2d8a78] text-[10px] font-bold text-white shadow-sm">{index + 1}</span><span className="text-[10px] font-bold uppercase tracking-wide text-slate-400">{index === steps.length - 1 ? "Outcome" : "Step"}</span></div><p className="mt-3 text-sm font-bold text-slate-900 group-hover:text-[#176b75]">{step.value}</p><p className="mt-1 text-[11px] font-semibold text-slate-700">{step.label}</p><p className="mt-1 text-[10px] leading-4 text-slate-500">{step.detail}</p></button>)}</div></div></div></div>
+  </section>;
+}
+
+function MeasurePulseTable({ onOpenPatientWorklist }: { onOpenPatientWorklist: (measure: string) => void }) {
+  const rows = hdiObligations.flatMap((obligation) => obligation.workItems.map((item) => ({ obligation, item }))).sort((a, b) => b.item.impact - a.item.impact).slice(0, 6);
+  return <section className="rounded-2xl border border-[#e2e7ee] bg-white p-5 shadow-sm sm:p-6"><div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-[0.12em] text-[#28737a]">Measure pulse</p><h3 className="mt-1 text-xl font-bold tracking-tight text-slate-900">The measures moving the portfolio</h3></div><span className="text-[11px] font-semibold text-slate-500">Click any row to open patients</span></div><div className="mt-4 overflow-x-auto"><div className="min-w-[680px]"><div className="grid grid-cols-[minmax(220px,1.4fr)_110px_120px_140px_95px] gap-3 border-b border-slate-100 pb-2 text-[10px] font-bold uppercase tracking-wide text-slate-400"><span>Measure / obligation</span><span>Current → target</span><span>Trajectory</span><span>Modeled impact</span><span>Due</span></div><div className="divide-y divide-slate-100">{rows.map(({ obligation, item }) => <button key={item.id} type="button" onClick={() => onOpenPatientWorklist(item.driver)} className="grid w-full grid-cols-[minmax(220px,1.4fr)_110px_120px_140px_95px] items-center gap-3 py-3 text-left hover:bg-[#f8fbfa]"><span className="min-w-0"><span className="block truncate text-xs font-bold text-slate-800">{item.driver}</span><span className="mt-0.5 block truncate text-[10px] text-slate-500">{obligation.shortTitle} · {item.practice}</span></span><span className="text-xs font-semibold text-slate-700">{obligation.forecast.current}% <span className="text-slate-300">→</span> {obligation.forecast.target}%</span><span><MiniTrend values={trajectory(obligation)} target={obligation.forecast.target} label={`${item.driver} trajectory`} /></span><span className="text-xs font-bold text-emerald-700">{money(item.impact)}</span><span className={`text-xs font-semibold ${item.dueInDays <= 21 ? "text-red-700" : "text-slate-600"}`}>{item.dueInDays}d <span className="text-[#176b75]">↗</span></span></button>)}</div></div></div></section>;
+}
+
 function ExpandedObligation({ obligation, opportunities, onWorklist, onOpenDataSubmissions, onOpenPatientWorklist }: { obligation: HdiObligation; opportunities: HdiCrossProgramOpportunity[]; onWorklist: (id: HdiObligationId) => void; onOpenDataSubmissions?: () => void; onOpenPatientWorklist: (measure: string) => void }) {
   return <div className="grid gap-5 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
     <div className="rounded-xl border border-[#dbe9e4] bg-[#f8fbfa] p-5">
@@ -101,7 +157,7 @@ function ObligationCard({ obligation, opportunities, expanded, onToggle, onWorkl
     <div className="p-5 sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0"><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#28737a]">{obligation.category}</p><button type="button" onClick={onToggle} className="mt-1 text-left text-lg font-bold tracking-tight text-slate-900 hover:text-[#176b75]">{obligation.title}</button><p className="mt-1 text-xs text-slate-500">{obligation.scope} · {obligation.deadline}</p></div><button type="button" onClick={onToggle} className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-[#176b75] hover:bg-[#f1f8f5]">{expanded ? "Hide detail" : "View detail"}</button></div>
       <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4"><div className="rounded-xl bg-[#f7f9fc] p-3"><p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">At risk</p><p className="mt-1 text-lg font-bold text-amber-700">{money(obligation.atRiskDollars)}</p></div><div className="rounded-xl bg-[#f7f9fc] p-3"><p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Recoverable</p><p className="mt-1 text-lg font-bold text-emerald-700">{money(obligation.recoverableDollars)}</p></div><div className="rounded-xl bg-[#f7f9fc] p-3"><p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Lives</p><p className="mt-1 text-lg font-bold text-slate-900">{whole(obligation.lives)}</p></div><div className="rounded-xl bg-[#f7f9fc] p-3"><p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Next due</p><p className="mt-1 text-lg font-bold text-slate-900">{nextDue}d</p></div></div>
-      <div className="mt-5 flex flex-wrap items-end justify-between gap-3"><div><p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">{obligation.forecast.unit}</p><p className="mt-1 text-sm font-semibold text-slate-800"><span className="text-[#f36d6d]">{obligation.forecast.current}% current</span><span className="px-1.5 text-slate-300">→</span><span className="text-[#5270e8]">{obligation.forecast.projected}% forecast</span><span className="px-1.5 text-slate-300">·</span><span className="text-slate-600">{obligation.forecast.target}% target</span></p></div><p className={`text-xs font-semibold ${gap > 0 ? "text-amber-700" : "text-emerald-700"}`}>{gap > 0 ? `${gap} pts to target` : "At target"}</p></div><div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-[#5270e8]" style={{ width: `${Math.max(8, obligation.forecast.projected)}%` }} /><div className="relative -mt-2 h-2 w-0.5 bg-slate-900" style={{ marginLeft: `${Math.min(98, obligation.forecast.target)}%` }} /></div>
+      <div className="mt-5 grid grid-cols-[minmax(0,1fr)_150px] items-end gap-4"><div><div className="flex items-center gap-3"><GoalRing projected={obligation.forecast.projected} target={obligation.forecast.target} /><div><p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">{obligation.forecast.unit}</p><p className="mt-1 text-sm font-semibold text-slate-800"><span className="text-[#f36d6d]">{obligation.forecast.current}% current</span><span className="px-1.5 text-slate-300">→</span><span className="text-[#5270e8]">{obligation.forecast.projected}% forecast</span><span className="px-1.5 text-slate-300">·</span><span className="text-slate-600">{obligation.forecast.target}% target</span></p><p className={`mt-1 text-xs font-semibold ${gap > 0 ? "text-amber-700" : "text-emerald-700"}`}>{gap > 0 ? `${gap} pts to target` : "At target"}</p></div></div></div><div><p className="mb-1 text-right text-[9px] font-bold uppercase tracking-wide text-slate-400">Trajectory</p><MiniTrend values={trajectory(obligation)} target={obligation.forecast.target} /></div></div>
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4"><div className="min-w-0"><p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Highest-value driver</p><button type="button" onClick={() => onOpenPatientWorklist(topWork.driver)} className="mt-1 truncate text-left text-sm font-semibold text-[#176b75] hover:underline">{topWork.driver} ↗</button><p className="mt-0.5 text-xs text-slate-500">{money(topWork.impact)} modeled impact · {topWork.dueInDays} days</p></div><button type="button" onClick={() => obligation.id === "mips-mvp" && onOpenDataSubmissions ? onOpenDataSubmissions() : onWorklist(obligation.id)} className="rounded-xl bg-[#285954] px-3 py-2 text-xs font-semibold text-white hover:bg-[#1f4b47]">{obligation.id === "mips-mvp" ? "Open performance" : "Open worklist"} <span className="ml-1">→</span></button></div>
     </div>
     {expanded && <div className="border-t border-[#dbe9e4] bg-[#fbfaf8] px-5 py-5 sm:px-6"><ExpandedObligation obligation={obligation} opportunities={opportunities} onWorklist={onWorklist} onOpenDataSubmissions={onOpenDataSubmissions} onOpenPatientWorklist={onOpenPatientWorklist} /></div>}
@@ -200,6 +256,10 @@ export default function HealthDataIntelligenceCommandPlane({ onOpenDataSubmissio
       <PortfolioPerformanceChart onWorklist={openObligationDestination} />
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]"><AttentionQueue onOpenPatientWorklist={openPatientWorklist} /><SharedMeasureMap onOpenPatientWorklist={openPatientWorklist} /></div>
+
+      <ContractReconciliation onOpenWorklist={openWorklist} />
+
+      <MeasurePulseTable onOpenPatientWorklist={openPatientWorklist} />
 
       <section><div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-[0.12em] text-[#28737a]">Obligation portfolio</p><h3 className="mt-1 text-xl font-bold tracking-tight text-slate-900">Performance at a glance</h3><p className="mt-1 text-xs text-slate-500">Every card pairs financial exposure, performance trajectory, and the next highest-value measure.</p></div><button type="button" onClick={() => setView("worklist")} className="text-xs font-semibold text-[#176b75] hover:underline">Open all worklists →</button></div><div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">{hdiObligations.map((obligation) => <ObligationCard key={obligation.id} obligation={obligation} opportunities={opportunitiesFor(obligation.id)} expanded={expandedId === obligation.id} onToggle={() => toggleObligation(obligation.id)} onWorklist={openWorklist} onOpenDataSubmissions={obligation.id === "mips-mvp" ? openMipsDashboard : undefined} onOpenPatientWorklist={openPatientWorklist} />)}</div></section>
 
