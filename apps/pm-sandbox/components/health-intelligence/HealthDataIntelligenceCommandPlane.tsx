@@ -10,8 +10,9 @@ import {
 } from "@/data/synthetic/healthIntelligenceObligations";
 import PortfolioExecutiveSummary from "@/components/health-intelligence/PortfolioExecutiveSummary";
 import ProgramOverview from "@/components/health-intelligence/ProgramOverview";
+import HdiContractDetail from "@/components/health-intelligence/HdiContractDetail";
 
-type HdiView = "overview" | "program" | "worklist" | "action";
+type HdiView = "overview" | "program" | "contract" | "worklist" | "action";
 type HdiLens = "enterprise" | "quality";
 
 const money = (value: number) => value >= 1000000 ? `$${(value / 1000000).toFixed(1)}M` : `$${Math.round(value / 1000)}K`;
@@ -41,13 +42,14 @@ function WorkspaceNavigation({ view, selected, onNavigate }: { view: HdiView; se
     { id: "worklist", label: "Worklists", helper: "Open practice work" },
     { id: "action", label: "Action center", helper: "Operational detail" },
   ];
-  const current = items.find((item) => item.id === view) ?? items[0];
+  const navView = view === "contract" ? "program" : view;
+  const current = items.find((item) => item.id === navView) ?? items[0];
   return <section className="rounded-xl border border-[#dce5e7] bg-white shadow-sm" aria-label="HDI workspace navigation">
     <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
       <div className="flex min-w-0 items-center gap-2 text-xs"><button type="button" onClick={() => onNavigate("overview")} className="font-bold text-[#176b75] hover:underline">HDI Command Center</button><span className="text-slate-300">/</span><span className="truncate font-semibold text-slate-700">{current.label}</span>{view !== "overview" && <><span className="text-slate-300">/</span><span className="truncate text-slate-500">{selected.shortTitle}</span></>}</div>
-      <nav className="flex flex-wrap items-center gap-1" aria-label="HDI sections">{items.map((item) => <button key={item.id} type="button" onClick={() => onNavigate(item.id)} aria-current={view === item.id ? "page" : undefined} className={`rounded-lg px-3 py-2 text-left transition ${view === item.id ? "bg-[#213a40] text-white" : "text-slate-600 hover:bg-[#f1f6f5] hover:text-[#176b75]"}`}><span className="block text-[11px] font-bold">{item.label}</span><span className={`mt-0.5 block text-[9px] ${view === item.id ? "text-white/70" : "text-slate-400"}`}>{item.helper}</span></button>)}</nav>
+      <nav className="flex flex-wrap items-center gap-1" aria-label="HDI sections">{items.map((item) => <button key={item.id} type="button" onClick={() => onNavigate(item.id)} aria-current={navView === item.id ? "page" : undefined} className={`rounded-lg px-3 py-2 text-left transition ${navView === item.id ? "bg-[#213a40] text-white" : "text-slate-600 hover:bg-[#f1f6f5] hover:text-[#176b75]"}`}><span className="block text-[11px] font-bold">{item.label}</span><span className={`mt-0.5 block text-[9px] ${navView === item.id ? "text-white/70" : "text-slate-400"}`}>{item.helper}</span></button>)}</nav>
     </div>
-    {view !== "overview" && <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 bg-[#f8fbfa] px-4 py-2 text-[10px] font-semibold text-slate-500"><span>You are here: <strong className="text-slate-700">{current.label}</strong>{view === "program" || view === "worklist" || view === "action" ? <span> · {selected.title}</span> : null}</span><button type="button" onClick={() => onNavigate("overview")} className="text-[#176b75] hover:underline">Return to portfolio overview →</button></div>}
+    {view !== "overview" && <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 bg-[#f8fbfa] px-4 py-2 text-[10px] font-semibold text-slate-500"><span>You are here: <strong className="text-slate-700">{current.label}</strong>{view === "program" || view === "contract" || view === "worklist" || view === "action" ? <span> · {selected.title}</span> : null}</span><button type="button" onClick={() => onNavigate("overview")} className="text-[#176b75] hover:underline">Return to portfolio overview →</button></div>}
   </section>;
 }
 
@@ -181,6 +183,7 @@ export default function HealthDataIntelligenceCommandPlane({ onOpenDataSubmissio
   const [selectedWorkId, setSelectedWorkId] = useState<string>("team-readmit-1");
   const [startedActions, setStartedActions] = useState<string[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
+  const [selectedContractId, setSelectedContractId] = useState<string | null>(null);
 
   useEffect(() => {
     const syncFromUrl = () => {
@@ -188,7 +191,10 @@ export default function HealthDataIntelligenceCommandPlane({ onOpenDataSubmissio
       const requestedProgram = params.get("program") as HdiObligationId | null;
       const requestedView = params.get("view") as HdiView | null;
       if (requestedProgram && hdiObligations.some((obligation) => obligation.id === requestedProgram)) setSelectedId(requestedProgram);
-      if (requestedView && ["overview", "program", "worklist", "action"].includes(requestedView)) setView(requestedView);
+      const requestedContract = params.get("contract");
+      if (requestedContract) setSelectedContractId(requestedContract);
+      if (requestedView && ["overview", "program", "contract", "worklist", "action"].includes(requestedView)) setView(requestedView);
+      else if (requestedContract) setView("contract");
       else if (requestedProgram) setView("program");
       else setView("overview");
     };
@@ -208,6 +214,7 @@ export default function HealthDataIntelligenceCommandPlane({ onOpenDataSubmissio
     const url = new URL(window.location.href);
     if (programId) url.searchParams.set("program", programId);
     else if (nextView === "overview") url.searchParams.delete("program");
+    if (nextView !== "contract") url.searchParams.delete("contract");
     url.searchParams.set("view", nextView);
     window.history.pushState(null, "", url);
   };
@@ -225,6 +232,21 @@ export default function HealthDataIntelligenceCommandPlane({ onOpenDataSubmissio
   };
   const closeProgram = () => {
     navigate("overview");
+  };
+  const openContract = (contractId: string) => {
+    setSelectedId("vbc-contracts");
+    setSelectedContractId(contractId);
+    setNotice(null);
+    const url = new URL(window.location.href);
+    url.searchParams.set("program", "vbc-contracts");
+    url.searchParams.set("view", "contract");
+    url.searchParams.set("contract", contractId);
+    window.history.pushState(null, "", url);
+    setView("contract");
+  };
+  const closeContract = () => {
+    setSelectedContractId(null);
+    navigate("program", "vbc-contracts");
   };
   const openWorklist = (id: HdiObligationId) => {
     setSelectedId(id);
@@ -270,7 +292,7 @@ export default function HealthDataIntelligenceCommandPlane({ onOpenDataSubmissio
 
   return <div className="space-y-6 pb-16">
     <section className="overflow-hidden rounded-2xl bg-[#213a40] text-white shadow-sm">
-      <div className="flex flex-wrap items-center gap-4 px-5 py-3 sm:px-6"><div className="flex items-center gap-2.5"><span className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/25 bg-white/10 text-[10px] font-bold tracking-[0.18em]">HDI</span><div><p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#d3e4df]">Oracle Health</p><h1 className="text-base font-semibold tracking-tight">HDI Command Center</h1></div></div><p className="hidden text-xs text-white/60 xl:block">Hyperion Health System <span className="px-1 text-white/35">·</span> PY 2026 obligation portfolio</p><div className="ml-auto flex flex-wrap items-center gap-2"><div className="flex items-center gap-1 rounded-lg bg-[#142b31] p-1 text-[10px] font-semibold"><button type="button" onClick={() => setLens("enterprise")} className={`rounded-md px-2.5 py-1.5 ${lens === "enterprise" ? "bg-[#faf7f0] text-[#213a40]" : "text-white/75 hover:text-white"}`}>Finance & contracting</button><button type="button" onClick={() => setLens("quality")} className={`rounded-md px-2.5 py-1.5 ${lens === "quality" ? "bg-[#faf7f0] text-[#213a40]" : "text-white/75 hover:text-white"}`}>Quality executive</button></div><nav className="flex gap-0.5 text-[10px] font-semibold" aria-label="HDI workspace views"><button type="button" onClick={() => navigate("overview")} className={`rounded-md px-2.5 py-1.5 ${view === "overview" ? "bg-white/15 text-white" : "text-white/60 hover:text-white"}`}>Portfolio</button><button type="button" onClick={() => navigate("program", selected.id)} className={`rounded-md px-2.5 py-1.5 ${view === "program" ? "bg-white/15 text-white" : "text-white/60 hover:text-white"}`}>Programs</button><button type="button" onClick={() => navigate("worklist", selected.id)} className={`rounded-md px-2.5 py-1.5 ${view === "worklist" ? "bg-white/15 text-white" : "text-white/60 hover:text-white"}`}>Worklists</button><button type="button" onClick={() => navigate("action", selected.id)} className={`rounded-md px-2.5 py-1.5 ${view === "action" ? "bg-white/15 text-white" : "text-white/60 hover:text-white"}`}>Actions</button></nav></div></div>
+      <div className="flex flex-wrap items-center gap-4 px-5 py-3 sm:px-6"><div className="flex items-center gap-2.5"><span className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/25 bg-white/10 text-[10px] font-bold tracking-[0.18em]">HDI</span><div><p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#d3e4df]">Oracle Health</p><h1 className="text-base font-semibold tracking-tight">HDI Command Center</h1></div></div><p className="hidden text-xs text-white/60 xl:block">Hyperion Health System <span className="px-1 text-white/35">·</span> PY 2026 obligation portfolio</p><div className="ml-auto flex flex-wrap items-center gap-2"><div className="flex items-center gap-1 rounded-lg bg-[#142b31] p-1 text-[10px] font-semibold"><button type="button" onClick={() => setLens("enterprise")} className={`rounded-md px-2.5 py-1.5 ${lens === "enterprise" ? "bg-[#faf7f0] text-[#213a40]" : "text-white/75 hover:text-white"}`}>Finance & contracting</button><button type="button" onClick={() => setLens("quality")} className={`rounded-md px-2.5 py-1.5 ${lens === "quality" ? "bg-[#faf7f0] text-[#213a40]" : "text-white/75 hover:text-white"}`}>Quality executive</button></div><nav className="flex gap-0.5 text-[10px] font-semibold" aria-label="HDI workspace views"><button type="button" onClick={() => navigate("overview")} className={`rounded-md px-2.5 py-1.5 ${view === "overview" ? "bg-white/15 text-white" : "text-white/60 hover:text-white"}`}>Portfolio</button><button type="button" onClick={() => navigate("program", selected.id)} className={`rounded-md px-2.5 py-1.5 ${view === "program" || view === "contract" ? "bg-white/15 text-white" : "text-white/60 hover:text-white"}`}>Programs</button><button type="button" onClick={() => navigate("worklist", selected.id)} className={`rounded-md px-2.5 py-1.5 ${view === "worklist" ? "bg-white/15 text-white" : "text-white/60 hover:text-white"}`}>Worklists</button><button type="button" onClick={() => navigate("action", selected.id)} className={`rounded-md px-2.5 py-1.5 ${view === "action" ? "bg-white/15 text-white" : "text-white/60 hover:text-white"}`}>Actions</button></nav></div></div>
     </section>
 
     {notice && <div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">{notice}</div>}
@@ -292,7 +314,9 @@ export default function HealthDataIntelligenceCommandPlane({ onOpenDataSubmissio
       <details className="rounded-2xl border border-[#e3deda] bg-white p-5 shadow-sm"><summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3"><span><span className="block text-xs font-bold uppercase tracking-[0.12em] text-[#28737a]">Shared opportunity detail</span><span className="mt-1 block text-base font-semibold text-slate-900">All cross-program pathways</span></span><span className="rounded-full bg-[#e8f3ef] px-3 py-1.5 text-xs font-semibold text-[#285954]">{hdiCrossProgramOpportunities.length} pathways · {money(hdiCrossProgramOpportunities.reduce((sum, opportunity) => sum + opportunity.recoverableDollars, 0))} recoverable</span></summary><div className="mt-4 border-t border-slate-100 pt-4"><p className="text-xs font-medium text-slate-500">Select a measure or evidence signal to open the patient worklist.</p><div className="mt-4 grid grid-cols-1 gap-3 xl:grid-cols-2">{hdiCrossProgramOpportunities.map((opportunity) => <article key={opportunity.id} className="rounded-xl border border-slate-200 bg-[#fbfaf8] p-4"><div className="flex flex-wrap items-start justify-between gap-3"><div><h4 className="text-sm font-semibold text-slate-900">{opportunity.title}</h4><p className="mt-1 text-xs text-slate-500">{money(opportunity.recoverableDollars)} recoverable · {whole(opportunity.affectedLives)} lives touched</p></div><RelationshipBadge relationship={opportunity.relationship} /></div><div className="mt-3 flex flex-wrap gap-1.5">{opportunity.measureSet.map((measure) => <button key={measure} type="button" onClick={() => openPatientWorklist(measure)} className="group rounded-md bg-white px-2 py-1 text-left text-[11px] text-slate-700 ring-1 ring-slate-200 hover:bg-[#e8f3ef] hover:text-[#176b75]">{measure} <span className="text-[#176b75] opacity-0 group-hover:opacity-100">↗</span></button>)}</div><div className="mt-3 flex flex-wrap gap-1.5 border-t border-slate-200 pt-3">{opportunity.sharedEvidence.slice(0, 4).map((evidence) => <button key={evidence} type="button" onClick={() => openPatientWorklist(opportunity.measureSet[0])} className="rounded-md bg-white px-2 py-1 text-[11px] text-slate-600 ring-1 ring-slate-200 hover:bg-[#e8f3ef] hover:text-[#176b75]">{evidence} ↗</button>)}</div></article>)}</div></div></details>
     </div>}
 
-    {view === "program" && <ProgramOverview obligation={selected} opportunities={opportunitiesFor(selected.id)} onBack={closeProgram} onWorklist={openWorklist} onOpenDataSubmissions={selected.id === "mips-mvp" ? openMipsDashboard : undefined} onOpenPatientWorklist={openPatientWorklist} />}
+    {view === "program" && <ProgramOverview obligation={selected} opportunities={opportunitiesFor(selected.id)} onBack={closeProgram} onWorklist={openWorklist} onOpenDataSubmissions={selected.id === "mips-mvp" ? openMipsDashboard : undefined} onOpenPatientWorklist={openPatientWorklist} onOpenContract={openContract} />}
+
+    {view === "contract" && selectedContractId && <HdiContractDetail contractId={selectedContractId} onBack={closeContract} onOpenPatientWorklist={openPatientWorklist} />}
 
     {view === "worklist" && <section className="space-y-6"><Breadcrumbs selected={selected} view={view} onOverview={() => navigate("overview")} onWorklist={() => navigate("worklist", selected.id)} /><div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-[0.14em] text-[#28737a]">Operational worklist</p><h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">{selected.shortTitle} worklist</h2><p className="mt-2 text-sm text-slate-500">{selected.workItems.length} work items · {opportunitiesFor(selected.id).length} shared paths</p></div><button type="button" onClick={() => navigate("overview")} className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Back to portfolio</button></div><div className="grid grid-cols-1 gap-4 sm:grid-cols-3"><Metric label="Open actions" value={whole(selected.workItems.length)} detail="Across practice owners" tone="text-[#176b75]" /><Metric label="Modeled impact" value={money(selected.workItems.reduce((sum, item) => sum + item.impact, 0))} detail="If work lands on time" tone="text-emerald-700" /><Metric label="Next deadline" value={`${Math.min(...selected.workItems.map((item) => item.dueInDays))} days`} detail="Earliest practice action" tone="text-red-700" /></div><div className="overflow-hidden rounded-2xl border border-[#e3deda] bg-white shadow-sm"><div className="border-b border-slate-100 px-6 py-4"><h3 className="font-semibold text-slate-900">Practice action queue</h3><p className="mt-1 text-xs text-slate-500">Select a measure to open the patient worklist.</p></div><div className="divide-y divide-slate-100">{selected.workItems.map((item) => <div key={item.id} className="grid gap-4 px-6 py-5 lg:grid-cols-[minmax(0,1.5fr)_180px_110px_160px_auto] lg:items-center"><div><h4 className="font-semibold text-slate-900">{item.title}</h4><p className="mt-1 text-xs text-slate-500">{item.practice} · {item.market} · {item.owner}</p><p className="mt-2 text-xs text-slate-500">{item.evidence}</p></div><div><p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Focus measure</p><button type="button" onClick={() => openPatientWorklist(item.driver)} className="mt-1 text-left text-sm font-semibold text-[#176b75] hover:underline">{item.driver} ↗</button></div><div><p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Due</p><p className={`mt-1 text-sm font-semibold ${item.dueInDays <= 21 ? "text-red-700" : "text-slate-700"}`}>{item.dueInDays} days</p></div><div><p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Impact</p><p className="mt-1 text-sm font-semibold text-emerald-700">{money(item.impact)}</p></div><button type="button" onClick={() => openPatientWorklist(item.driver)} className="rounded-xl border border-[#b5d1ca] bg-[#f5fbf8] px-3 py-2 text-xs font-semibold text-[#285954] hover:bg-[#e8f3ef]">Open patient list →</button></div>)}</div></div></section>}
 

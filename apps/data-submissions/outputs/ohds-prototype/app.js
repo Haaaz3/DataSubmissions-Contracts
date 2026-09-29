@@ -20,6 +20,7 @@ const state = {
   selectedValidationPatient: "HY-10482",
   patientValidationSearch: "",
   patientValidationFilter: "all",
+  patientValidationScope: "all",
   patientValidationSort: "changed-first",
   patientValidationRound: "current",
   qualityTargets: {
@@ -2636,6 +2637,34 @@ function validationMeasureById(measureId) {
   return visionValidationPatientMeasures.find((measure) => measure.id === measureId) || visionValidationPatientMeasures[0];
 }
 
+// The patient-level workspace is an operational view of the full denominator.
+// Keep a bounded representative table for prototype performance, while every
+// filter count and header reflects the complete eligible measure population.
+const fullPopulationByMeasure = {
+  cms349: 4820,
+  cms2: 6240,
+  cms153: 9580,
+  cms130: 7840,
+  cms165: 11420,
+  cms122: 8760,
+};
+
+function fullPopulationCountForMeasure(measure) {
+  return fullPopulationByMeasure[measure.id] || Math.max(measure.selected || 0, 1000);
+}
+
+function fullPopulationFilterCounts(measure) {
+  const total = fullPopulationCountForMeasure(measure);
+  const numerator = Math.round(total * (currentTrendValue(measure.id) / 100));
+  return {
+    all: total,
+    changed: Math.round(total * 0.14),
+    numerator,
+    denominator: Math.max(0, total - numerator),
+    exclusion: Math.round(total * 0.03),
+  };
+}
+
 function selectedValidationMeasure() {
   return validationMeasureById(state.selectedValidationMeasure);
 }
@@ -2661,6 +2690,7 @@ function focusValidationMeasure(measureId, options = {}) {
   state.selectedValidationMeasure = measure.id;
   state.selectedValidationPatient = options.patientId || fallbackPatient?.patient || state.selectedValidationPatient;
   state.patientValidationFilter = filter;
+  state.patientValidationScope = options.scope || "all";
   state.patientValidationSearch = options.patientId || "";
   state.patientValidationSort = options.sort || state.patientValidationSort || "changed-first";
 }
@@ -3465,6 +3495,7 @@ function sortPatientValidationRows(patients) {
 }
 
 function patientValidationFilterCounts(measure) {
+  if (state.patientValidationScope === "all") return fullPopulationFilterCounts(measure);
   const patients = validationPatientsForMeasure(measure);
   return {
     all: patients.length,
@@ -3486,14 +3517,15 @@ function renderVisionSelectedPatientsTab() {
   const visiblePatients = patientValidationRowsForMeasure(selected);
   const filterCounts = patientValidationFilterCounts(selected);
   const activeFilter = state.patientValidationFilter || "all";
-  const selectedTotal = validationPatientsForMeasure(selected).length;
+  const selectedTotal = state.patientValidationScope === "all" ? fullPopulationCountForMeasure(selected) : validationPatientsForMeasure(selected).length;
+  const populationLabel = state.patientValidationScope === "all" ? "entire eligible population" : "selected validation patients";
   return `
     <article class="vision-card patient-validation-workspace compact-patient-validation">
       <div class="validation-worklist-header compact">
         <div>
           <span class="vision-kicker">Patient level validation</span>
-          <h3>Validate selected patient populations</h3>
-          <p>Choose a submitted measure, filter its selected patients by outcome population or state change, then open explainability for any patient.</p>
+          <h3>Validate entire patient populations</h3>
+          <p>Filter the entire eligible measure population by outcome or state change, then open explainability for any patient.</p>
         </div>
         <div class="selected-patient-actions">
           <div class="patient-search-bar">
@@ -3511,7 +3543,7 @@ function renderVisionSelectedPatientsTab() {
       </div>
       <div class="patient-validation-measure-table-wrap">
         <table class="vision-table patient-validation-measure-table compact">
-          <thead><tr><th>Measure</th><th>Program</th><th>Selected patients</th><th>Satisfaction rate</th><th>WoW change</th><th>Target</th><th></th></tr></thead>
+          <thead><tr><th>Measure</th><th>Program</th><th>Eligible patients</th><th>Satisfaction rate</th><th>WoW change</th><th>Target</th><th></th></tr></thead>
           <tbody>
             ${visionValidationPatientMeasures.map((measure) => {
               const trend = attestationTrendFor(measure.id);
@@ -3520,7 +3552,7 @@ function renderVisionSelectedPatientsTab() {
                 <tr class="${measure.id === selected.id ? "selected" : ""}">
                   <td><strong>${measure.measure}</strong><span class="subline">${measure.code}</span></td>
                   <td>${measure.mvp}</td>
-                  <td><strong>${validationPatientsForMeasure(measure).length}</strong></td>
+                  <td><strong>${state.patientValidationScope === "all" ? fullPopulationCountForMeasure(measure) : validationPatientsForMeasure(measure).length}</strong></td>
                   <td><strong>${trend.current}</strong></td>
                   <td>${visionBadge(trend.wowChange, trend.wowTone)}<span class="subline">${validationPriorSnapshotLabel} -> ${validationCurrentSnapshotLabel}</span></td>
                   <td>${target}%</td>
@@ -3535,9 +3567,9 @@ function renderVisionSelectedPatientsTab() {
     <article class="vision-card spaced selected-patient-pane">
       <div class="selected-patient-header">
           <div>
-            <span class="vision-kicker">Selected patient population</span>
+            <span class="vision-kicker">Entire patient population</span>
             <h3>${selected.measure}</h3>
-            <p>${selected.code} · ${selected.mvp} · showing ${visiblePatients.length} of ${selectedTotal} selected patients${activeFilter === "all" ? "" : ` filtered to ${patientOutcomeCategoryName(activeFilter).toLowerCase()}`}</p>
+            <p>${selected.code} · ${selected.mvp} · showing ${visiblePatients.length} representative rows of ${selectedTotal} ${populationLabel}${activeFilter === "all" ? "" : ` filtered to ${patientOutcomeCategoryName(activeFilter).toLowerCase()}`}</p>
           </div>
           <div class="validation-snapshot-note">
             <span>Comparison window</span>
@@ -3546,20 +3578,27 @@ function renderVisionSelectedPatientsTab() {
       </div>
       <div class="validation-worklist-controls">
         <div class="validation-filter-group" aria-label="Patient validation filters">
-          ${renderPatientValidationFilterButton("all", "All selected", filterCounts.all, true)}
+          ${renderPatientValidationFilterButton("all", "All patients", filterCounts.all, true)}
           ${renderPatientValidationFilterButton("changed", "Status changed", filterCounts.changed, true)}
           ${renderPatientValidationFilterButton("numerator", "Numerator", filterCounts.numerator, true)}
           ${renderPatientValidationFilterButton("denominator", "Denominator", filterCounts.denominator, true)}
           ${renderPatientValidationFilterButton("exclusion", "Exclusion", filterCounts.exclusion, true)}
         </div>
-        <label class="validation-sort-control">
+        <div class="validation-sort-control">
           <span>Sort</span>
           <select data-validation-sort>
             <option value="changed-first" ${state.patientValidationSort === "changed-first" ? "selected" : ""}>Status changed first</option>
             <option value="outcome" ${state.patientValidationSort === "outcome" ? "selected" : ""}>Outcome population</option>
             <option value="patient-id" ${state.patientValidationSort === "patient-id" ? "selected" : ""}>Patient ID</option>
           </select>
-        </label>
+          <label class="validation-sort-control">
+            <span>Round</span>
+            <select data-validation-round>
+              <option value="current" ${state.patientValidationRound === "current" ? "selected" : ""}>Current round</option>
+              <option value="prior" ${state.patientValidationRound === "prior" ? "selected" : ""}>Prior round</option>
+            </select>
+          </label>
+        </div>
       </div>
       <table class="vision-table selected-patient-table validation-queue-table">
         <thead><tr><th>Patient</th><th>Provider / specialty</th><th>Outcome</th><th>Current (${validationCurrentSnapshotLabel})</th><th>Prior (${validationPriorSnapshotLabel})</th><th>State change</th><th>Evidence summary</th><th>Sources</th><th></th></tr></thead>
@@ -3588,7 +3627,7 @@ function renderVisionSelectedPatientsTab() {
 function renderVisionTrendingQualityTab() {
   const belowTarget = visionValidationPatientMeasures.filter((measure) => currentTrendValue(measure.id) < qualityTargetFor(measure.id)).length;
   const totalChanged = visionValidationPatientMeasures.reduce((sum, measure) => sum + changedPatientCountForMeasure(measure), 0);
-  const totalSelected = visionValidationPatientMeasures.reduce((sum, measure) => sum + validationPatientsForMeasure(measure).length, 0);
+  const totalSelected = visionValidationPatientMeasures.reduce((sum, measure) => sum + (state.patientValidationScope === "all" ? fullPopulationCountForMeasure(measure) : validationPatientsForMeasure(measure).length), 0);
   const largestMove = visionValidationPatientMeasures.reduce((largest, measure) => {
     const currentChange = Math.abs(Number.parseFloat(attestationTrendFor(measure.id).wowChange));
     const largestChange = Math.abs(Number.parseFloat(attestationTrendFor(largest.id).wowChange));
@@ -3600,7 +3639,7 @@ function renderVisionTrendingQualityTab() {
       <div>
         <span class="vision-kicker">Population validation</span>
         <strong>${visionValidationPatientMeasures.length} measures · ${belowTarget} below target · ${totalChanged} changed patient outcomes</strong>
-        <em>Largest WoW movement is ${largestMoveTrend.wowChange} on ${largestMove.measure}; selected validation population contains ${totalSelected} patients.</em>
+        <em>Largest WoW movement is ${largestMoveTrend.wowChange} on ${largestMove.measure}; the full eligible populations contain ${totalSelected.toLocaleString()} patients.</em>
       </div>
       <div class="inline-action-group">
         <button class="vision-row-button" data-validation-changes="${largestMove.id}" type="button">Review largest change</button>
@@ -3632,7 +3671,7 @@ function renderVisionTrendingQualityTab() {
         return `
           <tr class="${measure.id === selectedValidationMeasure().id ? "selected" : ""}">
             <td><strong>${measure.measure}</strong><span class="subline">${measure.code} / ${measure.mvp}</span></td>
-            <td><strong>${trend.current}</strong><span class="subline">${validationPatientsForMeasure(measure).length} selected patients</span></td>
+            <td><strong>${trend.current}</strong><span class="subline">${(state.patientValidationScope === "all" ? fullPopulationCountForMeasure(measure) : validationPatientsForMeasure(measure).length).toLocaleString()} eligible patients</span></td>
             <td><span class="wow-change-badge ${trend.wowTone}">${trend.wowChange}</span></td>
             <td>
               <label class="quality-target-control">
@@ -3666,12 +3705,12 @@ function renderVisionAttestationTrendsTab() {
 }
 
 function renderVisionValidationPlanTab() {
-  const totalSelected = visionValidationPatientMeasures.reduce((sum, measure) => sum + validationPatientsForMeasure(measure).length, 0);
+  const totalSelected = visionValidationPatientMeasures.reduce((sum, measure) => sum + (state.patientValidationScope === "all" ? fullPopulationCountForMeasure(measure) : validationPatientsForMeasure(measure).length), 0);
   const belowTarget = visionValidationPatientMeasures.filter((measure) => currentTrendValue(measure.id) < qualityTargetFor(measure.id)).length;
   return `
     <div class="vision-grid-4">
       <article class="vision-card"><span class="vision-kicker">Submitted measures</span><strong class="vision-metric">6</strong><p>Across the selected MVP + APP Plus mix</p></article>
-      <article class="vision-card"><span class="vision-kicker">Selected patients</span><strong class="vision-metric">${totalSelected}</strong><p>Frozen validation population</p></article>
+      <article class="vision-card"><span class="vision-kicker">Eligible patients</span><strong class="vision-metric">${totalSelected.toLocaleString()}</strong><p>Across full measure populations</p></article>
       <article class="vision-card"><span class="vision-kicker">Comparison window</span><strong class="vision-metric">${validationPriorSnapshotLabel} -> ${validationCurrentSnapshotLabel}</strong><p>Prior state vs. current state</p></article>
       <article class="vision-card"><span class="vision-kicker">Below target</span><strong class="vision-metric danger">${belowTarget}</strong><p>Measures needing closer review</p></article>
     </div>
@@ -3680,10 +3719,10 @@ function renderVisionValidationPlanTab() {
         <div class="vision-section-title">
           <span class="vision-kicker">Validation plan</span>
           <h3>Freeze the selected population and reconcile outcome movement</h3>
-          <p>The customer validates the selected patients for each submitted measure, then uses the same population to review changes after data, mapping, or logic updates.</p>
+          <p>The customer validates the full eligible population for each submitted measure, then uses the same population to review changes after data, mapping, or logic updates.</p>
         </div>
         <table class="vision-table">
-          <thead><tr><th>Measure</th><th>Program</th><th>Selected patients</th><th>Satisfaction rate</th><th>WoW change</th><th>Target</th><th>Status</th></tr></thead>
+          <thead><tr><th>Measure</th><th>Program</th><th>Eligible patients</th><th>Satisfaction rate</th><th>WoW change</th><th>Target</th><th>Status</th></tr></thead>
           <tbody>
             ${visionValidationPatientMeasures.map((measure) => {
               const trend = attestationTrendFor(measure.id);
@@ -3693,7 +3732,7 @@ function renderVisionValidationPlanTab() {
               <tr>
                 <td><strong>${measure.measure}</strong><span class="subline">${measure.code}</span></td>
                 <td>${measure.mvp}</td>
-                <td>${validationPatientsForMeasure(measure).length}</td>
+                <td>${(state.patientValidationScope === "all" ? fullPopulationCountForMeasure(measure) : validationPatientsForMeasure(measure).length).toLocaleString()}</td>
                 <td><strong>${trend.current}</strong></td>
                 <td>${visionBadge(trend.wowChange, trend.wowTone)}<span class="subline">${validationPriorSnapshotLabel} -> ${validationCurrentSnapshotLabel}</span></td>
                 <td>${target}%</td>
