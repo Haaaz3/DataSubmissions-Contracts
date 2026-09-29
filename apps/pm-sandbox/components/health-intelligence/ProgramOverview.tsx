@@ -5,6 +5,7 @@ import {
   type HdiObligation,
   type HdiObligationId,
 } from "@/data/synthetic/healthIntelligenceObligations";
+import VbcContractPortfolio from "@/components/health-intelligence/VbcContractPortfolio";
 
 const money = (value: number) => value >= 1_000_000 ? `$${(value / 1_000_000).toFixed(1)}M` : `$${Math.round(value / 1_000)}K`;
 const whole = (value: number) => value.toLocaleString("en-US");
@@ -51,6 +52,9 @@ function DriverTable({ obligation, onOpenPatientWorklist }: { obligation: HdiObl
 }
 
 export default function ProgramOverview({ obligation, opportunities, onBack, onWorklist, onOpenDataSubmissions, onOpenPatientWorklist }: { obligation: HdiObligation; opportunities: HdiCrossProgramOpportunity[]; onBack: () => void; onWorklist: (id: HdiObligationId) => void; onOpenDataSubmissions?: () => void; onOpenPatientWorklist: (measure: string) => void }) {
+  if (obligation.id === "vbc-contracts") {
+    return <VbcContractPortfolio obligation={obligation} onBack={onBack} onOpenPatientWorklist={onOpenPatientWorklist} />;
+  }
   const protectedValue = Math.max(0, obligation.atRiskDollars - obligation.recoverableDollars);
   const capture = Math.round((protectedValue / Math.max(1, obligation.atRiskDollars)) * 100);
   return <section className="space-y-4">
