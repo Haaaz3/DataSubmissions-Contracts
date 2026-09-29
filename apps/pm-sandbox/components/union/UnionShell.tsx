@@ -97,7 +97,7 @@ export default function UnionShell({ children }: { children: React.ReactNode }) 
     {criteriaOpen && <CriteriaPanel product={product} liveScenarios={liveScenarios} onClose={() => { setCriteriaOpen(false); criteriaButton.current?.focus(); }} />}
     {/* Keep all products mounted: switching preserves draft state and the current PM route. */}
     <div hidden={product !== 'pm-sandbox' || criteriaOpen}><NavBar /><AppShell>{children}</AppShell><FeatureControls /><FooterNav /></div>
-    <div hidden={product !== 'hdi-command-center' || criteriaOpen}><NavBar /><AppShell><HealthDataIntelligenceCommandPlane onOpenDataSubmissions={openDataSubmissions} onOpenPmAnalytics={openPmAnalytics} onOpenPatientWorklist={openPatientWorklist} /></AppShell></div>
+    <div hidden={product !== 'hdi-command-center' || criteriaOpen}><NavBar /><AppShell wide><HealthDataIntelligenceCommandPlane onOpenDataSubmissions={openDataSubmissions} onOpenPmAnalytics={openPmAnalytics} onOpenPatientWorklist={openPatientWorklist} /></AppShell></div>
     {submissionsVisited && <div hidden={product !== 'data-submissions' || criteriaOpen} className="union-submissions"><iframe ref={frame} title="Data Submissions" src="/data-submissions/index.html" onLoad={handleSubmissionsLoad} /></div>}
   </div>;
 }
