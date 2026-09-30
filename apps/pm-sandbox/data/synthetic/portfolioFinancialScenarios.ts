@@ -19,7 +19,7 @@ export interface FinancialScenario {
 export const portfolioFinancialScenarios: Partial<Record<HdiObligationId, FinancialScenario>> = {
   "cms-team": { year: 2026, downside: -4_000_000, upside: 4_000_000, projected: -1_000_000, withActions: 500_000 },
   "vbc-contracts": vbcFinancialSummary(mockContracts),
-  "mips-mvp": { year: 2026, downside: -2_000_000, upside: 800_000, projected: -300_000, withActions: -100_000 },
+  "mips-mvp": { year: 2026, downside: -2_000_000, upside: 800_000, projected: 300_000, withActions: 500_000 },
   "ma-stars": { year: 2026, downside: -1_400_000, upside: 2_800_000, projected: 600_000, withActions: 800_000 },
   "medicaid-vbp": { year: 2026, downside: -1_600_000, upside: 1_200_000, projected: -400_000, withActions: -100_000 },
   "hospital-quality": { year: 2026, downside: -1_000_000, upside: 0, projected: -250_000, withActions: -100_000 },

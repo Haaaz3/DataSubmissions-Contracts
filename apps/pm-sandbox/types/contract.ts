@@ -90,6 +90,7 @@ export interface Contract {
   vbcContractModel?: VbcContractModel;
   insuranceSegment?: InsuranceSegment;
   attributedLives: number;
+  expenseBasis?: "pmpm" | "pmpy"; // Preferred display basis; calculations normalize to PMPM.
   currentPmpm: number;      // Current Per Member Per Month spend
   targetPmpm: number;       // Target Per Member Per Month spend
   qualityScore: number;     // 0–100

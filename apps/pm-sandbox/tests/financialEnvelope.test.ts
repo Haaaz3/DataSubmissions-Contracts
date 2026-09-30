@@ -9,7 +9,7 @@ describe("financial envelope", () => {
   it("nets projected settlements and derives improvement from the alternative outcome", () => {
     const total = financialSummary(hdiObligations.filter(p => p.id !== "ambulatory-specialty-model"), 2026)!;
     const vbc = vbcFinancialSummary(mockContracts);
-    expect(total).toEqual({ year: 2026, count: 6, missing: 0, downside: vbc.downside - 10000000, upside: vbc.upside + 8800000, projected: vbc.projected - 1350000, withActions: vbc.withActions + 1000000 });
+    expect(total).toEqual({ year: 2026, count: 6, missing: 0, downside: vbc.downside - 10000000, upside: vbc.upside + 8800000, projected: vbc.projected - 750000, withActions: vbc.withActions + 1600000 });
     expect(improvement(total)).toBeCloseTo(vbc.improvement + 2350000);
     expect(total.projected + improvement(total)).toBe(total.withActions);
     expect(improvement(total)).not.toBe(total.upside - total.projected);

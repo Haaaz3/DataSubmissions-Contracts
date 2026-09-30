@@ -1,0 +1,19 @@
+"use client";
+import { useState } from "react";
+import type { HdiObligationId } from "@/data/synthetic/healthIntelligenceObligations";
+import { measuresVerifiedOn, programMeasureCatalogs, publishedMeasuresFor } from "@/data/reference/programQualityMeasures";
+
+export default function PublishedMeasureRequirements({ programId, idPrefix = "program-quality" }: { programId: HdiObligationId; idPrefix?: string }) {
+  const catalog = programMeasureCatalogs[programId];
+  const [year, setYear] = useState(catalog.years[0]);
+  const [cohort, setCohort] = useState("all");
+  const measures = publishedMeasuresFor(programId, year);
+  const shown = measures.filter(measure => cohort === "all" || measure.group === cohort);
+  const groups = [...new Set(measures.map(measure => measure.group))];
+  return <section id={`${idPrefix}-measures`} tabIndex={-1} aria-labelledby={`${idPrefix}-title`} className="scroll-mt-5 rounded-xl border border-[#b5d1ca] bg-white p-4 shadow-sm">
+    <div className="flex flex-wrap items-start justify-between gap-3"><div><h3 id={`${idPrefix}-title`} className="text-lg font-bold text-slate-900">Quality measures</h3><p className="mt-1 text-xs text-slate-500">{catalog.coverage} · {shown.filter(measure => !measure.pending).length} measures{shown.some(measure => measure.pending) ? " · 1 pending" : ""}</p></div><div className="flex flex-wrap items-end gap-3"><label className="text-[11px] font-semibold text-slate-600">{catalog.yearLabel}<select aria-label={catalog.yearLabel} value={year} onChange={event => { setYear(Number(event.target.value)); setCohort("all"); }} className="ml-2 rounded-md border border-slate-300 bg-white px-2 py-1.5">{catalog.years.map(value => <option key={value}>{value}</option>)}</select></label>{programId === "ambulatory-specialty-model" && <label className="text-[11px] font-semibold text-slate-600">Cohort<select aria-label="ASM cohort" value={cohort} onChange={event => setCohort(event.target.value)} className="ml-2 rounded-md border border-slate-300 bg-white px-2 py-1.5"><option value="all">All cohorts</option>{groups.map(group => <option key={group}>{group}</option>)}</select></label>}<a href={catalog.source} target="_blank" rel="noreferrer" className="text-xs font-semibold text-[#176b75] underline">CMS source ↗</a></div></div>
+    <p className="mt-3 text-xs leading-5 text-slate-600">{catalog.note}</p>
+    <div className="mt-3 overflow-x-auto"><table className="w-full min-w-[720px] text-left text-xs"><thead className="border-y border-slate-100 bg-slate-50 text-[10px] uppercase tracking-wide text-slate-500"><tr><th className="p-2">Measure</th><th className="p-2">Reporting / period</th><th className="p-2">Applicability</th></tr></thead><tbody className="divide-y divide-slate-100">{shown.map(measure => <tr key={measure.key} className={measure.pending ? "bg-amber-50/60" : ""}><td className="w-[44%] p-2.5 align-top"><p className="mb-1 text-[10px] font-bold text-[#176b75]">{measure.id}{measure.pending ? " · Not finalized" : ""}</p><a href={measure.source} target="_blank" rel="noreferrer" className="font-semibold leading-5 text-slate-800 hover:text-[#176b75] hover:underline">{measure.name} ↗</a>{measure.note && <p className="mt-1 text-[11px] leading-4 text-slate-500">{measure.note}</p>}</td><td className="w-[28%] p-2.5 align-top leading-5 text-slate-600"><p>{measure.collection}</p><p className="mt-1 text-[11px] text-slate-500">{measure.period}</p></td><td className="p-2.5 align-top leading-5 text-slate-600"><p className="font-semibold">{measure.group}</p><p className="mt-1 text-[11px]">{measure.applicability}</p></td></tr>)}</tbody></table></div>
+    <p className="mt-3 text-[11px] text-slate-500">Sources checked {measuresVerifiedOn}. Published definitions; connected measure results are unavailable. Performance, workloads and dollars in this prototype are modeled.</p>
+  </section>;
+}

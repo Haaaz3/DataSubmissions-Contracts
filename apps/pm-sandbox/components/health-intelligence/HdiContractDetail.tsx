@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import VbcFinancialSummary from "./VbcFinancialSummary";
-import { type CostUnit } from "@/lib/contracts/vbcFinancials";
+import { useExpenseBasis } from "@/lib/contracts/useExpenseBasis";
 import PmpmTrendChart from "@/components/charts/PmpmTrendChart";
 import QualityGauge from "@/components/charts/QualityGauge";
 import { mockContracts } from "@/lib/mockData";
@@ -103,8 +103,8 @@ function PopulationWorkbench({ measure, onOpenExternal }: { measure: MeasureRow;
 }
 
 export default function HdiContractDetail({ contractId, onBack, onOpenPatientWorklist }: { contractId: string; onBack: () => void; onOpenPatientWorklist: (measure: string) => void }) {
-  const [costUnit, setCostUnit] = useState<CostUnit>("pmpm");
   const contract = mockContracts.find((item) => item.id === contractId) ?? mockContracts[0];
+  const [costUnit, setCostUnit] = useExpenseBasis("contract:" + contract.id, contract.expenseBasis ?? "pmpm");
   const measures = useMemo(() => qualityMeasures(contract), [contract]);
   const [selectedMeasureId, setSelectedMeasureId] = useState(measures[0]?.id ?? "readmissions");
   const [detailNotice, setDetailNotice] = useState<string | null>(null);

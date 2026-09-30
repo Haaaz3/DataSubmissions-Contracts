@@ -334,7 +334,14 @@ export default function HealthDataIntelligenceCommandPlane({ onOpenDataSubmissio
         window.history.replaceState(null, "", url);
         window.dispatchEvent(new PopStateEvent("popstate"));
         setNotice(null);
-      } else setNotice("Published measure definition. Patient-level results are not connected for this program.");
+      } else {
+        const item = publishedOwner.workItems.find(item => item.driver.toLowerCase() === normalized);
+        const url = new URL(window.location.href);
+        if (item?.qualityMeasureKey) url.searchParams.set("qualityMeasure", item.qualityMeasureKey);
+        window.history.replaceState(null, "", url);
+        window.dispatchEvent(new PopStateEvent("popstate"));
+        setNotice(null);
+      }
       requestAnimationFrame(() => { document.getElementById("program-quality-measures")?.scrollIntoView({ behavior: "smooth" }); });
       return;
     }

@@ -1,71 +1,20 @@
 "use client";
-
-import {
-  type HdiCrossProgramOpportunity,
-  type HdiObligation,
-  type HdiObligationId,
-} from "@/data/synthetic/healthIntelligenceObligations";
+import type { HdiCrossProgramOpportunity, HdiObligation, HdiObligationId } from "@/data/synthetic/healthIntelligenceObligations";
 import ProgramQualityMeasures from "./ProgramQualityMeasures";
+import ProgramPerformanceOverview from "./ProgramPerformanceOverview";
 import ModelProgramWorkspace from "./ModelProgramWorkspace";
-import VbcContractPortfolio from "@/components/health-intelligence/VbcContractPortfolio";
+import VbcContractPortfolio from "./VbcContractPortfolio";
 
-const money = (value: number) => value >= 1_000_000 ? `$${(value / 1_000_000).toFixed(1)}M` : `$${Math.round(value / 1_000)}K`;
-const whole = (value: number) => value.toLocaleString("en-US");
-
-function TrendChart({ obligation }: { obligation: HdiObligation }) {
-  const width = 560;
-  const height = 168;
-  const delta = obligation.forecast.projected - obligation.forecast.current;
-  const values = [obligation.forecast.current - Math.round(delta * 0.7), obligation.forecast.current - Math.round(delta * 0.4), obligation.forecast.current - Math.round(delta * 0.2), obligation.forecast.current, obligation.forecast.current + Math.round(delta * 0.55), obligation.forecast.projected];
-  const all = [...values, obligation.forecast.target];
-  const min = Math.min(...all) - 1;
-  const max = Math.max(...all) + 1;
-  const y = (value: number) => height - 28 - ((value - min) / Math.max(1, max - min)) * (height - 52);
-  const x = (index: number) => 36 + (index / (values.length - 1)) * (width - 56);
-  const points = values.map((value, index) => `${x(index)},${y(value)}`).join(" ");
-  return <div className="rounded-xl border border-[#e2e7ee] bg-white p-4 shadow-sm">
-    <div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-[10px] font-bold uppercase tracking-[0.13em] text-[#28737a]">Modeled forecast</p><h3 className="mt-1 text-base font-bold tracking-tight text-slate-900">{obligation.forecast.unit} trajectory</h3><p className="mt-1 text-[11px] text-slate-500">Prototype scenario; not a submitted measure result.</p></div><span className="text-[11px] font-semibold text-slate-500">Target {obligation.forecast.target}{obligation.forecast.unit.includes("%") ? "%" : ""}</span></div>
-    <svg className="mt-3 h-40 w-full" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${obligation.title} performance trajectory`}>
-      {[0, 1, 2].map((index) => { const lineY = 20 + index * 52; return <line key={lineY} x1="36" x2={width - 20} y1={lineY} y2={lineY} stroke="#e8edf2" strokeDasharray="3 4" />; })}
-      <line x1="36" x2={width - 20} y1={y(obligation.forecast.target)} y2={y(obligation.forecast.target)} stroke="#2d8a78" strokeDasharray="5 4" strokeWidth="1.5" />
-      <polyline points={points} fill="none" stroke="#5270e8" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-      {values.map((value, index) => <circle key={`${value}-${index}`} cx={x(index)} cy={y(value)} r={index === values.length - 1 ? 5 : 3.5} fill="#5270e8" stroke="white" strokeWidth="1.5" />)}
-      <text x="40" y="14" fill="#94a3b8" fontSize="10">{Math.round(max)}{obligation.forecast.unit.includes("%") ? "%" : ""}</text>
-      <text x="40" y={height - 30} fill="#94a3b8" fontSize="10">{Math.round(min)}{obligation.forecast.unit.includes("%") ? "%" : ""}</text>
-      {['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'].map((label, index) => <text key={label} x={x(index)} y={height - 8} textAnchor="middle" fill="#94a3b8" fontSize="10">{label}</text>)}
-    </svg>
-    <div className="flex flex-wrap items-center gap-4 border-t border-slate-100 pt-2 text-[10px] font-semibold text-slate-500"><span><i className="mr-1 inline-block h-2 w-2 rounded-full bg-[#5270e8]" />Forecast trajectory</span><span><i className="mr-1 inline-block h-2 w-2 rounded-full bg-[#2d8a78]" />Target baseline</span></div>
-  </div>;
-}
-
-function ValueCapture({ obligation }: { obligation: HdiObligation }) {
-  const recoveryShare = obligation.atRiskDollars ? obligation.recoverableDollars / obligation.atRiskDollars * 100 : 0;
-  return <section className="rounded-xl border border-[#e2e7ee] bg-white p-4 shadow-sm">
-    <h3 className="text-base font-bold text-slate-900">Financial exposure</h3>
-    <div className="mt-4 grid grid-cols-2 gap-3"><div className="rounded-lg bg-amber-50 p-3"><p className="text-xs text-slate-500">Dollars at risk</p><p className="mt-1 text-xl font-bold text-amber-700">{money(obligation.atRiskDollars)}</p></div><div className="rounded-lg bg-[#e8f3ef] p-3"><p className="text-xs text-slate-500">Recoverable opportunity</p><p className="mt-1 text-xl font-bold text-[#176b75]">{money(obligation.recoverableDollars)}</p></div></div>
-    <div className="mt-4 h-2 overflow-hidden rounded-full bg-amber-100" aria-hidden="true"><div className="h-full bg-[#29867a]" style={{ width: `${recoveryShare}%` }} /></div>
-    <p className="mt-2 text-xs text-slate-500">{recoveryShare.toFixed(1)}% of the at-risk estimate has identified recovery opportunity.</p>
-    <p className="mt-3 text-[11px] leading-5 text-slate-500">Modeled estimates. Recovery is included in risk; financial overlap across programs has not been reconciled.</p>
-  </section>;
-}
-
-function DriverTable({ obligation, onWorklist }: { obligation: HdiObligation; onWorklist: (id: HdiObligationId) => void }) {
-  return <section className="rounded-xl border border-[#e2e7ee] bg-white p-4 shadow-sm"><div className="flex flex-wrap items-center justify-between gap-3"><h3 className="text-base font-bold text-slate-900">Operational work</h3><button type="button" onClick={() => onWorklist(obligation.id)} className="text-xs font-semibold text-[#176b75]">Open worklist →</button></div><p className="mt-1 text-[11px] text-slate-500">Modeled tasks and impact; not official measure results.</p><div className="mt-3 divide-y divide-slate-100">{obligation.workItems.map(item => <div key={item.id} className="grid gap-3 py-3 sm:grid-cols-[minmax(0,1fr)_180px_100px]"><div><p className="text-xs font-semibold text-slate-800">{item.title}</p><p className="mt-1 text-[11px] font-semibold text-[#176b75]">{item.driver}</p><p className="mt-1 text-[11px] leading-4 text-slate-500">{item.evidence}</p></div><div className="text-xs text-slate-600"><p>{item.practice}</p><p className="mt-1 text-[11px] text-slate-500">{item.owner}</p></div><div className="text-xs"><p className="font-semibold text-emerald-700">{money(item.impact)}</p><p className="mt-1 text-slate-500">Due {item.dueInDays}d</p></div></div>)}</div></section>;
-}
-
-export default function ProgramOverview({ obligation, opportunities, onBack, onWorklist, onOpenDataSubmissions, onOpenPatientWorklist, onOpenContract }: { obligation: HdiObligation; opportunities: HdiCrossProgramOpportunity[]; onBack: () => void; onWorklist: (id: HdiObligationId) => void; onOpenDataSubmissions?: () => void; onOpenPatientWorklist: (measure: string) => void; onOpenContract?: (contractId: string) => void }) {
-  if (obligation.id === "vbc-contracts") {
-    return <VbcContractPortfolio obligation={obligation} onBack={onBack} onOpenPatientWorklist={onOpenPatientWorklist} onOpenContract={onOpenContract ?? (() => undefined)} />;
-  }
-  if (obligation.id === "cms-team" || obligation.id === "ambulatory-specialty-model") {
-    return <ModelProgramWorkspace key={obligation.id} program={obligation.id} onBack={onBack} />;
-  }
+export default function ProgramOverview({ obligation, onBack, onWorklist, onOpenDataSubmissions, onOpenPatientWorklist, onOpenContract }: { obligation: HdiObligation; opportunities: HdiCrossProgramOpportunity[]; onBack: () => void; onWorklist: (id: HdiObligationId) => void; onOpenDataSubmissions?: () => void; onOpenPatientWorklist: (measure: string) => void; onOpenContract?: (contractId: string) => void }) {
+  if (obligation.id === "vbc-contracts") return <VbcContractPortfolio obligation={obligation} onBack={onBack} onOpenPatientWorklist={onOpenPatientWorklist} onOpenContract={onOpenContract ?? (() => undefined)} />;
+  if (obligation.id === "cms-team" || obligation.id === "ambulatory-specialty-model") return <ModelProgramWorkspace key={obligation.id} program={obligation.id} onBack={onBack} />;
   return <section className="space-y-4">
-    <div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#28737a]">Program overview</p><h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{obligation.title}</h2><p className="mt-1 text-xs text-slate-500">{obligation.category} · {obligation.scope} · {obligation.deadline}</p></div><button type="button" onClick={onBack} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">← Back to portfolio</button></div>
-    <ProgramQualityMeasures key={obligation.id} programId={obligation.id} />
-    <section className="rounded-xl border border-[#e2e7ee] bg-white p-4 shadow-sm"><p className="mb-3 text-xs font-semibold text-slate-500">Modeled program forecast</p><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><span className="rounded-full bg-[#e8f3ef] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[#285954]">{obligation.shortTitle}</span><span className="text-[11px] font-semibold text-slate-500">{obligation.sponsor}</span></div><span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${obligation.forecast.projected >= obligation.forecast.target ? "bg-[#e8f3ef] text-[#285954]" : "bg-[#fff6e7] text-[#9b641d]"}`}>{obligation.forecast.projected >= obligation.forecast.target ? "Target met" : `${obligation.forecast.target - obligation.forecast.projected} pt gap`}</span></div><div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4"><div><p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Attributed lives</p><p className="mt-1 text-xl font-bold text-slate-900">{whole(obligation.lives)}</p><p className="mt-1 text-[10px] text-slate-500">{whole(obligation.providers)} providers / participants</p></div><div><p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Projected forecast</p><p className="mt-1 text-xl font-bold text-[#5270e8]">{obligation.forecast.projected}{obligation.forecast.unit.includes("%") ? "%" : ""}</p><p className="mt-1 text-[10px] text-slate-500">Target {obligation.forecast.target}{obligation.forecast.unit.includes("%") ? "%" : ""}</p></div><div><p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Dollars at risk</p><p className="mt-1 text-xl font-bold text-amber-700">{money(obligation.atRiskDollars)}</p><p className="mt-1 text-[10px] text-slate-500">Gross modeled exposure</p></div><div><p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Recoverable opportunity</p><p className="mt-1 text-xl font-bold text-[#176b75]">{money(obligation.recoverableDollars)}</p><p className="mt-1 text-[10px] text-slate-500">Across {obligation.workItems.length} work queues</p></div></div></section>
-    <div className="grid gap-4 xl:grid-cols-[minmax(0,1.18fr)_minmax(340px,0.82fr)]"><TrendChart obligation={obligation} /><ValueCapture obligation={obligation} /></div>
-    <DriverTable obligation={obligation} onWorklist={onWorklist} />
-    <details className="rounded-xl border border-[#dbe9e4] bg-[#f8fbfa] p-4"><summary className="flex cursor-pointer items-center justify-between gap-3 text-sm font-bold text-slate-900"><span>Open full obligation detail</span><span className="text-xs font-semibold text-[#176b75]">{opportunities.length} shared pathways · {obligation.forecast.unit}</span></summary><div className="mt-4 grid gap-3 border-t border-[#dbe9e4] pt-4 sm:grid-cols-2 lg:grid-cols-4"><div><p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Sponsor</p><p className="mt-1 text-sm font-semibold text-slate-800">{obligation.sponsor}</p></div><div><p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Scope</p><p className="mt-1 text-sm font-semibold text-slate-800">{obligation.scope}</p></div><div><p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Forecast now</p><p className="mt-1 text-sm font-semibold text-slate-800">{obligation.forecast.current} → {obligation.forecast.projected}</p></div><div><p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Next deadline</p><p className="mt-1 text-sm font-semibold text-slate-800">{obligation.deadline}</p></div></div><button type="button" onClick={() => obligation.id === "mips-mvp" && onOpenDataSubmissions ? onOpenDataSubmissions() : onWorklist(obligation.id)} className="mt-4 rounded-lg bg-[#285954] px-3 py-2 text-xs font-semibold text-white hover:bg-[#1f4b47]">{obligation.id === "mips-mvp" ? "Open MIPS performance dashboard" : "Open coordinated worklist"} →</button></details>
+    <div className="flex flex-wrap items-start justify-between gap-4"><div><h2 className="text-2xl font-bold text-slate-900">{obligation.title}</h2><p className="mt-1 text-xs text-slate-500">{obligation.sponsor} · {obligation.scope} · {obligation.deadline}</p></div><button type="button" onClick={onBack} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700">← Back to portfolio</button></div>
+    <ProgramPerformanceOverview obligation={obligation} onQuality={key => {
+      if (key) { const url = new URL(window.location.href); url.searchParams.set("qualityMeasure", key); window.history.pushState(null, "", url); window.dispatchEvent(new PopStateEvent("popstate")); }
+      requestAnimationFrame(() => document.getElementById(key ? "program-measure-worklist" : "program-quality-measures")?.scrollIntoView({ behavior: "smooth", block: "start" }));
+    }} onWorklist={() => onWorklist(obligation.id)} onReporting={onOpenDataSubmissions} />
+    <ProgramQualityMeasures key={obligation.id} programId={obligation.id} onOpenReporting={onOpenDataSubmissions} />
+    <section className="rounded-xl border border-slate-200 bg-white p-4"><div className="flex items-center justify-between"><h3 className="text-base font-bold text-slate-900">Operational work</h3><button type="button" onClick={() => onWorklist(obligation.id)} className="text-xs font-semibold text-[#176b75]">Open worklist →</button></div><div className="mt-3 divide-y divide-slate-100">{obligation.workItems.map(item => <div key={item.id} className="flex flex-wrap justify-between gap-3 py-3"><div><p className="text-xs font-semibold text-slate-800">{item.title}</p><p className="mt-1 text-xs text-slate-500">{item.owner} · {item.practice}</p></div><p className="text-xs font-semibold text-slate-600">Due {item.dueInDays} days</p></div>)}</div></section>
   </section>;
 }
