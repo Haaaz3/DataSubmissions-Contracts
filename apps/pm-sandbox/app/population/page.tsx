@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import PatientListTable, { PatientListFrame } from "@/components/population/PatientListTable";
 import SummaryCard from "@/components/SummaryCard";
 import ConditionList from "@/components/ConditionList";
 import FeatureGuard from "@/components/FeatureGuard";
@@ -1062,7 +1063,7 @@ function PopulationPageContent() {
       </section>
       ) : null}
 
-      <div id={selectedTrial ? "trial-patient-roster" : undefined} className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+      <PatientListFrame id={selectedTrial ? "trial-patient-roster" : undefined}>
         <div className="mb-3 flex flex-wrap items-center gap-2">
           <input
             value={searchTerm}
@@ -1112,78 +1113,7 @@ function PopulationPageContent() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-[1450px] w-full divide-y divide-slate-200 text-sm">
-            <thead className="bg-slate-50">
-              <tr>
-                <th className="px-3 py-2.5 text-left"><input type="checkbox" aria-label="Select all rows" /></th>
-                {[
-                  { label: "Opportunity", key: "opportunity" as SortKey },
-                  { label: "Name (MRN)", key: "name" as SortKey },
-                  { label: "Date of Birth (Age)", key: "dateOfBirth" as SortKey },
-                  { label: "Gender (Birth Sex)", key: "gender" as SortKey },
-                  { label: "Primary Contact", key: "primaryContact" as SortKey },
-                  { label: "Total Unmet Measures", key: "totalUnmetMeasures" as SortKey },
-                  { label: "Provider Name", key: "providerName" as SortKey },
-                  { label: "Recent Visit Date", key: "recentVisitDate" as SortKey },
-                  { label: "Next Attributed Provider Visit Date", key: "nextAttributedProviderVisitDate" as SortKey },
-                ].map((col) => (
-                  <th
-                    key={col.key}
-                    onClick={() => toggleSort(col.key)}
-                    className="cursor-pointer px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-600"
-                  >
-                    <span className="inline-flex items-center gap-1">
-                      {col.label}
-                      <span className="text-[10px] text-slate-400">↕</span>
-                    </span>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-
-            <tbody className="divide-y divide-slate-100 bg-white">
-              {pagedPatients.map((row) => (
-                <tr key={row.id} className="hover:bg-slate-50/60">
-                  <td className="px-3 py-3 align-top"><input type="checkbox" aria-label={`Select ${row.name}`} /></td>
-                  <td className="px-3 py-3 align-top">
-                    <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-                      row.opportunity === "High"
-                        ? "bg-amber-100 text-amber-800"
-                        : row.opportunity === "Medium"
-                        ? "bg-indigo-100 text-indigo-700"
-                        : "bg-emerald-100 text-emerald-700"
-                    }`}>
-                      {row.opportunity}
-                    </span>
-                  </td>
-                  <td className="px-3 py-3 align-top">
-                    <Link href={`/population/member/${row.id}`} className="font-semibold text-sky-700 hover:underline">
-                      {row.name}
-                    </Link>
-                    <p className="mt-1 text-xs text-slate-500">MRN: {row.mrn}</p>
-                  </td>
-                  <td className="px-3 py-3 align-top">
-                    <p className="text-slate-900">{row.dateOfBirth}</p>
-                    <p className="mt-1 text-xs text-slate-500">{row.age} years</p>
-                  </td>
-                  <td className="px-3 py-3 align-top">
-                    <p className="text-slate-900">{row.gender}</p>
-                    <p className="mt-1 text-xs text-slate-500">Birth Sex: {row.birthSex}</p>
-                  </td>
-                  <td className="px-3 py-3 align-top">
-                    <p className="text-slate-900">{row.primaryContact}</p>
-                    <p className="mt-1 text-xs text-slate-500">Type: {row.contactType}</p>
-                  </td>
-                  <td className="px-3 py-3 align-top text-slate-900">{row.totalUnmetMeasures}</td>
-                  <td className="px-3 py-3 align-top text-slate-900">{row.providerName}</td>
-                  <td className="px-3 py-3 align-top text-slate-900">{row.recentVisitDate}</td>
-                  <td className="px-3 py-3 align-top text-slate-900">{row.nextAttributedProviderVisitDate}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <PatientListTable patients={pagedPatients} onSort={toggleSort} />
 
         {sortedPatients.length === 0 && (
           <div className="rounded-lg border border-dashed border-slate-200 p-6 text-center text-sm text-slate-500">
@@ -1217,7 +1147,7 @@ function PopulationPageContent() {
             </div>
           </div>
         ) : null}
-      </div>
+      </PatientListFrame>
       </div>
     </FeatureGuard>
   );

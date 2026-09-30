@@ -26,6 +26,7 @@ export type MeasureObligation = {
   definitionId: string;
   contractId?: string;
   impact: MeasureImpact;
+  history: { month: string; eligible: number; numerator: number }[];
 };
 
 export type SharedMeasureFamily = {
@@ -61,12 +62,18 @@ function exampleObligations(hedisId: string, ecqmId: string, inputs: [ImpactInpu
     const pool = pools[index];
     return { eligible, numerator, targetPercent, financial: pool ? { ...pool, weightPercent } : null };
   };
+  const history = (index: number) => {
+    const { eligible, numerator } = impact(index);
+    const offsets = [[-6, -5, -3, -4, -2, 0], [2, 1, 1.5, 0.5, -0.5, 0], [-4, -3, -2, -2.5, -1, 0], [-7, -6, -4, -3, -1, 0], [-5, -4, -4.5, -2, -1, 0]][index];
+    // Synthetic monthly snapshots, with the latest snapshot equal to the card.
+    return ["Apr 2026", "May 2026", "Jun 2026", "Jul 2026", "Aug 2026", "Sep 2026"].map((month, point) => ({ month, eligible, numerator: Math.max(0, Math.min(eligible, numerator + Math.round(eligible * offsets[point] * (hedisId === "GSD >9%" ? -1 : 1) / 100))) }));
+  };
   return [
-    { id: "aetna-commercial", programId: "vbc-contracts", label: "Aetna Commercial ACO — Large Employer", definitionId: hedisId, contractId: "comm-001", impact: impact(0) },
-    { id: "united-commercial", programId: "vbc-contracts", label: "United Commercial Value — Mid-Market", definitionId: hedisId, contractId: "comm-002", impact: impact(1) },
-    { id: "ma-quality", programId: "ma-stars", label: "Medicare Advantage quality obligation", definitionId: hedisId, impact: impact(2) },
-    { id: "medicaid-quality", programId: "medicaid-vbp", label: "Medicaid VBP quality obligation", definitionId: hedisId, impact: impact(3) },
-    { id: "mips-ecqm", programId: "mips-mvp", label: "MIPS clinician reporting — eCQM collection", definitionId: ecqmId, impact: impact(4) },
+    { id: "aetna-commercial", programId: "vbc-contracts", label: "Aetna Commercial ACO — Large Employer", definitionId: hedisId, contractId: "comm-001", impact: impact(0), history: history(0) },
+    { id: "united-commercial", programId: "vbc-contracts", label: "United Commercial Value — Mid-Market", definitionId: hedisId, contractId: "comm-002", impact: impact(1), history: history(1) },
+    { id: "ma-quality", programId: "ma-stars", label: "Medicare Advantage quality obligation", definitionId: hedisId, impact: impact(2), history: history(2) },
+    { id: "medicaid-quality", programId: "medicaid-vbp", label: "Medicaid VBP quality obligation", definitionId: hedisId, impact: impact(3), history: history(3) },
+    { id: "mips-ecqm", programId: "mips-mvp", label: "MIPS clinician reporting — eCQM collection", definitionId: ecqmId, impact: impact(4), history: history(4) },
   ];
 }
 

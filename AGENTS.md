@@ -6,6 +6,8 @@ This is one integrated prototype, published to two repositories at the user's re
 
 Make prototype changes once in this working copy. Preserve the original Data Submissions dropdown experience and the real PM Sandbox functionality. Run checks appropriate to the changes.
 
+Use short, literal B2B labels for product copy (for example, "Shared measures"). Avoid slogans, marketing headlines and redundant explanatory text.
+
 For completed prototype updates requested by this user, publish the same committed revision to both repositories. The user has requested this ongoing workflow. Do not create two independently edited versions. Check both remote main branches first and reconcile any changes; never force-push, delete branches, or overwrite work to obtain matching branches.
 
 Use `pnpm publish:repos` (or `node scripts/publish-repos.mjs`) after committing and verification. `--check` performs preflight without publishing. Both destinations must pass preflight before either is pushed. Verify both remote heads equal the published commit before reporting synchronization.

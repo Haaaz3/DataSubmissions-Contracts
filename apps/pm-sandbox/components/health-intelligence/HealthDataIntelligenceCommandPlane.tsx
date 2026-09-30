@@ -11,11 +11,13 @@ import {
 import PortfolioExecutiveSummary from "@/components/health-intelligence/PortfolioExecutiveSummary";
 import ProgramOverview from "@/components/health-intelligence/ProgramOverview";
 import HdiContractDetail from "@/components/health-intelligence/HdiContractDetail";
+import SharedMeasurePatientList from "@/components/health-intelligence/SharedMeasurePatientList";
+import { measurePatientHref, measurePatientState, parseMeasurePatientState, type MeasurePatientListState, type MeasurePatientStatus } from "@/lib/health-intelligence/measurePopulation";
 import SharedMeasureExplorer from "@/components/health-intelligence/SharedMeasureExplorer";
 import MeasureImpactMetrics from "@/components/health-intelligence/MeasureImpactMetrics";
 import { sharedMeasureFamilies, type SharedMeasureFamily, type MeasureObligation } from "@/data/synthetic/sharedMeasures";
 
-type HdiView = "overview" | "program" | "contract" | "worklist" | "action";
+type HdiView = "overview" | "program" | "contract" | "worklist" | "action" | "measure-patients";
 type HdiLens = "enterprise" | "quality";
 
 const money = (value: number) => value >= 1000000 ? `$${(value / 1000000).toFixed(1)}M` : `$${Math.round(value / 1000)}K`;
@@ -45,11 +47,11 @@ function WorkspaceNavigation({ view, selected, onNavigate }: { view: HdiView; se
     { id: "worklist", label: "Worklists", helper: "Open practice work" },
     { id: "action", label: "Action center", helper: "Operational detail" },
   ];
-  const navView = view === "contract" ? "program" : view;
+  const navView = view === "contract" ? "program" : view === "measure-patients" ? "worklist" : view;
   const current = items.find((item) => item.id === navView) ?? items[0];
   return <section className="rounded-xl border border-[#dce5e7] bg-white shadow-sm" aria-label="HDI workspace navigation">
     <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-      <div className="flex min-w-0 items-center gap-2 text-xs"><button type="button" onClick={() => onNavigate("overview")} className="font-bold text-[#176b75] hover:underline">HDI Command Center</button><span className="text-slate-300">/</span><span className="truncate font-semibold text-slate-700">{current.label}</span>{view !== "overview" && <><span className="text-slate-300">/</span><span className="truncate text-slate-500">{selected.shortTitle}</span></>}</div>
+      <div className="flex min-w-0 items-center gap-2 text-xs"><button type="button" onClick={() => onNavigate("overview")} className="font-bold text-[#176b75] hover:underline">HDI Command Center</button><span className="text-slate-300">/</span><span className="truncate font-semibold text-slate-700">{current.label}</span>{view !== "overview" && <><span className="text-slate-300">/</span><span className="truncate text-slate-500">{view === "measure-patients" ? "Shared measures" : selected.shortTitle}</span></>}</div>
       <nav className="flex flex-wrap items-center gap-1" aria-label="HDI sections">{items.map((item) => <button key={item.id} type="button" onClick={() => onNavigate(item.id)} aria-current={navView === item.id ? "page" : undefined} className={`rounded-lg px-3 py-2 text-left transition ${navView === item.id ? "bg-[#213a40] text-white" : "text-slate-600 hover:bg-[#f1f6f5] hover:text-[#176b75]"}`}><span className="block text-[11px] font-bold">{item.label}</span><span className={`mt-0.5 block text-[9px] ${navView === item.id ? "text-white/70" : "text-slate-400"}`}>{item.helper}</span></button>)}</nav>
     </div>
     {view !== "overview" && <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 bg-[#f8fbfa] px-4 py-2 text-[10px] font-semibold text-slate-500"><span>You are here: <strong className="text-slate-700">{current.label}</strong>{view === "program" || view === "contract" || view === "worklist" || view === "action" ? <span> · {selected.title}</span> : null}</span><button type="button" onClick={() => onNavigate("overview")} className="text-[#176b75] hover:underline">Return to portfolio overview →</button></div>}
@@ -173,6 +175,7 @@ type HdiCommandPlaneProps = {
 };
 
 export default function HealthDataIntelligenceCommandPlane({ onOpenDataSubmissions, onOpenPmAnalytics, onOpenPatientWorklist }: HdiCommandPlaneProps) {
+  const [patientList, setPatientList] = useState<MeasurePatientListState | null>(null);
   const [view, setView] = useState<HdiView>("overview");
   const [lens, setLens] = useState<HdiLens>("enterprise");
   const [selectedId, setSelectedId] = useState<HdiObligationId>("cms-team");
@@ -189,6 +192,7 @@ export default function HealthDataIntelligenceCommandPlane({ onOpenDataSubmissio
       const params = new URLSearchParams(window.location.search);
       const requestedProgram = params.get("program") as HdiObligationId | null;
       const requestedView = params.get("view") as HdiView | null;
+      setPatientList(requestedView === "measure-patients" ? parseMeasurePatientState(params) : null);
       if (requestedProgram && hdiObligations.some((obligation) => obligation.id === requestedProgram)) setSelectedId(requestedProgram);
       const family = sharedMeasureFamilies.find(item => item.id === params.get("measureFamily"));
       const obligation = family?.obligations.find(item => item.id === params.get("measureObligation") && item.programId === requestedProgram && (item.contractId ? params.get("contract") === item.contractId && requestedView === "contract" : requestedView === "program"));
@@ -196,7 +200,7 @@ export default function HealthDataIntelligenceCommandPlane({ onOpenDataSubmissio
       if (family) setExpandedMeasureId(family.id);
       const requestedContract = params.get("contract");
       if (requestedContract) setSelectedContractId(requestedContract);
-      if (requestedView && ["overview", "program", "contract", "worklist", "action"].includes(requestedView)) setView(requestedView);
+      if (requestedView && ["overview", "program", "contract", "worklist", "action", "measure-patients"].includes(requestedView)) setView(requestedView);
       else if (requestedContract) setView("contract");
       else if (requestedProgram) setView("program");
       else setView("overview");
@@ -221,6 +225,7 @@ export default function HealthDataIntelligenceCommandPlane({ onOpenDataSubmissio
     if (nextView !== "contract") url.searchParams.delete("contract");
     url.searchParams.delete("measureFamily");
     url.searchParams.delete("measureObligation");
+    for (const key of ["gapStatus", "q", "provider", "page", "measure", "context", "source"]) url.searchParams.delete(key);
     url.searchParams.set("view", nextView);
     window.history.pushState(null, "", url);
   };
@@ -252,6 +257,18 @@ export default function HealthDataIntelligenceCommandPlane({ onOpenDataSubmissio
     url.searchParams.delete("measureObligation");
     window.history.pushState(null, "", url);
     setView("contract");
+  };
+  const changePatientList = (next: MeasurePatientListState, replace = false) => {
+    setPatientList(next);
+    setMeasureContext(null);
+    setView("measure-patients");
+    setExpandedMeasureId(next.familyId);
+    if (replace) window.history.replaceState(null, "", measurePatientHref(next));
+    else window.history.pushState(null, "", measurePatientHref(next));
+  };
+  const openMeasurePatients = (familyId: string, obligationId = "all", status: MeasurePatientStatus = "all") => {
+    changePatientList(measurePatientState(familyId, obligationId, status));
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
   const openMeasureObligation = (family: SharedMeasureFamily, obligation: MeasureObligation) => {
     if (obligation.contractId) openContract(obligation.contractId);
@@ -298,20 +315,15 @@ export default function HealthDataIntelligenceCommandPlane({ onOpenDataSubmissio
     startAction();
   };
   const openPatientWorklist = (measure: string) => {
-    if (onOpenPatientWorklist) {
-      onOpenPatientWorklist(measure);
-      return;
-    }
-    const normalized = measure.toLowerCase();
-    const mappedMeasure = normalized.includes("medication") || normalized.includes("adherence")
-      ? "Medication Adherence"
-      : normalized.includes("ed") || normalized.includes("follow-up")
-      ? "Follow-up after ED"
-      : normalized.includes("evidence") || normalized.includes("ecqm") || normalized.includes("cqm")
-      ? "A1c Control"
-      : "Post Discharge Follow-up";
-    const params = new URLSearchParams({ product: "pm-sandbox", measure: mappedMeasure, source: "hdi-shared-measure", context: measure });
-    window.location.assign(`/population?${params.toString()}`);
+    const normalized = measure.trim().toLowerCase();
+    const family = sharedMeasureFamilies.find(item => item.name.toLowerCase() === normalized || item.definitions.some(definition => definition.name.toLowerCase() === normalized || definition.id.toLowerCase() === normalized));
+    if (family) { openMeasurePatients(family.id); return; }
+    const supported = ["Medication Adherence", "Follow-up after ED", "Post Discharge Follow-up", "A1c Control", "Colorectal Screening", "Breast Screening", "COPD Management", "Transportation"];
+    const mappedMeasure = supported.find(item => item.toLowerCase() === normalized);
+    if (!mappedMeasure) { setNotice(`No patient list is configured for ${measure}.`); return; }
+    if (onOpenPatientWorklist) { onOpenPatientWorklist(mappedMeasure); return; }
+    const params = new URLSearchParams({ product: "pm-sandbox", measure: mappedMeasure, source: "hdi-worklist", context: measure });
+    window.location.assign(`/population?${params}`);
   };
   const startAction = () => {
     if (!startedActions.includes(selectedWork.id)) setStartedActions((current) => [...current, selectedWork.id]);
@@ -333,7 +345,7 @@ export default function HealthDataIntelligenceCommandPlane({ onOpenDataSubmissio
 
       <section><div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#28737a]">Opportunity portfolio</p><h3 className="mt-1 text-lg font-bold tracking-tight text-slate-900">All program opportunities</h3></div><button type="button" onClick={() => navigate("worklist", selected.id)} className="text-xs font-semibold text-[#176b75] hover:underline">Open all worklists →</button></div><div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">{hdiObligations.map((obligation) => <ObligationCard key={obligation.id} obligation={obligation} opportunities={opportunitiesFor(obligation.id)} expanded={expandedId === obligation.id} onToggle={() => toggleObligation(obligation.id)} onOpenProgram={() => openProgram(obligation.id)} onWorklist={openWorklist} onOpenDataSubmissions={obligation.id === "mips-mvp" ? openMipsDashboard : undefined} onOpenPatientWorklist={openPatientWorklist} />)}</div></section>
 
-      <SharedMeasureExplorer initialExpandedId={expandedMeasureId} onOpenObligation={openMeasureObligation} />
+      <SharedMeasureExplorer initialExpandedId={expandedMeasureId} onOpenObligation={openMeasureObligation} onOpenPatients={openMeasurePatients} />
 
       <AttentionQueue onOpenPatientWorklist={openPatientWorklist} />
 
@@ -344,10 +356,12 @@ export default function HealthDataIntelligenceCommandPlane({ onOpenDataSubmissio
       <details className="rounded-2xl border border-[#e3deda] bg-white p-5 shadow-sm"><summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3"><span><span className="block text-xs font-bold uppercase tracking-[0.12em] text-[#28737a]">Shared opportunity detail</span><span className="mt-1 block text-base font-semibold text-slate-900">All cross-program pathways</span></span><span className="rounded-full bg-[#e8f3ef] px-3 py-1.5 text-xs font-semibold text-[#285954]">{hdiCrossProgramOpportunities.length} pathways · {money(hdiCrossProgramOpportunities.reduce((sum, opportunity) => sum + opportunity.recoverableDollars, 0))} recoverable</span></summary><div className="mt-4 border-t border-slate-100 pt-4"><p className="text-xs font-medium text-slate-500">Select a measure or evidence signal to open the patient worklist.</p><div className="mt-4 grid grid-cols-1 gap-3 xl:grid-cols-2">{hdiCrossProgramOpportunities.map((opportunity) => <article key={opportunity.id} className="rounded-xl border border-slate-200 bg-[#fbfaf8] p-4"><div className="flex flex-wrap items-start justify-between gap-3"><div><h4 className="text-sm font-semibold text-slate-900">{opportunity.title}</h4><p className="mt-1 text-xs text-slate-500">{money(opportunity.recoverableDollars)} recoverable · {whole(opportunity.affectedLives)} lives touched</p></div><RelationshipBadge relationship={opportunity.relationship} /></div><div className="mt-3 flex flex-wrap gap-1.5">{opportunity.measureSet.map((measure) => <button key={measure} type="button" onClick={() => openPatientWorklist(measure)} className="group rounded-md bg-white px-2 py-1 text-left text-[11px] text-slate-700 ring-1 ring-slate-200 hover:bg-[#e8f3ef] hover:text-[#176b75]">{measure} <span className="text-[#176b75] opacity-0 group-hover:opacity-100">↗</span></button>)}</div><div className="mt-3 flex flex-wrap gap-1.5 border-t border-slate-200 pt-3">{opportunity.sharedEvidence.slice(0, 4).map((evidence) => <button key={evidence} type="button" onClick={() => openPatientWorklist(opportunity.measureSet[0])} className="rounded-md bg-white px-2 py-1 text-[11px] text-slate-600 ring-1 ring-slate-200 hover:bg-[#e8f3ef] hover:text-[#176b75]">{evidence} ↗</button>)}</div></article>)}</div></div></details>
     </div>}
 
+    {view === "measure-patients" && (patientList ? <SharedMeasurePatientList key={patientList.familyId} state={patientList} onChange={changePatientList} onBack={returnToSharedMeasures} /> : <section className="rounded-xl border border-slate-200 bg-white p-6"><h2 className="text-lg font-semibold">Patient list unavailable</h2><p className="mt-2 text-sm text-slate-500">The measure or obligation filter is invalid.</p><button type="button" onClick={returnToSharedMeasures} className="mt-3 text-sm font-semibold text-[#176b75]">Back to shared measures</button></section>)}
+
     {measureContext && (view === "program" || view === "contract") && <aside className="rounded-xl border border-[#b5d1ca] bg-[#f5fbf8] p-4">
       <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-wide text-[#28737a]">Shared measure context</p><p className="mt-1 text-base font-bold text-slate-900">{measureContext.family.name} · {measureContext.obligation.definitionId}</p><p className="mt-1 text-xs text-slate-600">{measureContext.obligation.label} · illustrative MY 2026 mapping</p></div><button type="button" onClick={returnToSharedMeasures} className="rounded-lg border border-[#b5d1ca] bg-white px-3 py-2 text-xs font-semibold text-[#176b75]">← Back to shared measures</button></div>
-      <MeasureImpactMetrics impact={measureContext.obligation.impact} direction={measureContext.family.definitions.find(item => item.id === measureContext.obligation.definitionId)!.direction} />
-      <p className="mt-3 text-sm text-slate-700"><strong>Action:</strong> {measureContext.family.nextAction}</p><p className="mt-1 text-xs leading-5 text-slate-500">Full {view === "contract" ? "contract" : "program"} overview; patient lists are not filtered to this measure.</p>
+      <MeasureImpactMetrics impact={measureContext.obligation.impact} direction={measureContext.family.definitions.find(item => item.id === measureContext.obligation.definitionId)!.direction} onOpenPatients={status => openMeasurePatients(measureContext.family.id, measureContext.obligation.id, status)} />
+      <p className="mt-3 text-sm text-slate-700"><strong>Action:</strong> {measureContext.family.nextAction}</p><p className="mt-1 text-xs leading-5 text-slate-500">{view === "contract" ? "Contract" : "Program"} overview. Counts above open measure-filtered patient lists.</p>
     </aside>}
 
     {view === "program" && <ProgramOverview obligation={selected} opportunities={opportunitiesFor(selected.id)} onBack={closeProgram} onWorklist={openWorklist} onOpenDataSubmissions={selected.id === "mips-mvp" ? openMipsDashboard : undefined} onOpenPatientWorklist={openPatientWorklist} onOpenContract={openContract} />}

@@ -5,9 +5,12 @@ import { hdiObligations, type HdiObligationId } from "@/data/synthetic/healthInt
 import { sharedMeasureFamilies, type SharedMeasureFamily, type MeasureObligation } from "@/data/synthetic/sharedMeasures";
 import { calculateMeasureImpact, countMeasurePrograms, filterSharedMeasures } from "@/lib/health-intelligence/sharedMeasures";
 import MeasureImpactMetrics from "./MeasureImpactMetrics";
+import MeasureTrend, { MeasureTrendChart } from "./MeasureTrend";
+import type { MeasurePatientStatus } from "@/lib/health-intelligence/measurePopulation";
 
 type Props = {
   initialExpandedId?: string;
+  onOpenPatients: (familyId: string, obligationId: string, status: MeasurePatientStatus) => void;
   onOpenObligation: (family: SharedMeasureFamily, obligation: MeasureObligation) => void;
 };
 
@@ -31,12 +34,13 @@ function DefinitionComparison({ family }: { family: SharedMeasureFamily }) {
   </div>;
 }
 
-function MeasureFamily({ family, obligations, expanded, onToggle, onOpenObligation }: {
+function MeasureFamily({ family, obligations, expanded, onToggle, onOpenObligation, onOpenPatients }: {
   family: SharedMeasureFamily;
   obligations: MeasureObligation[];
   expanded: boolean;
   onToggle: () => void;
   onOpenObligation: Props["onOpenObligation"];
+  onOpenPatients: Props["onOpenPatients"];
 }) {
   const [comparing, setComparing] = useState(false);
   const reference = family.definitions[0];
@@ -53,7 +57,9 @@ function MeasureFamily({ family, obligations, expanded, onToggle, onOpenObligati
         <span className="rounded-full bg-amber-50 px-2.5 py-1 font-semibold text-amber-800">HEDIS ↔ CQM close match</span>
       </span>
     </button></h4>
+    <div className="px-5 pb-3"><button type="button" onClick={() => onOpenPatients(family.id, "all", "all")} className="text-xs font-semibold text-[#176b75] hover:underline">{family.name} patient list · All obligations →</button></div>
     {expanded && <div id={`${headingId}-body`} role="region" aria-labelledby={headingId} className="border-t border-[#dbe9e4] bg-[#f8fbfa] p-4 sm:p-5">
+      <MeasureTrend family={family} obligations={obligations} />
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div className="max-w-3xl"><p className="text-xs font-bold text-[#28737a]">Shared evidence</p><p className="mt-1 text-sm text-slate-700">{family.reuse}</p><p className="mt-2 text-xs leading-5 text-slate-500"><strong className="text-slate-600">Action:</strong> {family.nextAction}</p></div>
         <button type="button" onClick={() => setComparing(value => !value)} aria-expanded={comparing} aria-controls={`${headingId}-comparison`} className="shrink-0 rounded-lg border border-amber-200 bg-white px-3 py-2 text-xs font-semibold text-amber-900 hover:bg-amber-50">{comparing ? "Hide comparison" : "Compare HEDIS & CQM"}</button>
@@ -71,7 +77,8 @@ function MeasureFamily({ family, obligations, expanded, onToggle, onOpenObligati
             {close ? <button type="button" onClick={() => setComparing(value => !value)} aria-expanded={comparing} aria-controls={`${headingId}-comparison`} className="w-fit rounded-full bg-amber-50 px-2.5 py-1.5 text-left text-xs font-semibold text-amber-800 hover:bg-amber-100">Close clinical match ↗</button> : <span className="w-fit rounded-full bg-[#e8f3ef] px-2.5 py-1.5 text-xs font-semibold text-[#285954]">Shared HEDIS measure</span>}
             <button type="button" onClick={() => onOpenObligation(family, obligation)} aria-label={`Open ${obligation.label} for ${family.name}`} className="w-fit rounded-lg border border-[#b5d1ca] px-3 py-2 text-xs font-semibold text-[#176b75] hover:bg-[#e8f3ef]">{obligation.contractId ? "Open contract" : "Open program"} →</button>
             </div>
-            <MeasureImpactMetrics impact={obligation.impact} direction={definition.direction} />
+            <MeasureImpactMetrics impact={obligation.impact} direction={definition.direction} onOpenPatients={status => onOpenPatients(family.id, obligation.id, status)} />
+            <div className="mt-3 flex flex-wrap items-end justify-between gap-3"><MeasureTrendChart obligation={obligation} direction={definition.direction} compact /><button type="button" onClick={() => onOpenPatients(family.id, obligation.id, "all")} aria-label={`Patient list for ${family.name} in ${obligation.label}`} className="rounded-lg bg-[#285954] px-3 py-2 text-xs font-semibold text-white">Patient list →</button></div>
           </li>;
         })}
       </ul>
@@ -80,7 +87,7 @@ function MeasureFamily({ family, obligations, expanded, onToggle, onOpenObligati
   </article>;
 }
 
-export default function SharedMeasureExplorer({ initialExpandedId = "blood-pressure", onOpenObligation }: Props) {
+export default function SharedMeasureExplorer({ initialExpandedId = "blood-pressure", onOpenObligation, onOpenPatients }: Props) {
   const [expandedIds, setExpandedIds] = useState<string[]>([initialExpandedId]);
   const [query, setQuery] = useState("");
   const [program, setProgram] = useState<HdiObligationId | "all">("all");
@@ -94,7 +101,7 @@ export default function SharedMeasureExplorer({ initialExpandedId = "blood-press
       <button type="button" onClick={() => setExpandedIds(results.every(({ family }) => expandedIds.includes(family.id)) ? [] : results.map(({ family }) => family.id))} disabled={!results.length} className="rounded-lg px-3 py-2.5 text-xs font-semibold text-[#176b75] hover:bg-[#f1f6f5] disabled:opacity-40">{results.length > 0 && results.every(({ family }) => expandedIds.includes(family.id)) ? "Collapse all" : "Expand all"}</button>
     </div>
     <p aria-live="polite" className="my-3 text-xs text-slate-500">{results.length} measure {results.length === 1 ? "family" : "families"}</p>
-    <div className="space-y-3">{results.map(({ family, obligations }) => <MeasureFamily key={family.id} family={family} obligations={obligations} expanded={expandedIds.includes(family.id)} onToggle={() => setExpandedIds(ids => ids.includes(family.id) ? ids.filter(id => id !== family.id) : [...ids, family.id])} onOpenObligation={onOpenObligation} />)}</div>
+    <div className="space-y-3">{results.map(({ family, obligations }) => <MeasureFamily key={family.id} family={family} obligations={obligations} expanded={expandedIds.includes(family.id)} onToggle={() => setExpandedIds(ids => ids.includes(family.id) ? ids.filter(id => id !== family.id) : [...ids, family.id])} onOpenObligation={onOpenObligation} onOpenPatients={onOpenPatients} />)}</div>
     {results.length === 0 && <div className="rounded-xl border border-dashed border-slate-300 p-6 text-center"><p className="text-sm text-slate-600">No measures match this search and program.</p><button type="button" onClick={() => { setQuery(""); setProgram("all"); }} className="mt-2 text-sm font-semibold text-[#176b75] underline">Clear filters</button></div>}
     <p className="mt-4 text-xs leading-5 text-slate-500">Illustrative obligations and impact. Populations overlap; patient counts and exposure are not portfolio totals.</p>
   </section>;

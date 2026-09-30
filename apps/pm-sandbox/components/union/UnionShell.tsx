@@ -69,15 +69,7 @@ export default function UnionShell({ children }: { children: React.ReactNode }) 
     window.location.assign('/quality');
   }
   function openPatientWorklist(measure: string) {
-    const normalized = measure.toLowerCase();
-    const mappedMeasure = normalized.includes('medication') || normalized.includes('adherence')
-      ? 'Medication Adherence'
-      : normalized.includes('ed') || normalized.includes('follow-up')
-      ? 'Follow-up after ED'
-      : normalized.includes('evidence') || normalized.includes('ecqm') || normalized.includes('cqm')
-      ? 'A1c Control'
-      : 'Post Discharge Follow-up';
-    const params = new URLSearchParams({ product: 'pm-sandbox', measure: mappedMeasure, source: 'hdi-shared-measure', context: measure });
+    const params = new URLSearchParams({ product: 'pm-sandbox', measure, source: 'hdi-worklist', context: measure });
     setProduct('pm-sandbox');
     router.push(`/population?${params.toString()}`);
   }

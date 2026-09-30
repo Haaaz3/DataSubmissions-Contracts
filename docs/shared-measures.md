@@ -26,14 +26,35 @@ assumptions ($200,000 and $150,000), not their population-health investment budg
 The scenario exposes the allocation while a target is missed, and zero once met.
 This is not a payment, savings or settlement calculation. MIPS financial impact
 is unallocated, displayed as a dash rather than zero. The Calculation disclosure
-shows the inputs and assumptions for every row. No patient or financial totals
-are added across overlapping obligations. Full licensed measure logic is not run.
+shows the inputs and assumptions for every row. Impact cards do not sum patient counts or financial exposure
+across overlapping obligations. Full licensed measure logic is not run.
 
-Contract/program links open existing overviews with these same impact metrics;
-existing patient lists are not measure-filtered.
+Each obligation has six modeled monthly snapshots. The trend uses that obligation's
+numerator/denominator and target, with improvement direction reversed for poor
+control. HEDIS and eCQM rates are not averaged into a family-wide rate.
+
+The family patient-list link opens all obligations in HDI. Eligible and open-gap
+counts open the corresponding obligation/status scope. Filters are stored in the
+URL, restored on reload/back/forward, and reject invalid measure/obligation IDs.
+The shared patient table and frame are also used by the existing Population page.
+Search, provider/status/obligation filters, sorting, pagination and CSV export work
+against the selected roster; export includes all filtered rows, not just the page.
+
+Rosters are deterministic synthetic records that reconcile exactly to each impact
+card. Payer cohorts are disjoint; the clinician-reporting cohort overlaps them.
+The combined list deduplicates by person, retaining each obligation's result.
+In the combined view, "Open gaps" means at least one applicable obligation is open;
+"Measure met" means all applicable obligations are met. Membership rows can narrow
+the list to their obligation. No generic member chart is linked for these new
+synthetic identities. Legacy HDI links without an exact supported measure report
+an unavailable list instead of routing to an unrelated clinical measure.
 
 Validation: unit tests cover measure-ID searches, intersecting program/search
 filters, distinct program counts, inverse rates, whole-patient thresholds, missing
 allocations and empty populations. Browser checks cover expansion, specification
 comparison, empty-state recovery, contract/program navigation and context after
-reload. The prototype suite, typecheck and lint pass.
+reload. Patient-list tests verify exact eligible/open/met reconciliation for all
+20 obligations, deduplication, independent obligation results, combined filters,
+URL round-trips and scoped CSV exports. Browser checks verify the existing
+Population table, the combined roster, obligation/open-gap/provider filters,
+pagination and reload/back navigation. All 97 tests, typecheck and lint pass.

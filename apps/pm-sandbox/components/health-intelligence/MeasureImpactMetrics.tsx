@@ -1,15 +1,16 @@
 import type { MeasureDefinition, MeasureImpact } from "@/data/synthetic/sharedMeasures";
+import type { MeasurePatientStatus } from "@/lib/health-intelligence/measurePopulation";
 import { calculateMeasureImpact } from "@/lib/health-intelligence/sharedMeasures";
 
 const whole = (value: number) => value.toLocaleString("en-US");
 const dollars = (value: number) => value.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 
-export default function MeasureImpactMetrics({ impact, direction }: { impact: MeasureImpact; direction: MeasureDefinition["direction"] }) {
+export default function MeasureImpactMetrics({ impact, direction, onOpenPatients }: { impact: MeasureImpact; direction: MeasureDefinition["direction"]; onOpenPatients?: (status: MeasurePatientStatus) => void }) {
   const result = calculateMeasureImpact(impact, direction);
   const higher = direction === "Higher is better";
   return <div className="mt-3 border-t border-slate-100 pt-3">
     <dl className="grid grid-cols-2 gap-x-5 gap-y-3 lg:grid-cols-4">
-      <div><dt className="text-[11px] font-semibold text-slate-500">Eligible patients</dt><dd className="mt-1 text-lg font-bold tabular-nums text-slate-900">{whole(impact.eligible)}</dd><dd className="text-xs text-slate-500">{whole(result.openGaps)} open gaps</dd></div>
+      <div><dt className="text-[11px] font-semibold text-slate-500">Eligible patients</dt><dd className="mt-1 text-lg font-bold tabular-nums text-slate-900">{onOpenPatients ? <button type="button" aria-label={`View ${whole(impact.eligible)} eligible patients`} onClick={() => onOpenPatients("all")} className="text-[#176b75] underline decoration-[#b5d1ca] underline-offset-4">{whole(impact.eligible)}</button> : whole(impact.eligible)}</dd><dd className="text-xs text-slate-500">{onOpenPatients ? <button type="button" onClick={() => onOpenPatients("open")} className="text-[#176b75] underline underline-offset-2">{whole(result.openGaps)} open gaps</button> : `${whole(result.openGaps)} open gaps`}</dd></div>
       <div><dt className="text-[11px] font-semibold text-slate-500">Current / target</dt><dd className="mt-1 text-lg font-bold tabular-nums text-slate-900">{result.rate === null ? "—" : `${result.rate.toFixed(1)}%`} <span className="text-sm font-medium text-slate-500">/ {higher ? "≥" : "≤"}{impact.targetPercent}%</span></dd><dd className="text-xs text-slate-500">{direction}</dd></div>
       <div><dt className="text-[11px] font-semibold text-slate-500">Patients to target</dt><dd className={`mt-1 text-lg font-bold tabular-nums ${result.targetMet ? "text-emerald-700" : "text-amber-800"}`}>{result.patientsToTarget === null ? "—" : whole(result.patientsToTarget)}</dd><dd className="text-xs text-slate-500">{result.targetMet === null ? "No eligible population" : result.targetMet ? "Target met" : `${result.gapPoints!.toFixed(1)} percentage-point gap`}</dd></div>
       <div><dt className="text-[11px] font-semibold text-slate-500">Modeled exposure</dt><dd className={`mt-1 text-lg font-bold tabular-nums ${result.exposureDollars ? "text-amber-800" : "text-slate-900"}`}>{result.exposureDollars === null ? "—" : dollars(result.exposureDollars)}</dd><dd className="text-xs text-slate-500">{result.allocatedDollars === null ? "Not allocated" : `${dollars(result.allocatedDollars)} measure allocation`}</dd></div>
