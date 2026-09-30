@@ -2,7 +2,9 @@
 
 Reviewed September 30, 2026. Scope: the integrated prototype’s three products and public product/design guidance from Tableau, Microsoft, Arcadia, Innovaccer and Health Catalyst. Vendor sources describe published capabilities; this review does not claim access to their private applications.
 
-## Recommendation
+> Update: the portfolio overview now uses an annual downside/upside envelope with projected settlement and an alternative action scenario. The original exposure/recovery recommendation below is superseded for the top-level visuals. Improvement is the difference between the two settlement scenarios, not a percentage of downside exposure. The default is 2026; ASM 2027 has no financial envelope configured. Values are explicit illustrative assumptions, not payment calculations or conversions of clinical scores. Program-detail models remain separate in this first iteration.
+
+## Original recommendation
 
 Use a compact portfolio summary followed by one sortable comparison table. Put dollars at risk, recoverable opportunity, current performance, forecast, target and the next work deadline on the same program row. Open the existing program or worklist from that row.
 
