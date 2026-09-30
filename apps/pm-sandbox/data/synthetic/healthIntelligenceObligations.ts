@@ -9,6 +9,7 @@ export interface HdiWorkItem {
   dueInDays: number;
   impact: number;
   driver: string;
+  qualityMeasureKey?: string;
   evidence: string;
   actionLabel: string;
   actionType: "Worklist" | "Review" | "Approval" | "Project";
@@ -56,11 +57,11 @@ export const hdiObligations: HdiObligation[] = [
     atRiskDollars: 2750000,
     recoverableDollars: 1100000,
     deadline: "PY 2026 reconciliation",
-    forecast: { current: 68, target: 82, projected: 74, unit: "% quality score" },
+    forecast: { current: 68, target: 82, projected: 74, unit: "CQS points (modeled)" },
     workItems: [
-      { id: "team-readmit-1", title: "Close post-discharge follow-up gap", practice: "Northstar Medical Group", market: "Mid-Atlantic", owner: "Care Management", dueInDays: 12, impact: 460000, driver: "CHF readmissions", evidence: "412 discharges lack a documented 7-day follow-up appointment.", actionLabel: "Review patient worklist", actionType: "Worklist" },
-      { id: "team-readmit-2", title: "Resolve medication reconciliation backlog", practice: "Lakeside Physicians", market: "Mid-Atlantic", owner: "Quality Operations", dueInDays: 19, impact: 270000, driver: "COPD readmissions", evidence: "Medication reconciliation is missing for 28% of high-risk discharges.", actionLabel: "Assign review queue", actionType: "Review" },
-      { id: "team-readmit-3", title: "Approve transition-of-care protocol", practice: "Summit Family Health", market: "Southeast", owner: "Medical Director", dueInDays: 27, impact: 200000, driver: "All-cause readmissions", evidence: "A new protocol is modeled to reduce avoidable readmissions by 6.4%.", actionLabel: "Open approval brief", actionType: "Approval" },
+      { id: "team-readmit-1", title: "Close post-discharge follow-up gap", practice: "Northstar Medical Group", market: "Mid-Atlantic", owner: "Care Management", dueInDays: 12, impact: 460000, driver: "HWR · CMIT 356", qualityMeasureKey: "team-hwr-claims", evidence: "412 surgical discharges need transition review in the modeled roster. Follow-up is an intervention, not the HWR measure itself.", actionLabel: "Review patient worklist", actionType: "Worklist" },
+      { id: "team-readmit-2", title: "Review inpatient safety events", practice: "Lakeside Physicians", market: "Mid-Atlantic", owner: "Quality Operations", dueInDays: 19, impact: 270000, driver: "CMS PSI 90 · CMIT 135", qualityMeasureKey: "team-psi90", evidence: "Review modeled inpatient safety flags and source documentation before hospital-level reporting.", actionLabel: "Assign review queue", actionType: "Review" },
+      { id: "team-readmit-3", title: "Reconcile THA/TKA patient-reported outcomes", practice: "Summit Family Health", market: "Southeast", owner: "Medical Director", dueInDays: 27, impact: 200000, driver: "THA/TKA PRO-PM · CMIT 1618", qualityMeasureKey: "team-pro-2026", evidence: "Reconcile preoperative and postoperative outcome assessments for the applicable inpatient joint-replacement cohort.", actionLabel: "Open approval brief", actionType: "Approval" },
       { id: "team-readmit-4", title: "Launch high-risk discharge project", practice: "Riverbend Hospitalists", market: "Southeast", owner: "Transformation Office", dueInDays: 34, impact: 130000, driver: "High-risk discharge cohort", evidence: "Pilot roster is ready with 186 attributed patients and named owners.", actionLabel: "Create project brief", actionType: "Project" },
     ],
   },
@@ -96,7 +97,7 @@ export const hdiObligations: HdiObligation[] = [
     deadline: "Mar 31, 2027",
     forecast: { current: 78, target: 85, projected: 83, unit: "% projected score" },
     workItems: [
-      { id: "mips-evidence-1", title: "Complete eCQM evidence review", practice: "Summit Family Health", market: "Southeast", owner: "Quality Operations", dueInDays: 42, impact: 390000, driver: "eCQM evidence", evidence: "31% of denominator patients need a final evidence review.", actionLabel: "Open Data Submissions", actionType: "Worklist" },
+      { id: "mips-evidence-1", title: "Complete eCQM evidence review", practice: "Summit Family Health", market: "Southeast", owner: "Quality Operations", dueInDays: 42, impact: 390000, driver: "Blood pressure control · QID 236", qualityMeasureKey: "qpp-236", evidence: "31% of denominator patients need a final evidence review.", actionLabel: "Open Data Submissions", actionType: "Worklist" },
       { id: "mips-evidence-2", title: "Confirm MVP subgroup roster", practice: "Riverbend Hospitalists", market: "Southeast", owner: "MIPS Program Lead", dueInDays: 58, impact: 190000, driver: "Subgroup registration", evidence: "Roster is 94% reconciled against the current TIN/NPI assignment.", actionLabel: "Review roster", actionType: "Review" },
     ],
   },
@@ -114,7 +115,7 @@ export const hdiObligations: HdiObligation[] = [
     deadline: "Oct 15, 2026",
     forecast: { current: 84, target: 86, projected: 86, unit: "% measure attainment" },
     workItems: [
-      { id: "stars-med-1", title: "Prioritize medication adherence outreach", practice: "Lakeside Physicians", market: "Mid-Atlantic", owner: "Pharmacy Programs", dueInDays: 23, impact: 160000, driver: "Medication adherence", evidence: "1,240 members are within the outreach window with no completed refill signal.", actionLabel: "Review outreach list", actionType: "Worklist" },
+      { id: "stars-med-1", title: "Prioritize medication adherence outreach", practice: "Lakeside Physicians", market: "Mid-Atlantic", owner: "Pharmacy Programs", dueInDays: 23, impact: 160000, driver: "Diabetes medication adherence · D08", qualityMeasureKey: "stars-D08", evidence: "1,240 members are within the outreach window with no completed refill signal.", actionLabel: "Review outreach list", actionType: "Worklist" },
     ],
   },
   {
@@ -131,7 +132,7 @@ export const hdiObligations: HdiObligation[] = [
     deadline: "Nov 30, 2026",
     forecast: { current: 62, target: 75, projected: 70, unit: "% quality gate" },
     workItems: [
-      { id: "medicaid-state-1", title: "Reconcile state measure definitions", practice: "Summit Family Health", market: "Southeast", owner: "State Programs", dueInDays: 16, impact: 330000, driver: "Measure definition", evidence: "Two state extracts use different denominator exclusions for prenatal care.", actionLabel: "Open reconciliation", actionType: "Review" },
+      { id: "medicaid-state-1", title: "Reconcile state measure definitions", practice: "Summit Family Health", market: "Southeast", owner: "State Programs", dueInDays: 16, impact: 330000, driver: "Depression screening · CDF-AD", qualityMeasureKey: "adult-CDF-AD", evidence: "Validate the published Adult Core Set definition before configuring a state-specific VBP requirement.", actionLabel: "Open reconciliation", actionType: "Review" },
     ],
   },
   {
@@ -148,24 +149,25 @@ export const hdiObligations: HdiObligation[] = [
     deadline: "Feb 28, 2027",
     forecast: { current: 88, target: 90, projected: 90, unit: "% submission readiness" },
     workItems: [
-      { id: "hqrda-1", title: "Clear emergency department validation queue", practice: "Riverbend Hospital", market: "Southeast", owner: "Hospital Quality", dueInDays: 31, impact: 140000, driver: "QRDA validation", evidence: "18 files need a final validation review before the next package generation.", actionLabel: "Open validation queue", actionType: "Worklist" },
+      { id: "hqrda-1", title: "Validate inpatient hypoglycemia reporting", practice: "Riverbend Hospital", market: "Southeast", owner: "Hospital Quality", dueInDays: 31, impact: 140000, driver: "Severe hypoglycemia · CMS816v5", qualityMeasureKey: "hospital-hypoglycemia", evidence: "18 files need a final validation review before the next package generation.", actionLabel: "Open validation queue", actionType: "Worklist" },
     ],
   },
   {
     id: "ambulatory-specialty-model",
     title: "Ambulatory Specialty Model",
     shortTitle: "AMBULATORY SPECIALTY",
-    sponsor: "Specialty network partners",
-    category: "Ambulatory model",
-    scope: "8 specialty practices · 18,400 covered lives",
+    sponsor: "CMS Innovation Center",
+    category: "Mandatory specialty model · PY 2027 preparation",
+    scope: "8 modeled practices · heart failure / low back pain",
     lives: 18400,
     providers: 164,
     atRiskDollars: 420000,
     recoverableDollars: 150000,
-    deadline: "Jan 31, 2027",
+    deadline: "First performance year: Jan–Dec 2027",
     forecast: { current: 74, target: 80, projected: 77, unit: "% performance readiness" },
     workItems: [
-      { id: "asm-follow-up-1", title: "Close specialty follow-up gaps", practice: "Northstar Specialty Network", market: "Mid-Atlantic", owner: "Ambulatory Operations", dueInDays: 29, impact: 110000, driver: "Specialty follow-up", evidence: "18,400 covered lives are concentrated across eight specialty practices with uneven post-visit follow-up.", actionLabel: "Open specialty worklist", actionType: "Worklist" },
+      { id: "asm-follow-up-1", title: "Prepare heart-failure functional assessments", practice: "Northstar Specialty Network", market: "Mid-Atlantic", owner: "Ambulatory Operations", dueInDays: 29, impact: 110000, driver: "HF functional status · MIPS 377", qualityMeasureKey: "asm-377", evidence: "Prepare initial and follow-up assessment capture for the 2027 heart-failure cohort. Workload and dollars are modeled.", actionLabel: "Open preparation worklist", actionType: "Worklist" },
+      { id: "asm-lbp-1", title: "Validate low-back-pain outcome collection", practice: "Northstar Specialty Network", market: "Mid-Atlantic", owner: "Specialty Quality", dueInDays: 45, impact: 40000, driver: "Low back functional status · MIPS 220", qualityMeasureKey: "asm-220", evidence: "Prepare the MIPS CQM collection workflow for functional status change in the 2027 low-back-pain cohort.", actionLabel: "Review collection workflow", actionType: "Review" },
     ],
   },
 ];
@@ -174,15 +176,14 @@ export const hdiCrossProgramOpportunities: HdiCrossProgramOpportunity[] = [
   {
     id: "transitions-readmissions",
     title: "Transitions of care",
-    thesis: "The same discharge cohort is being measured through different program lenses. A coordinated follow-up and medication-reconciliation workflow can improve the shared readmission outcome family without creating four separate queues.",
+    thesis: "Hospital readmission measures share discharge evidence; eligible populations, measurement periods and risk adjustment differ across TEAM, Hospital IQR and MA.",
     relationship: "Shared measure family",
     measureSet: [
       "TEAM HWR · CMIT 356",
-      "MIPS / ACO readmission measures",
-      "MA Plan All-Cause Readmissions",
-      "Hospital IQR HWR",
+      "MA Stars C18 · Plan All-Cause Readmissions",
+      "Hospital IQR · Hybrid HWR",
     ],
-    obligationIds: ["cms-team", "mips-mvp", "ma-stars", "hospital-quality"],
+    obligationIds: ["cms-team", "ma-stars", "hospital-quality"],
     sharedEvidence: ["Index discharge and episode type", "48-hour outreach", "Medication reconciliation", "30-day readmission outcome"],
     action: "Create one transition-of-care worklist with program-specific evidence views",
     recoverableDollars: 2240000,
@@ -194,9 +195,9 @@ export const hdiCrossProgramOpportunities: HdiCrossProgramOpportunity[] = [
     thesis: "Medication reconciliation after discharge and medication adherence are not the same measure, but they rely on overlapping pharmacy, care-management, and patient outreach workflows. Fixing the handoff creates lift across quality and contract performance.",
     relationship: "Related opportunity",
     measureSet: [
-      "MIPS QID 46 · Medication Reconciliation Post-Discharge",
-      "MA Stars · Medication Reconciliation Post-Discharge",
-      "MA Part D · Diabetes / hypertension / statin adherence",
+      "MIPS QID 130 · Documentation of Current Medications",
+      "MA Stars C17 · Medication Reconciliation Post-Discharge",
+      "MA Part D D08 / D09 / D10 · Medication adherence",
       "VBC · avoidable utilization and PMPM",
     ],
     obligationIds: ["vbc-contracts", "mips-mvp", "ma-stars", "cms-team"],
@@ -207,16 +208,16 @@ export const hdiCrossProgramOpportunities: HdiCrossProgramOpportunity[] = [
   },
   {
     id: "ed-follow-up",
-    title: "ED follow-up",
-    thesis: "Avoidable ED use, timely follow-up, and chronic-condition management are measured separately, but the intervention is shared: identify the rising-risk patient, close the appointment loop, and return the outcome to both the contract and quality forecast.",
+    title: "Follow-up and referrals",
+    thesis: "ED follow-up, hospital transitions and referral closure have different eligible events and timing rules. Coordinate the workflows while retaining each measure’s separate result.",
     relationship: "Related opportunity",
     measureSet: [
-      "MA Stars · follow-up after ED visit for high-risk chronic conditions",
-      "MIPS / MVP · care coordination and chronic-condition measures",
+      "MA Stars C20 · Transitions of Care",
+      "MIPS QID 374 · Closing the Referral Loop",
       "VBC · ED utilization and total cost of care",
-      "Medicaid VBP · access and follow-up measures",
+      "Adult Core Set FUM-AD · Mental-health ED follow-up",
     ],
-    obligationIds: ["vbc-contracts", "mips-mvp", "ma-stars", "medicaid-vbp", "ambulatory-specialty-model"],
+    obligationIds: ["vbc-contracts", "mips-mvp", "ma-stars", "medicaid-vbp"],
     sharedEvidence: ["ED visit", "High-risk condition", "7-day follow-up appointment", "Primary-care connection"],
     action: "Open a rising-risk ED cohort and assign follow-up by practice",
     recoverableDollars: 940000,

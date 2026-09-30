@@ -45,7 +45,7 @@ function ProgramExposure({ onOpenProgram }: { onOpenProgram: (id: HdiObligationI
     <div className="mt-3 grid gap-x-5 gap-y-2.5 sm:grid-cols-2">{programs.map((program) => <button key={program.id} type="button" onClick={() => onOpenProgram(program.id)} className="group text-left">
       <div className="flex items-center justify-between gap-2"><span className="truncate text-[11px] font-bold text-slate-800 group-hover:text-[#176b75]">{program.shortTitle}</span><span className="shrink-0 text-[11px] font-bold text-amber-700">{money(program.atRiskDollars)}</span></div>
       <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-gradient-to-r from-[#f8c24d] to-[#ed9b3b]" style={{ width: `${Math.max(7, (program.atRiskDollars / maxRisk) * 100)}%` }} /></div>
-      <div className="mt-1 flex justify-between text-[10px] text-slate-500"><span>{whole(program.lives)} lives</span><span>{money(program.recoverableDollars)} recoverable · {program.forecast.projected}% projected</span></div>
+      <div className="mt-1 flex justify-between text-[10px] text-slate-500"><span>{whole(program.lives)} lives</span><span>{money(program.recoverableDollars)} recoverable · {program.forecast.projected}{program.forecast.unit.includes("%") ? "%" : " pts"} projected</span></div>
     </button>)}</div>
   </section>;
 }

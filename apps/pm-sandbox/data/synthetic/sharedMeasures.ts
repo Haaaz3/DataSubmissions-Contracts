@@ -26,6 +26,7 @@ export type MeasureObligation = {
   definitionId: string;
   contractId?: string;
   impact: MeasureImpact;
+  reportingNote?: string;
   history: { month: string; eligible: number; numerator: number }[];
 };
 
@@ -71,8 +72,8 @@ function exampleObligations(hedisId: string, ecqmId: string, inputs: [ImpactInpu
   return [
     { id: "aetna-commercial", programId: "vbc-contracts", label: "Aetna Commercial ACO — Large Employer", definitionId: hedisId, contractId: "comm-001", impact: impact(0), history: history(0) },
     { id: "united-commercial", programId: "vbc-contracts", label: "United Commercial Value — Mid-Market", definitionId: hedisId, contractId: "comm-002", impact: impact(1), history: history(1) },
-    { id: "ma-quality", programId: "ma-stars", label: "Medicare Advantage quality obligation", definitionId: hedisId, impact: impact(2), history: history(2) },
-    { id: "medicaid-quality", programId: "medicaid-vbp", label: "Medicaid VBP quality obligation", definitionId: hedisId, impact: impact(3), history: history(3) },
+    { id: "ma-quality", programId: "ma-stars", label: "Medicare Advantage quality obligation", definitionId: hedisId, impact: impact(2), history: history(2), reportingNote: hedisId === "GSD >9%" ? "Quality monitoring only. Stars C12 reports blood sugar controlled; this poor-control rate is not a Stars C12 result." : "Modeled MY 2026 population. Published Stars rating years use earlier measurement data; these are not official Stars results." },
+    { id: "medicaid-quality", programId: "medicaid-vbp", label: "Medicaid VBP quality obligation", definitionId: hedisId, impact: impact(3), history: history(3), reportingNote: "Illustrative VBP contract. Related Adult Core Set measures do not establish a state-specific contract requirement." },
     { id: "mips-ecqm", programId: "mips-mvp", label: "MIPS clinician reporting — eCQM collection", definitionId: ecqmId, impact: impact(4), history: history(4) },
   ];
 }
