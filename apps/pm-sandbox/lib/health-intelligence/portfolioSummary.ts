@@ -2,7 +2,7 @@ import { hdiObligations, type HdiObligation, type HdiObligationId } from "@/data
 
 export const portfolioMetricContext: Record<HdiObligationId, { label: string; unit: "%" | "pts"; year: number; basis: string }> = {
   "cms-team": { label: "Composite quality score", unit: "pts", year: 2026, basis: "Modeled program exposure across two hospitals. The TEAM detail uses a separate 732-episode participant scenario." },
-  "vbc-contracts": { label: "Value capture", unit: "%", year: 2026, basis: "Modeled contract exposure and recovery estimate. Payment depends on the individual contract terms and reconciliation." },
+  "vbc-contracts": { label: "Contracts meeting quality gate", unit: "%", year: 2026, basis: "Aggregated modeled sharing caps and settlements from the same 16 payer contracts used in the detailed view." },
   "mips-mvp": { label: "MIPS score", unit: "pts", year: 2026, basis: "Modeled payment exposure and recovery estimate. Score improvement alone is not a dollar-to-point conversion." },
   "ma-stars": { label: "Measure attainment", unit: "%", year: 2026, basis: "Modeled plan quality exposure. The displayed attainment rate is an internal indicator, not a CMS star rating." },
   "medicaid-vbp": { label: "Quality gate", unit: "%", year: 2026, basis: "Illustrative state-program exposure; state and contract payment terms remain unconfigured." },
@@ -36,6 +36,7 @@ export function dollarAxisMaximum(programs: HdiObligation[]) {
   return Math.max(500_000, Math.ceil(Math.max(0, ...programs.flatMap(p => [p.atRiskDollars, p.recoverableDollars])) / 500_000) * 500_000);
 }
 export function portfolioMoney(value: number) {
+  if (Math.abs(value) >= 1_000_000_000) return "$" + (value / 1_000_000_000).toLocaleString("en-US", { maximumFractionDigits: 2 }) + "B";
   if (Math.abs(value) >= 1_000_000) return `$${(value / 1_000_000).toLocaleString("en-US", { maximumFractionDigits: 2 })}M`;
   if (Math.abs(value) >= 1_000) return `$${(value / 1_000).toLocaleString("en-US", { maximumFractionDigits: 0 })}K`;
   return `$${value.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;

@@ -1,3 +1,5 @@
+import { mockContracts } from "../lib/mockData";
+import { vbcFinancialSummary } from "../lib/contracts/vbcFinancials";
 import { describe, expect, it } from "vitest";
 import { hdiObligations } from "../data/synthetic/healthIntelligenceObligations";
 import { portfolioFinancialScenarios } from "../data/synthetic/portfolioFinancialScenarios";
@@ -6,8 +8,9 @@ import { envelopePosition, financialSummary, improvement, signedMoney } from "..
 describe("financial envelope", () => {
   it("nets projected settlements and derives improvement from the alternative outcome", () => {
     const total = financialSummary(hdiObligations.filter(p => p.id !== "ambulatory-specialty-model"), 2026)!;
-    expect(total).toEqual({ year: 2026, count: 6, missing: 0, downside: -13500000, upside: 13800000, projected: -2150000, withActions: 1200000 });
-    expect(improvement(total)).toBe(3350000);
+    const vbc = vbcFinancialSummary(mockContracts);
+    expect(total).toEqual({ year: 2026, count: 6, missing: 0, downside: vbc.downside - 10000000, upside: vbc.upside + 8800000, projected: vbc.projected - 1350000, withActions: vbc.withActions + 1000000 });
+    expect(improvement(total)).toBeCloseTo(vbc.improvement + 2350000);
     expect(total.projected + improvement(total)).toBe(total.withActions);
     expect(improvement(total)).not.toBe(total.upside - total.projected);
   });

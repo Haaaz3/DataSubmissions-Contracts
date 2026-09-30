@@ -8,6 +8,10 @@ import {
   type HdiObligation,
   type HdiObligationId,
 } from "@/data/synthetic/healthIntelligenceObligations";
+import { mockContracts } from "@/lib/mockData";
+import { vbcFinancialSummary } from "@/lib/contracts/vbcFinancials";
+import { portfolioMoney } from "@/lib/health-intelligence/portfolioSummary";
+import { signedMoney } from "@/lib/health-intelligence/financialEnvelope";
 import PortfolioExecutiveSummary from "@/components/health-intelligence/PortfolioExecutiveSummary";
 import { programMeasureCatalogs } from "@/data/reference/programQualityMeasures";
 import { modelViewKeys } from "@/data/synthetic/modelProgram";
@@ -104,18 +108,19 @@ function GoalRing({ projected, target, unit }: { projected: number; target: numb
   </div>;
 }
 
-function ContractReconciliation({ onOpenWorklist }: { onOpenWorklist: (id: HdiObligationId) => void }) {
-  const contract = hdiObligations.find((obligation) => obligation.id === "vbc-contracts") ?? hdiObligations[0];
+function ContractReconciliation({ onOpenProgram }: { onOpenProgram: (id: HdiObligationId) => void }) {
+  const totals = vbcFinancialSummary(mockContracts);
   const steps = [
-    { label: "Benchmark spend", value: "$337.2M", detail: "Target PMPM × lives" },
-    { label: "Actual spend", value: "$325.3M", detail: "12.0M below benchmark" },
-    { label: "Gross savings", value: "$11.9M", detail: "3.0% of benchmark" },
-    { label: "Quality share", value: "40%", detail: "2 of 6 gates met" },
-    { label: "Expected recovery", value: money(contract.recoverableDollars), detail: "Current VBC forecast" },
+    { label: "Medical budget", value: portfolioMoney(totals.benchmarkSpend), detail: "Benchmark PMPM × member months" },
+    { label: "Medical expense", value: portfolioMoney(totals.actualSpend), detail: "Current PMPM × member months" },
+    { label: "Projected settlement", value: signedMoney(totals.projected), detail: "After sharing, quality gates and caps" },
+    { label: "With actions", value: signedMoney(totals.withActions), detail: "Same contract terms" },
+    { label: "Settlement improvement", value: signedMoney(totals.improvement), detail: "Change from current projection" },
   ];
-  return <section className="rounded-2xl border border-[#e2e7ee] bg-white p-5 shadow-sm sm:p-6">
-    <div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-[0.12em] text-[#28737a]">Contract economics</p><h3 className="mt-1 text-xl font-bold tracking-tight text-slate-900">VBC reconciliation signal</h3></div><button type="button" onClick={() => onOpenWorklist("vbc-contracts")} className="text-xs font-semibold text-[#176b75] hover:underline">Open contract detail →</button></div>
-    <div className="mt-5 grid gap-5 lg:grid-cols-[180px_minmax(0,1fr)]"><div className="rounded-xl bg-[#f5fbf8] p-4"><p className="text-[10px] font-bold uppercase tracking-wide text-[#28737a]">Estimate</p><p className="mt-2 text-3xl font-bold tracking-tight text-emerald-700">{money(contract.recoverableDollars)}</p><p className="mt-1 text-xs text-slate-500">forecast recoverable</p><div className="mt-4 border-t border-[#dbe9e4] pt-3"><p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Potential at risk</p><p className="mt-1 text-lg font-bold text-amber-700">{money(contract.atRiskDollars)}</p></div></div><div className="relative overflow-x-auto"><div className="min-w-[620px]"><div className="absolute left-7 right-7 top-8 h-px bg-[#b5d1ca]" /><div className="relative grid grid-cols-5 gap-3">{steps.map((step, index) => <button type="button" key={step.label} onClick={() => onOpenWorklist("vbc-contracts")} className="group text-left"><div className="flex items-center gap-2"><span className="relative z-10 flex h-7 w-7 items-center justify-center rounded-full border-4 border-white bg-[#2d8a78] text-[10px] font-bold text-white shadow-sm">{index + 1}</span><span className="text-[10px] font-bold uppercase tracking-wide text-slate-400">{index === steps.length - 1 ? "Outcome" : "Step"}</span></div><p className="mt-3 text-sm font-bold text-slate-900 group-hover:text-[#176b75]">{step.value}</p><p className="mt-1 text-[11px] font-semibold text-slate-700">{step.label}</p><p className="mt-1 text-[10px] leading-4 text-slate-500">{step.detail}</p></button>)}</div></div></div></div>
+  return <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="flex flex-wrap items-center justify-between gap-3"><h3 className="text-lg font-bold text-slate-900">VBC settlement</h3><button type="button" onClick={() => onOpenProgram("vbc-contracts")} className="text-xs font-semibold text-[#176b75] hover:underline">Open payer contracts →</button></div>
+    <dl className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">{steps.map(step => <div key={step.label}><dt className="text-xs text-slate-500">{step.label}</dt><dd className="mt-2 text-xl font-bold text-slate-900">{step.value}</dd><dd className="mt-1 text-[11px] text-slate-500">{step.detail}</dd></div>)}</dl>
+    <p className="mt-4 text-[11px] text-slate-500">PY {totals.year} · {totals.count} contracts · Illustrative annual provider settlements. Medical expense and settlement are separate amounts.</p>
   </section>;
 }
 
@@ -366,7 +371,7 @@ export default function HealthDataIntelligenceCommandPlane({ onOpenDataSubmissio
 
       <AttentionQueue onOpenPatientWorklist={openPatientWorklist} />
 
-      <ContractReconciliation onOpenWorklist={openWorklist} />
+      <ContractReconciliation onOpenProgram={openProgram} />
 
       <MeasurePulseTable onOpenPatientWorklist={openPatientWorklist} />
 

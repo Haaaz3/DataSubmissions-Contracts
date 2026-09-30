@@ -6,9 +6,9 @@ import { calculateEstimatedSettlement } from "@/lib/contracts/settlement";
 import { mockContractAgreements, mockContracts } from "@/lib/mockData";
 
 const pmpmRangeByContractType = {
-  MSSP: { min: 700, max: 1_150 },
-  "Medicare Advantage": { min: 900, max: 1_450 },
-  Commercial: { min: 300, max: 650 },
+  MSSP: { min: 900, max: 1_500 },
+  "Medicare Advantage": { min: 1_000, max: 1_700 },
+  Commercial: { min: 500, max: 900 },
 } as const;
 
 const measureInsightIds = [

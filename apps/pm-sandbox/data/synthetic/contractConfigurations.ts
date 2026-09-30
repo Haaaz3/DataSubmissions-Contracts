@@ -4,7 +4,7 @@ export const seededContractConfigurations: ContractConfiguration[] = [
   {
     contractId: "mssp-001",
     basics: {
-      name: "ACO REACH — Northeast Region",
+      name: "MSSP ACO — Northeast Region",
       payer: "CMS",
       lineOfBusiness: "mssp_aco",
       contractType: "two_sided_risk",
@@ -43,10 +43,10 @@ export const seededContractConfigurations: ContractConfiguration[] = [
         contractId: "mssp-001",
         contractMetricSelectionId: "sel-mssp-001-pmpm",
         targetType: "absolute",
-        baselineValue: 910,
-        thresholdValue: 890,
-        targetValue: 875,
-        stretchValue: 860,
+        baselineValue: 1138,
+        thresholdValue: 1112,
+        targetValue: 1094,
+        stretchValue: 1075,
         weight: 60,
       },
       {
@@ -360,10 +360,10 @@ export const seededContractConfigurations: ContractConfiguration[] = [
         contractId: "comm-001",
         contractMetricSelectionId: "sel-comm-001-pmpm",
         targetType: "absolute",
-        baselineValue: 480,
-        thresholdValue: 465,
-        targetValue: 450,
-        stretchValue: 435,
+        baselineValue: 696,
+        thresholdValue: 674,
+        targetValue: 652,
+        stretchValue: 631,
         weight: 40,
       },
       {

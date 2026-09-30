@@ -1,3 +1,7 @@
+import { mockContracts } from "@/lib/mockData";
+import { vbcFinancialSummary } from "@/lib/contracts/vbcFinancials";
+const vbcFinance = vbcFinancialSummary(mockContracts);
+
 export type HdiObligationId = "cms-team" | "vbc-contracts" | "mips-mvp" | "ma-stars" | "medicaid-vbp" | "hospital-quality" | "ambulatory-specialty-model";
 
 export interface HdiWorkItem {
@@ -67,17 +71,17 @@ export const hdiObligations: HdiObligation[] = [
   },
   {
     id: "vbc-contracts",
-    title: "Commercial VBC Contracts",
+    title: "Payer VBC Contracts",
     shortTitle: "VBC CONTRACTS",
-    sponsor: "Five payer partners",
+    sponsor: "8 payer partners",
     category: "Contract performance",
-    scope: "14 contracts · 318,500 covered lives",
-    lives: 318500,
+    scope: "16 contracts · 338,000 attributed members",
+    lives: vbcFinance.lives,
     providers: 2104,
-    atRiskDollars: 3120000,
-    recoverableDollars: 1220000,
+    atRiskDollars: Math.abs(vbcFinance.downside),
+    recoverableDollars: vbcFinance.improvement,
     deadline: "Dec 31, 2026",
-    forecast: { current: 71, target: 79, projected: 76, unit: "% value capture" },
+    forecast: { current: Math.round(vbcFinance.qualityPassed / vbcFinance.count * 100), target: 100, projected: Math.round(vbcFinance.actionQualityPassed / vbcFinance.count * 100), unit: "% contracts meeting quality gate" },
     workItems: [
       { id: "vbc-ed-1", title: "Review avoidable ED utilization", practice: "Northstar Medical Group", market: "Mid-Atlantic", owner: "Contracting", dueInDays: 21, impact: 680000, driver: "ED utilization", evidence: "PMPM is $18 above target in the rising-risk cohort.", actionLabel: "Open contract analysis", actionType: "Worklist" },
       { id: "vbc-ed-2", title: "Validate attributed member leakage", practice: "Lakeside Physicians", market: "Mid-Atlantic", owner: "Network Analytics", dueInDays: 45, impact: 260000, driver: "Attribution leakage", evidence: "2.4% of attributed lives have no in-network primary-care touchpoint.", actionLabel: "Review attribution", actionType: "Review" },

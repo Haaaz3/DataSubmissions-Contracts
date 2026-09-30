@@ -55,7 +55,7 @@ describe("studio settlement and storytelling", () => {
     expect(one.overrides.currentPmpm).toBe(830);
     const two = setStudioPerformance(s, one, "currentPmpm", 840);
     expect(two.kpiValues["sel-mssp-001-pmpm"]).toBe(840);
-    expect(initial.overrides.currentPmpm).toBe(910);
+    expect(initial.overrides.currentPmpm).toBe(s.contract.currentPmpm);
   });
   it("ED alone changes no settlement dollars; driver increments reconcile", () => {
     const s = snapshot(); const inputs = createStudioInputs(s);
@@ -67,7 +67,7 @@ describe("studio settlement and storytelling", () => {
   it("applies savings gates, risk caps, and payout thresholds", () => {
     const s = snapshot(); const initial = createStudioInputs(s).overrides;
     expect(calculateContractScenarioComparison(s.contract, { ...initial, currentPmpm: 800, qualityScore: 60 }).scenario.status).toBe("quality_blocked");
-    expect(calculateContractScenarioComparison(s.contract, { ...initial, currentPmpm: 870 }).scenario.status).toBe("below_threshold");
+    expect(calculateContractScenarioComparison(s.contract, { ...initial, currentPmpm: initial.benchmarkPmpm * 0.995 }).scenario.status).toBe("below_threshold");
     const risk = calculateContractScenarioComparison(s.contract, { ...initial, currentPmpm: 2000 }).scenario;
     expect(risk.estimatedAmount).toBeCloseTo(-risk.benchmarkSpend * risk.terms.downsideRiskCap / 100);
     const savings = calculateContractScenarioComparison(s.contract, { ...initial, currentPmpm: 0, qualityScore: 100 }).scenario;
