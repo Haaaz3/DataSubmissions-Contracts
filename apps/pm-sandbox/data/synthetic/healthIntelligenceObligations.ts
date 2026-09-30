@@ -95,7 +95,7 @@ export const hdiObligations: HdiObligation[] = [
     atRiskDollars: 1860000,
     recoverableDollars: 980000,
     deadline: "Mar 31, 2027",
-    forecast: { current: 78, target: 85, projected: 83, unit: "% projected score" },
+    forecast: { current: 78, target: 85, projected: 83, unit: "MIPS points (modeled)" },
     workItems: [
       { id: "mips-evidence-1", title: "Complete eCQM evidence review", practice: "Summit Family Health", market: "Southeast", owner: "Quality Operations", dueInDays: 42, impact: 390000, driver: "Blood pressure control · QID 236", qualityMeasureKey: "qpp-236", evidence: "31% of denominator patients need a final evidence review.", actionLabel: "Open Data Submissions", actionType: "Worklist" },
       { id: "mips-evidence-2", title: "Confirm MVP subgroup roster", practice: "Riverbend Hospitalists", market: "Southeast", owner: "MIPS Program Lead", dueInDays: 58, impact: 190000, driver: "Subgroup registration", evidence: "Roster is 94% reconciled against the current TIN/NPI assignment.", actionLabel: "Review roster", actionType: "Review" },
@@ -244,9 +244,9 @@ export const hdiCrossProgramOpportunities: HdiCrossProgramOpportunity[] = [
 
 export const hdiExecutiveMetrics = {
   obligations: 20,
-  programs: 7,
-  atRiskDollars: 10930000,
-  recoverableDollars: 4490000,
-  deadlinesIn30Days: 7,
+  programs: hdiObligations.length,
+  atRiskDollars: hdiObligations.reduce((sum, program) => sum + program.atRiskDollars, 0),
+  recoverableDollars: hdiObligations.reduce((sum, program) => sum + program.recoverableDollars, 0),
+  deadlinesIn30Days: hdiObligations.flatMap(program => program.workItems).filter(item => item.dueInDays <= 30).length,
   forecastCoverage: 86,
 };

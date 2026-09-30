@@ -1,74 +1,54 @@
 "use client";
 
-import {
-  hdiExecutiveMetrics,
-  hdiObligations,
-  type HdiObligationId,
-} from "@/data/synthetic/healthIntelligenceObligations";
+import { Fragment, useState } from "react";
+import type { HdiObligation, HdiObligationId } from "@/data/synthetic/healthIntelligenceObligations";
 import { healthSystemSnapshot } from "@/data/synthetic/healthSystemObligations";
+import { dollarAxisMaximum, nextProgramDeadline, portfolioForYear, portfolioMetricContext, portfolioMoney as money, portfolioRows, portfolioTotals, type PortfolioFilter, type PortfolioSort } from "@/lib/health-intelligence/portfolioSummary";
 
-const money = (value: number) => value >= 1_000_000 ? `$${(value / 1_000_000).toFixed(1)}M` : `$${Math.round(value / 1_000)}K`;
-const whole = (value: number) => value.toLocaleString("en-US");
+const fullMoney = (value: number) => value.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+const rowButton = "rounded-md px-2 py-1.5 text-xs font-semibold text-[#176b75] hover:bg-[#eaf4f1] focus-visible:outline-2 focus-visible:outline-[#176b75]";
 
-function MetricTile({ label, value, detail, tone, trend }: { label: string; value: string; detail: string; tone: string; trend: string }) {
-  return <div className="rounded-xl border border-[#e2e7ee] bg-white px-4 py-3 shadow-sm">
-    <div className="flex items-center justify-between gap-2"><p className="text-[10px] font-bold uppercase tracking-[0.13em] text-slate-500">{label}</p><span className={`text-[10px] font-bold ${tone}`}>{trend}</span></div>
-    <p className={`mt-2 text-2xl font-bold tracking-tight ${tone}`}>{value}</p>
-    <p className="mt-1 text-[11px] leading-4 text-slate-500">{detail}</p>
-  </div>;
+function DollarBar({ value, maximum, opportunity = false }: { value: number; maximum: number; opportunity?: boolean }) {
+  return <div className="min-w-[100px]" title={fullMoney(value)}><p className={`text-sm font-bold tabular-nums ${opportunity ? "text-[#176b75]" : "text-[#a65714]"}`}>{money(value)}</p><div className="mt-2 h-2 overflow-hidden rounded-sm bg-slate-100" aria-hidden="true"><div className={`h-full rounded-sm ${opportunity ? "bg-[#29867a]" : "bg-[#d99b59]"}`} style={{ width: `${value / maximum * 100}%` }} /></div></div>;
 }
 
-function PortfolioSignalChart() {
-  const width = 520;
-  const height = 116;
-  const risk = [112, 109, 106, 103, 101, 100];
-  const lives = [91, 93, 95, 97, 99, 100];
-  const points = (values: number[]) => values.map((value, index) => `${24 + (index / (values.length - 1)) * (width - 48)},${height - 18 - ((value - 88) / 24) * (height - 36)}`).join(" ");
-  return <div className="rounded-xl border border-[#e2e7ee] bg-white p-4 shadow-sm">
-    <div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-[10px] font-bold uppercase tracking-[0.13em] text-[#28737a]">Portfolio signal</p><h3 className="mt-1 text-base font-bold tracking-tight text-slate-900">Risk and membership trend</h3><p className="mt-1 text-[11px] text-slate-500">Six refreshes, indexed to the latest portfolio snapshot.</p></div><div className="flex gap-3 text-[10px] font-semibold text-slate-500"><span><i className="mr-1 inline-block h-2 w-2 rounded-full bg-[#ed9b3b]" />Risk</span><span><i className="mr-1 inline-block h-2 w-2 rounded-full bg-[#5270e8]" />Lives</span></div></div>
-    <svg className="mt-3 h-28 w-full" viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Portfolio risk and attributed lives trend over the last six refreshes">
-      {[18, 50, 82].map((y) => <line key={y} x1="24" x2={width - 24} y1={y} y2={y} stroke="#e8edf2" strokeDasharray="3 4" />)}
-      <polyline points={points(risk)} fill="none" stroke="#ed9b3b" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-      <polyline points={points(lives)} fill="none" stroke="#5270e8" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-      {[risk, lives].map((series, seriesIndex) => <g key={seriesIndex}>{series.map((value, index) => <circle key={`${seriesIndex}-${index}`} cx={24 + (index / (series.length - 1)) * (width - 48)} cy={height - 18 - ((value - 88) / 24) * (height - 36)} r="3.5" fill={seriesIndex === 0 ? "#ed9b3b" : "#5270e8"} stroke="white" strokeWidth="1.5" />)}</g>)}
-      {['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'].map((label, index) => <text key={label} x={24 + (index / 5) * (width - 48)} y={height - 1} textAnchor="middle" fill="#94a3b8" fontSize="9">{label}</text>)}
-    </svg>
-    <div className="mt-1 flex items-center justify-between border-t border-slate-100 pt-2 text-[10px] font-semibold text-slate-500"><span>Risk now <strong className="text-amber-700">{money(hdiExecutiveMetrics.atRiskDollars)}</strong></span><span>Lives now <strong className="text-slate-800">{whole(healthSystemSnapshot.attributedLives)}</strong></span></div>
-  </div>;
+function PerformanceBullet({ program }: { program: HdiObligation }) {
+  const { label, unit } = portfolioMetricContext[program.id];
+  const { current, projected, target } = program.forecast;
+  const suffix = unit === "%" ? "%" : " pts";
+  const position = (value: number) => `${Math.max(0, Math.min(100, value))}%`;
+  return <div className="min-w-[225px]"><p className="text-[11px] font-semibold text-slate-700">{label}</p><div role="img" aria-label={`${label}: current ${current}${suffix}, forecast ${projected}${suffix}, internal target ${target}${suffix}. Scale zero to 100.`} className="relative my-2 h-5"><div className="absolute inset-x-0 top-1.5 h-2 rounded-sm bg-slate-100" /><div className="absolute left-0 top-1.5 h-2 rounded-sm bg-[#d3e5e8]" style={{ width: position(projected) }} /><span className="absolute top-1 h-3 w-3 -translate-x-1/2 rounded-full border-2 border-white bg-[#236f7e] shadow-sm" style={{ left: position(current) }} /><span className="absolute top-1 h-3 w-3 -translate-x-1/2 rotate-45 border-2 border-[#236f7e] bg-white" style={{ left: position(projected) }} /><span className="absolute top-0 h-5 w-0.5 -translate-x-1/2 bg-slate-700" style={{ left: position(target) }} /></div><div className="flex items-center justify-between gap-2 text-[10px] tabular-nums text-slate-500"><span>Current <strong className="font-semibold text-slate-700">{current}{suffix}</strong></span><span>Forecast <strong className="font-semibold text-[#176b75]">{projected}{suffix}</strong></span><span>Target <strong className="font-semibold text-slate-700">{target}{suffix}</strong></span></div></div>;
 }
 
-function ProgramExposure({ onOpenProgram }: { onOpenProgram: (id: HdiObligationId) => void }) {
-  const programs = [...hdiObligations].sort((a, b) => b.atRiskDollars - a.atRiskDollars);
-  const maxRisk = programs[0]?.atRiskDollars ?? 1;
-  return <section className="rounded-xl border border-[#e2e7ee] bg-white p-4 shadow-sm">
-    <div className="flex items-end justify-between gap-3"><div><p className="text-[10px] font-bold uppercase tracking-[0.13em] text-[#28737a]">Obligation exposure</p><h3 className="mt-1 text-base font-bold tracking-tight text-slate-900">Where the portfolio is concentrated</h3></div><span className="text-[10px] font-semibold text-slate-500">Risk · lives · opportunity</span></div>
-    <div className="mt-3 grid gap-x-5 gap-y-2.5 sm:grid-cols-2">{programs.map((program) => <button key={program.id} type="button" onClick={() => onOpenProgram(program.id)} className="group text-left">
-      <div className="flex items-center justify-between gap-2"><span className="truncate text-[11px] font-bold text-slate-800 group-hover:text-[#176b75]">{program.shortTitle}</span><span className="shrink-0 text-[11px] font-bold text-amber-700">{money(program.atRiskDollars)}</span></div>
-      <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-gradient-to-r from-[#f8c24d] to-[#ed9b3b]" style={{ width: `${Math.max(7, (program.atRiskDollars / maxRisk) * 100)}%` }} /></div>
-      <div className="mt-1 flex justify-between text-[10px] text-slate-500"><span>{whole(program.lives)} lives</span><span>{money(program.recoverableDollars)} recoverable · {program.forecast.projected}{program.forecast.unit.includes("%") ? "%" : " pts"} projected</span></div>
-    </button>)}</div>
-  </section>;
-}
-
-export default function PortfolioExecutiveSummary({ attentionCount, onOpenProgram }: { attentionCount: number; onOpenProgram: (id: HdiObligationId) => void }) {
-  const sharedCohortLives = 1840 + 3120 + 2680 + 12100;
-  const recoveryRate = Math.round((hdiExecutiveMetrics.recoverableDollars / hdiExecutiveMetrics.atRiskDollars) * 100);
-  return <section className="space-y-3" aria-label="Portfolio executive summary">
-    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-      <MetricTile label="Total risk" value={money(hdiExecutiveMetrics.atRiskDollars)} detail={`${hdiExecutiveMetrics.programs} programs · ${hdiExecutiveMetrics.obligations} active obligations`} tone="text-amber-700" trend="Portfolio" />
-      <MetricTile label="Attributed lives" value={whole(healthSystemSnapshot.attributedLives)} detail={`${healthSystemSnapshot.hospitals} hospitals · ${healthSystemSnapshot.ambulatorySites} ambulatory sites`} tone="text-slate-900" trend="+3.1%" />
-      <MetricTile label="Recoverable opportunity" value={money(hdiExecutiveMetrics.recoverableDollars)} detail={`${recoveryRate}% of modeled risk still actionable`} tone="text-emerald-700" trend="Prioritize" />
-      <MetricTile label="Attention window" value={`${attentionCount} programs`} detail={`${hdiExecutiveMetrics.deadlinesIn30Days} deadlines inside 30 days`} tone="text-[#b85d12]" trend="Act now" />
+export default function PortfolioExecutiveSummary({ onOpenProgram, onOpenWorklist }: { onOpenProgram: (id: HdiObligationId) => void; onOpenWorklist: (id: HdiObligationId) => void }) {
+  const [year, setYear] = useState<"all" | "2026" | "2027">("all");
+  const [filter, setFilter] = useState<PortfolioFilter>("all");
+  const [sort, setSort] = useState<PortfolioSort>("opportunity");
+  const [expanded, setExpanded] = useState<HdiObligationId | null>(null);
+  const programs = portfolioForYear(year);
+  const totals = portfolioTotals(programs);
+  const rows = portfolioRows(programs, filter, sort);
+  const maximum = dollarAxisMaximum(programs);
+  const share = totals.risk ? totals.opportunity / totals.risk * 100 : 0;
+  return <section className="space-y-4" aria-label="Portfolio executive summary">
+    <div className="flex flex-wrap items-center justify-between gap-3"><div className="flex flex-wrap items-center gap-2 text-xs text-slate-500"><span className="rounded-full bg-slate-100 px-2.5 py-1 font-semibold">Modeled estimates</span><span>{totals.count} {totals.count === 1 ? "program" : "programs"} · As of {healthSystemSnapshot.asOf}</span></div><label className="text-xs font-semibold text-slate-600">Program year<select value={year} onChange={event => { setYear(event.target.value as typeof year); setFilter("all"); setExpanded(null); }} className="ml-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs"><option value="all">All · 2026 + 2027 scenario</option><option value="2026">2026</option><option value="2027">2027 · ASM scenario</option></select></label></div>
+    <div className="grid gap-3 lg:grid-cols-[1fr_1fr_1.05fr]">
+      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"><div className="flex items-center justify-between gap-3"><h3 className="text-sm font-semibold text-slate-700">Dollars at risk</h3><span className="text-[10px] font-semibold text-slate-400">GROSS ESTIMATE</span></div><p className="mt-3 text-4xl font-bold tracking-tight tabular-nums text-[#a65714]" title={fullMoney(totals.risk)}>{money(totals.risk)}</p><p className="mt-2 text-xs text-slate-500">Across {totals.count} {totals.count === 1 ? "program" : "programs"} in scope</p><div className="mt-4 flex h-2.5 overflow-hidden rounded-sm bg-[#efdcc5]" aria-label={`${fullMoney(totals.opportunity)} recoverable within ${fullMoney(totals.risk)} at risk`} role="img"><div className="h-full bg-[#29867a]" style={{ width: `${share}%` }} /></div><p className="mt-2 text-[11px] leading-4 text-slate-500"><span className="mr-1.5 inline-block h-2 w-2 rounded-sm bg-[#29867a]" />{money(totals.opportunity)} has identified recovery opportunity</p></div>
+      <div className="rounded-xl border border-[#c4ded7] bg-[#f6faf9] p-5 shadow-sm"><div className="flex items-center justify-between gap-3"><h3 className="text-sm font-semibold text-slate-700">Recoverable opportunity</h3><span className="text-[10px] font-semibold text-[#176b75]">WITHIN RISK</span></div><p className="mt-3 text-4xl font-bold tracking-tight tabular-nums text-[#176b75]" title={fullMoney(totals.opportunity)}>{money(totals.opportunity)}</p><p className="mt-2 text-xs text-slate-500">{share.toFixed(1)}% of {money(totals.risk)} at risk</p><p className="mt-4 text-[11px] leading-5 text-slate-600">Estimated exposure addressable through the identified program work.</p><button type="button" className={`${rowButton} -ml-2 mt-1`} onClick={() => { setSort("opportunity"); setFilter("all"); document.getElementById("portfolio-program-table")?.scrollIntoView({ behavior: "smooth", block: "start" }); }}>Rank by opportunity ↓</button></div>
+      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"><h3 className="text-sm font-semibold text-slate-700">Forecast below target</h3><p className="mt-3 text-4xl font-bold tracking-tight tabular-nums text-[#a65714]">{totals.forecastBelow}<span className="ml-1 text-xl font-normal text-slate-400">/ {totals.count}</span></p><p className="mt-2 text-xs text-slate-500">{totals.currentBelow} currently below their internal target</p><div className="mt-4 flex h-2.5 gap-1" aria-hidden="true">{programs.map(program => <span key={program.id} className={`h-full flex-1 rounded-sm ${program.forecast.projected < program.forecast.target ? "bg-[#d99b59]" : "bg-[#29867a]"}`} />)}</div><div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px]"><button type="button" className="font-semibold text-[#a65714] hover:underline" onClick={() => setFilter("below")}>{totals.forecastBelow} below forecast target</button><button type="button" className="font-semibold text-[#176b75] hover:underline" onClick={() => setFilter("meets")}>{totals.forecastMeets} forecast to meet</button></div></div>
     </div>
-    <div className="grid gap-3 xl:grid-cols-[minmax(0,1.02fr)_minmax(0,0.98fr)]">
-      <PortfolioSignalChart />
-      <ProgramExposure onOpenProgram={onOpenProgram} />
-    </div>
-    <div className="flex flex-wrap items-center gap-x-5 gap-y-2 rounded-xl border border-[#e2e7ee] bg-[#f8fbfa] px-4 py-3 text-[11px] font-semibold text-slate-600">
-      <span><strong className="text-slate-900">{whole(sharedCohortLives)}</strong> shared-cohort lives across cross-program measures</span>
-      <span><strong className="text-slate-900">{hdiExecutiveMetrics.obligations}</strong> obligations mapped to work</span>
-      <span><strong className="text-emerald-700">{money(hdiExecutiveMetrics.recoverableDollars)}</strong> value available to recover</span>
-      <span className="text-slate-500">Updated {healthSystemSnapshot.asOf}</span>
-    </div>
+    <section id="portfolio-program-table" className="scroll-mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm" aria-labelledby="portfolio-performance-title">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-4"><div><h3 id="portfolio-performance-title" className="text-base font-bold text-slate-900">Obligation performance</h3><p className="mt-1 text-xs text-slate-500">{rows.length} of {totals.count} {totals.count === 1 ? "program" : "programs"} · {totals.dueSoon} work {totals.dueSoon === 1 ? "item" : "items"} due within 30 days</p></div><div className="flex flex-wrap items-center gap-3"><div className="flex gap-1 rounded-lg bg-slate-100 p-1" aria-label="Forecast filter">{([ ["all", "All"], ["below", "Below target"], ["meets", "Meets target"] ] as const).map(([value, label]) => <button key={value} type="button" aria-pressed={filter === value} onClick={() => setFilter(value)} className={`rounded-md px-3 py-1.5 text-[11px] font-semibold ${filter === value ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-900"}`}>{label}</button>)}</div><label className="text-[11px] text-slate-500">Sort<select value={sort} onChange={event => setSort(event.target.value as PortfolioSort)} className="ml-2 rounded-md border border-slate-200 bg-white p-2 text-[11px] text-slate-700"><option value="opportunity">Opportunity</option><option value="risk">Dollars at risk</option><option value="deadline">Next work due</option></select></label></div></div>
+      <div className="flex flex-wrap justify-between gap-2 border-b border-slate-100 bg-[#fbfcfd] px-5 py-2 text-[10px] text-slate-500"><span>Dollar bars: $0–{money(maximum)} · Same scale in both columns</span><span><span className="font-bold text-[#236f7e]">●</span> Current <span className="ml-3 font-bold text-[#236f7e]">◇</span> Forecast <span className="ml-3 font-bold text-slate-700">│</span> Internal target · Row scale 0–100</span></div>
+      <div className="overflow-x-auto"><table className="w-full min-w-[1020px] table-fixed text-left"><thead className="border-b border-slate-200 text-[10px] uppercase tracking-wide text-slate-500"><tr><th className="w-[21%] px-5 py-3">Obligation</th><th className="w-[14%] px-4 py-3">Dollars at risk</th><th className="w-[14%] px-4 py-3">Recoverable</th><th className="w-[28%] px-4 py-3">Performance</th><th className="w-[12%] px-4 py-3">Forecast gap</th><th className="w-[11%] px-4 py-3">Work due</th></tr></thead><tbody className="divide-y divide-slate-100">{rows.map(program => {
+        const context = portfolioMetricContext[program.id];
+        const gap = program.forecast.target - program.forecast.projected;
+        const due = nextProgramDeadline(program);
+        return <Fragment key={program.id}><tr className="align-middle hover:bg-slate-50/70"><td className="px-5 py-4"><button type="button" onClick={() => onOpenProgram(program.id)} className="text-left text-sm font-bold text-[#176b75] hover:underline" aria-label={`Open ${program.shortTitle} overview`}>{program.shortTitle === "AMBULATORY SPECIALTY" ? "ASM" : program.shortTitle} →</button><p className="mt-1 text-[10px] text-slate-500">{context.year}{context.year === 2027 ? " · Preparation scenario" : " · Modeled program"}</p><button type="button" aria-expanded={expanded === program.id} aria-controls={expanded === program.id ? `basis-${program.id}` : undefined} onClick={() => setExpanded(expanded === program.id ? null : program.id)} className="mt-1 text-[10px] font-semibold text-slate-500 hover:text-[#176b75]">{expanded === program.id ? "−" : "+"} Basis</button></td><td className="px-4 py-4"><DollarBar value={program.atRiskDollars} maximum={maximum} /></td><td className="px-4 py-4"><DollarBar value={program.recoverableDollars} maximum={maximum} opportunity /></td><td className="px-4 py-4"><PerformanceBullet program={program} /></td><td className="px-4 py-4"><p className={`text-xs font-bold ${gap > 0 ? "text-[#a65714]" : "text-[#176b75]"}`}>{gap > 0 ? `${gap} ${context.unit === "%" ? "pp" : "pts"} below` : gap < 0 ? `${Math.abs(gap)} ${context.unit === "%" ? "pp" : "pts"} above` : "Target met"}</p><p className="mt-1 text-[10px] text-slate-500">{gap > 0 ? "Forecast shortfall" : "At forecast"}</p></td><td className="px-4 py-4">{due !== null ? <button type="button" className={`${rowButton} -ml-2 ${due <= 30 ? "!text-[#a65714]" : ""}`} onClick={() => onOpenWorklist(program.id)} aria-label={`Open ${program.shortTitle} worklist, next due in ${due} days`}>{due} days →</button> : <span className="text-xs text-slate-500">No open work</span>}<p className="text-[10px] text-slate-500">{program.workItems.length} work {program.workItems.length === 1 ? "item" : "items"}</p></td></tr>
+          {expanded === program.id && <tr id={`basis-${program.id}`}><td colSpan={6} className="bg-[#f6faf9] px-5 py-4"><div className="grid gap-4 md:grid-cols-[1.2fr_1fr]"><div><h4 className="text-xs font-bold text-slate-800">{program.shortTitle} · Estimate basis</h4><p className="mt-1 text-xs leading-5 text-slate-600">{context.basis}</p><p className="mt-1 text-[11px] text-slate-500">{program.scope} · {program.deadline}</p></div><div className="text-xs leading-5 text-slate-600"><p>{fullMoney(program.recoverableDollars)} recoverable within {fullMoney(program.atRiskDollars)} at risk.</p><p>{fullMoney(program.atRiskDollars - program.recoverableDollars)} has no identified recovery in this scenario.</p><p className="mt-1 text-[11px] text-slate-500">Estimates may overlap with other programs. Work-item impacts are not added to this total.</p></div></div></td></tr>}
+        </Fragment>;
+      })}{!rows.length && <tr><td colSpan={6} className="px-5 py-10 text-center text-sm text-slate-500">No programs match this forecast filter.</td></tr>}</tbody></table></div>
+      <div className="border-t border-slate-200 bg-[#fbfcfd] px-5 py-3 text-[11px] leading-5 text-slate-500"><p>Recoverable amounts sit within at-risk estimates. Cross-program financial overlap has not been reconciled. Performance uses each program’s own metric and internal target.</p><details className="mt-1"><summary className="cursor-pointer font-semibold text-[#176b75]">Metric definitions</summary><dl className="mt-3 grid gap-3 sm:grid-cols-3"><div><dt className="font-semibold text-slate-700">Dollars at risk</dt><dd>Program estimates of exposure if obligations are not met. The gross sum is not a reconciled expected loss.</dd></div><div><dt className="font-semibold text-slate-700">Recoverable opportunity</dt><dd>Exposure estimated to be addressable through identified work. It is not earned savings or additional revenue.</dd></div><div><dt className="font-semibold text-slate-700">Performance and gap</dt><dd>Current and forecast compared with the internal target. Gap uses points for scores and percentage points for rates. Readiness indicators are labeled separately.</dd></div></dl></details></div>
+    </section>
   </section>;
 }

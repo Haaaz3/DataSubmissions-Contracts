@@ -215,7 +215,6 @@ export default function HealthDataIntelligenceCommandPlane({ onOpenDataSubmissio
   const selected = useMemo(() => hdiObligations.find((obligation) => obligation.id === selectedId) ?? hdiObligations[0], [selectedId]);
   const selectedWork = useMemo(() => selected.workItems.find((item) => item.id === selectedWorkId) ?? selected.workItems[0], [selected, selectedWorkId]);
   const opportunitiesFor = (id: HdiObligationId) => hdiCrossProgramOpportunities.filter((opportunity) => opportunity.obligationIds.includes(id));
-  const attentionCount = hdiObligations.filter((obligation) => obligation.forecast.projected < obligation.forecast.target || Math.min(...obligation.workItems.map((item) => item.dueInDays)) <= 30).length;
 
   const navigate = (nextView: HdiView, programId?: HdiObligationId) => {
     setMeasureContext(null);
@@ -358,10 +357,10 @@ export default function HealthDataIntelligenceCommandPlane({ onOpenDataSubmissio
     <WorkspaceNavigation view={view} selected={selected} onNavigate={(nextView) => navigate(nextView, nextView === "overview" ? undefined : selected.id)} />
 
     {view === "overview" && <div className="space-y-5">
-      <section><p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#28737a]">Executive home</p><h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">All opportunities, ranked for action.</h2><p className="mt-1 max-w-3xl text-xs leading-5 text-slate-500">Scan program risk, lives, trend, and the next best work in one view. Select a driver or program to open its operational detail.</p></section>
-      <PortfolioExecutiveSummary attentionCount={attentionCount} onOpenProgram={openProgram} />
+      <section><h2 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Portfolio performance</h2></section>
+      <PortfolioExecutiveSummary onOpenProgram={openProgram} onOpenWorklist={openWorklist} />
 
-      <section><div className="flex flex-wrap items-end justify-between gap-3"><div><p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#28737a]">Opportunity portfolio</p><h3 className="mt-1 text-lg font-bold tracking-tight text-slate-900">All program opportunities</h3></div><button type="button" onClick={() => navigate("worklist", selected.id)} className="text-xs font-semibold text-[#176b75] hover:underline">Open all worklists →</button></div><div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">{hdiObligations.map((obligation) => <ObligationCard key={obligation.id} obligation={obligation} opportunities={opportunitiesFor(obligation.id)} expanded={expandedId === obligation.id} onToggle={() => toggleObligation(obligation.id)} onOpenProgram={() => openProgram(obligation.id)} onWorklist={openWorklist} onOpenDataSubmissions={obligation.id === "mips-mvp" ? openMipsDashboard : undefined} onOpenPatientWorklist={openPatientWorklist} />)}</div></section>
+      <details className="rounded-xl border border-slate-200 bg-white p-4"><summary className="cursor-pointer text-sm font-semibold text-[#176b75]">Program worklists</summary><div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">{hdiObligations.map((obligation) => <ObligationCard key={obligation.id} obligation={obligation} opportunities={opportunitiesFor(obligation.id)} expanded={expandedId === obligation.id} onToggle={() => toggleObligation(obligation.id)} onOpenProgram={() => openProgram(obligation.id)} onWorklist={openWorklist} onOpenDataSubmissions={obligation.id === "mips-mvp" ? openMipsDashboard : undefined} onOpenPatientWorklist={openPatientWorklist} />)}</div></details>
 
       <SharedMeasureExplorer initialExpandedId={expandedMeasureId} onOpenObligation={openMeasureObligation} onOpenPatients={openMeasurePatients} />
 
