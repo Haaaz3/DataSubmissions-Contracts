@@ -1,15 +1,16 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import PayerComparison from "./PayerComparison";
 import { mockContractAgreements } from "@/lib/mockData";
 import type { Contract, ContractType } from "@/types/contract";
 import type { HdiObligation } from "@/data/synthetic/healthIntelligenceObligations";
 
 const money = (value: number, digits = 1) => {
   const absolute = Math.abs(value);
-  if (absolute >= 1_000_000) return `${value < 0 ? "-" : ""}$${(value / 1_000_000).toFixed(digits)}M`;
-  if (absolute >= 1_000) return `${value < 0 ? "-" : ""}$${Math.round(value / 1_000)}K`;
-  return `${value < 0 ? "-" : ""}$${Math.round(value)}`;
+  if (absolute >= 1_000_000) return `${value < 0 ? "-" : ""}$${(absolute / 1_000_000).toFixed(digits)}M`;
+  if (absolute >= 1_000) return `${value < 0 ? "-" : ""}$${Math.round(absolute / 1_000)}K`;
+  return `${value < 0 ? "-" : ""}$${Math.round(absolute)}`;
 };
 
 const number = (value: number) => value.toLocaleString("en-US");
@@ -64,21 +65,6 @@ function TrendChart({ contracts }: { contracts: Contract[] }) {
   </div>;
 }
 
-function DistributionBars({ contracts, mode }: { contracts: Contract[]; mode: "expense" | "value" | "lives" }) {
-  const byPayor = Array.from(new Set(contracts.map((contract) => contract.payor))).map((payor) => {
-    const rows = contracts.filter((contract) => contract.payor === payor);
-    const lives = rows.reduce((sum, contract) => sum + contract.attributedLives, 0);
-    const expense = rows.reduce((sum, contract) => sum + contract.currentPmpm * contract.attributedLives * 12, 0);
-    const target = rows.reduce((sum, contract) => sum + contract.targetPmpm * contract.attributedLives * 12, 0);
-    return { payor, lives, expense, target, value: Math.max(0, (expense - target) * 0.42) };
-  }).sort((a, b) => (mode === "lives" ? b.lives - a.lives : mode === "expense" ? b.expense - a.expense : b.value - a.value));
-  const max = Math.max(...byPayor.map((item) => mode === "lives" ? item.lives : mode === "expense" ? item.expense : item.value), 1);
-  const palette = mode === "lives" ? "from-[#6a8cf3] to-[#4d4de5]" : mode === "value" ? "from-[#39c99b] to-[#087b5b]" : "from-[#ffd45c] to-[#f36b13]";
-  const title = mode === "lives" ? "Lives by payer" : mode === "value" ? "Captured value by payer" : "Expense by payer";
-  const subtitle = mode === "lives" ? "Attributed lives and portfolio share" : mode === "value" ? "Value positioned from PMPM performance" : "Annualized current spend versus target";
-  return <div className="rounded-2xl border border-[#e2e7ee] bg-white p-4 shadow-sm"><div className="flex items-start justify-between gap-2"><div><h3 className="text-sm font-bold text-slate-900">{title}</h3><p className="mt-1 text-[11px] text-slate-500">{subtitle}</p></div><span className={`rounded-full px-2 py-1 text-[10px] font-bold ${mode === "lives" ? "bg-indigo-50 text-indigo-700" : mode === "value" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>{byPayor.length} payers</span></div><div className="mt-4 space-y-3">{byPayor.slice(0, 6).map((item) => { const value = mode === "lives" ? item.lives : mode === "expense" ? item.expense : item.value; return <div key={item.payor}><div className="flex items-center justify-between gap-2 text-xs"><span className="font-semibold text-slate-700">{item.payor}</span><span className="font-bold text-slate-900">{mode === "lives" ? `${(value / 1000).toFixed(1)}K` : money(value)}</span></div><div className="mt-1.5 h-2 overflow-hidden rounded-full bg-slate-100"><div className={`h-full rounded-full bg-gradient-to-r ${palette}`} style={{ width: `${Math.max(5, (value / max) * 100)}%` }} /></div><p className="mt-1 text-[10px] text-slate-400">{mode === "lives" ? `${Math.round((item.lives / Math.max(1, contracts.reduce((sum, contract) => sum + contract.attributedLives, 0))) * 100)}% of lives` : `${Math.round((value / max) * 100)}% of top payer`}</p></div>; })}</div></div>;
-}
-
 function ContractMix({ contracts }: { contracts: Contract[] }) {
   const groups = (Object.keys(typeColor) as ContractType[]).map((type) => ({ type, count: contracts.filter((contract) => contract.contractType === type).length, lives: contracts.filter((contract) => contract.contractType === type).reduce((sum, contract) => sum + contract.attributedLives, 0) }));
   const total = groups.reduce((sum, group) => sum + group.lives, 0);
@@ -96,7 +82,7 @@ function DomainGroups({ contracts, totalValue, remainingOpportunity }: { contrac
 
 function ContractRow({ contract, onOpenContract, onOpenPatientWorklist }: { contract: Contract; onOpenContract: (id: string) => void; onOpenPatientWorklist: (measure: string) => void }) {
   const variance = contract.currentPmpm - contract.targetPmpm;
-  const annualVariance = Math.max(0, variance * contract.attributedLives * 12);
+  const annualVariance = variance * contract.attributedLives * 12;
   const first = contract.trend[0]?.pmpm ?? contract.currentPmpm;
   const trend = contract.currentPmpm - first;
   const topOpportunity = contract.opportunities[0];
@@ -104,29 +90,34 @@ function ContractRow({ contract, onOpenContract, onOpenPatientWorklist }: { cont
 }
 
 export default function VbcContractPortfolio({ obligation, onBack, onOpenPatientWorklist, onOpenContract }: { obligation: HdiObligation; onBack: () => void; onOpenPatientWorklist: (measure: string) => void; onOpenContract: (contractId: string) => void }) {
+  const [payer, setPayer] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "risk" | "quality">("all");
   const contracts = useMemo(() => mockContractAgreements.flatMap((agreement) => agreement.contracts), []);
   const visibleContracts = useMemo(() => {
     const filtered = filter === "risk" ? contracts.filter((contract) => contract.currentPmpm > contract.targetPmpm) : filter === "quality" ? contracts.filter((contract) => contract.qualityScore < 75) : contracts;
-    return [...filtered].sort((a, b) => (b.currentPmpm - b.targetPmpm) * b.attributedLives - (a.currentPmpm - a.targetPmpm) * a.attributedLives);
-  }, [contracts, filter]);
+    return filtered.filter(contract => !payer || contract.payor === payer).sort((a, b) => (b.currentPmpm - b.targetPmpm) * b.attributedLives - (a.currentPmpm - a.targetPmpm) * a.attributedLives);
+  }, [contracts, filter, payer]);
   const totalLives = contracts.reduce((sum, contract) => sum + contract.attributedLives, 0);
   const annualSpend = contracts.reduce((sum, contract) => sum + contract.currentPmpm * contract.attributedLives * 12, 0);
   const targetSpend = contracts.reduce((sum, contract) => sum + contract.targetPmpm * contract.attributedLives * 12, 0);
   const remainingOpportunity = Math.max(0, annualSpend - targetSpend);
-  const earnedValue = Math.max(0, remainingOpportunity * 0.42);
+  const spendVariance = annualSpend - targetSpend;
   const quality = Math.round(contracts.reduce((sum, contract) => sum + contract.qualityScore * contract.attributedLives, 0) / Math.max(1, totalLives));
   const atRiskCount = contracts.filter((contract) => contract.status !== "On Track").length;
 
   return <section className="space-y-4">
     <div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#28737a]">VBC contract portfolio</p><div className="mt-1 flex flex-wrap items-center gap-2"><h2 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">All payer contracts</h2><span className="rounded-full bg-indigo-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-indigo-700">VBCA</span><span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-600">{contracts.length} contracts</span></div><p className="mt-1 text-xs text-slate-500">{obligation.sponsor} · {number(totalLives)} attributed lives · {obligation.deadline} performance year</p></div><button type="button" onClick={onBack} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">← Back to portfolio</button></div>
 
-    <section className="rounded-2xl border border-[#e2e7ee] bg-white p-4 shadow-sm"><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5"><div className="rounded-xl bg-[#f8fafc] p-3"><p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Lives</p><p className="mt-1 text-2xl font-bold tracking-tight text-slate-900">{number(totalLives)}</p><p className="mt-1 text-[10px] text-slate-500">Across {contracts.length} active contracts</p></div><div className="rounded-xl bg-[#e8f7f0] p-3"><p className="text-[10px] font-bold uppercase tracking-wide text-[#087b5b]">Current earned VBC value</p><p className="mt-1 text-2xl font-bold tracking-tight text-[#087b5b]">{money(earnedValue)}</p><p className="mt-1 text-[10px] text-emerald-700">Net value positioned</p></div><div className="rounded-xl bg-[#eef2ff] p-3"><p className="text-[10px] font-bold uppercase tracking-wide text-indigo-600">Budgeted opportunity</p><p className="mt-1 text-2xl font-bold tracking-tight text-indigo-700">{money(remainingOpportunity)}</p><p className="mt-1 text-[10px] text-indigo-600">PMPM gap to target</p></div><div className="rounded-xl bg-[#fff7e8] p-3"><p className="text-[10px] font-bold uppercase tracking-wide text-amber-700">Remaining opportunity</p><p className="mt-1 text-2xl font-bold tracking-tight text-amber-700">{money(Math.max(0, remainingOpportunity - earnedValue))}</p><p className="mt-1 text-[10px] text-amber-700">Open value to capture</p></div><div className="rounded-xl bg-[#fff4f1] p-3"><p className="text-[10px] font-bold uppercase tracking-wide text-red-700">Contracts needing attention</p><p className="mt-1 text-2xl font-bold tracking-tight text-red-700">{atRiskCount}</p><p className="mt-1 text-[10px] text-red-600">{quality}% weighted quality score</p></div></div></section>
+    <section className="rounded-2xl border border-[#e2e7ee] bg-white p-4 shadow-sm"><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5"><div className="rounded-xl bg-[#f8fafc] p-3"><p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Lives</p><p className="mt-1 text-2xl font-bold tracking-tight text-slate-900">{number(totalLives)}</p><p className="mt-1 text-[10px] text-slate-500">Across {contracts.length} active contracts</p></div><div className="rounded-xl bg-[#e8f7f0] p-3"><p className="text-[10px] font-bold uppercase tracking-wide text-[#087b5b]">Annualized spend</p><p className="mt-1 text-2xl font-bold tracking-tight text-[#087b5b]">{money(annualSpend)}</p><p className="mt-1 text-[10px] text-emerald-700">Current PMPM × lives × 12</p></div><div className="rounded-xl bg-[#eef2ff] p-3"><p className="text-[10px] font-bold uppercase tracking-wide text-indigo-600">Target spend</p><p className="mt-1 text-2xl font-bold tracking-tight text-indigo-700">{money(targetSpend)}</p><p className="mt-1 text-[10px] text-indigo-600">Target PMPM × lives × 12</p></div><div className="rounded-xl bg-[#fff7e8] p-3"><p className="text-[10px] font-bold uppercase tracking-wide text-amber-700">Net spend variance</p><p className="mt-1 text-2xl font-bold tracking-tight text-amber-700">{money(spendVariance)}</p><p className="mt-1 text-[10px] text-amber-700">{spendVariance > 0 ? "Above target" : spendVariance < 0 ? "Below target" : "On target"}</p></div><div className="rounded-xl bg-[#fff4f1] p-3"><p className="text-[10px] font-bold uppercase tracking-wide text-red-700">Contracts needing attention</p><p className="mt-1 text-2xl font-bold tracking-tight text-red-700">{atRiskCount}</p><p className="mt-1 text-[10px] text-red-600">{quality}% weighted quality score</p></div></div></section>
 
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(300px,0.65fr)]"><TrendChart contracts={contracts} /><ContractMix contracts={contracts} /></div>
-    <section><div className="mb-3 flex flex-wrap items-end justify-between gap-3"><div><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#28737a]">Portfolio distribution</p><h3 className="mt-1 text-lg font-bold tracking-tight text-slate-900">Where lives, expense, and captured value sit</h3></div><span className="text-[11px] font-semibold text-slate-500">Click a payer bar or contract for detail</span></div><div className="grid gap-4 lg:grid-cols-3"><DistributionBars contracts={contracts} mode="expense" /><DistributionBars contracts={contracts} mode="value" /><DistributionBars contracts={contracts} mode="lives" /></div></section>
+    <PayerComparison contracts={contracts} onSelectPayer={selected => {
+      setPayer(selected);
+      setFilter("all");
+      document.getElementById("vbc-contract-scorecard")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }} />
     <DomainGroups contracts={contracts} totalValue={Math.max(remainingOpportunity, obligation.atRiskDollars)} remainingOpportunity={Math.max(remainingOpportunity, obligation.recoverableDollars)} />
 
-    <section className="overflow-hidden rounded-2xl border border-[#e2e7ee] bg-white shadow-sm"><div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-4 py-4"><div><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#28737a]">Contract scorecard</p><h3 className="mt-1 text-lg font-bold tracking-tight text-slate-900">Payer contracts ranked by performance exposure</h3><p className="mt-1 text-xs text-slate-500">Open a contract for its full scorecard, financial reconciliation, and population insights.</p></div><div className="flex items-center gap-1 rounded-lg bg-slate-100 p-1 text-[10px] font-bold"><button type="button" onClick={() => setFilter("all")} className={`rounded-md px-2.5 py-1.5 ${filter === "all" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500"}`}>All {contracts.length}</button><button type="button" onClick={() => setFilter("risk")} className={`rounded-md px-2.5 py-1.5 ${filter === "risk" ? "bg-white text-amber-700 shadow-sm" : "text-slate-500"}`}>Above target</button><button type="button" onClick={() => setFilter("quality")} className={`rounded-md px-2.5 py-1.5 ${filter === "quality" ? "bg-white text-red-700 shadow-sm" : "text-slate-500"}`}>Quality gap</button></div></div><div className="overflow-x-auto"><div className="min-w-[1060px]"><div className="grid grid-cols-[minmax(220px,1.45fr)_100px_110px_110px_110px_120px_122px] gap-3 border-b border-slate-100 bg-[#fbfcfe] px-4 py-2.5 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400"><span>Contract / payer</span><span>Lives</span><span>Current</span><span>Target</span><span>Variance</span><span>Quality</span><span>Trend / action</span></div>{visibleContracts.map((contract) => <ContractRow key={contract.id} contract={contract} onOpenContract={onOpenContract} onOpenPatientWorklist={onOpenPatientWorklist} />)}</div></div><div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 bg-[#fbfcfe] px-4 py-3 text-[11px] text-slate-500"><span>Showing {visibleContracts.length} of {contracts.length} contracts · HDI-native payer portfolio</span><span className="font-semibold text-[#176b75]">Select a contract for the HDI scorecard →</span></div></section>
+    <section id="vbc-contract-scorecard" className="scroll-mt-4 overflow-hidden rounded-2xl border border-[#e2e7ee] bg-white shadow-sm"><div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-4 py-4"><div><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#28737a]">Contract scorecard</p><h3 className="mt-1 text-lg font-bold tracking-tight text-slate-900">{payer ? `${payer} contracts` : "Payer contracts ranked by performance exposure"}</h3><p className="mt-1 text-xs text-slate-500">Open a contract for its full scorecard, financial reconciliation, and population insights.</p>{payer && <button type="button" onClick={() => setPayer(null)} className="mt-2 text-xs font-semibold text-[#176b75] underline">Clear payer filter</button>}</div><div className="flex items-center gap-1 rounded-lg bg-slate-100 p-1 text-[10px] font-bold"><button type="button" onClick={() => setFilter("all")} className={`rounded-md px-2.5 py-1.5 ${filter === "all" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500"}`}>All {contracts.filter(contract => !payer || contract.payor === payer).length}</button><button type="button" onClick={() => setFilter("risk")} className={`rounded-md px-2.5 py-1.5 ${filter === "risk" ? "bg-white text-amber-700 shadow-sm" : "text-slate-500"}`}>Above target</button><button type="button" onClick={() => setFilter("quality")} className={`rounded-md px-2.5 py-1.5 ${filter === "quality" ? "bg-white text-red-700 shadow-sm" : "text-slate-500"}`}>Quality gap</button></div></div><div className="overflow-x-auto"><div className="min-w-[1060px]"><div className="grid grid-cols-[minmax(220px,1.45fr)_100px_110px_110px_110px_120px_122px] gap-3 border-b border-slate-100 bg-[#fbfcfe] px-4 py-2.5 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400"><span>Contract / payer</span><span>Lives</span><span>Current</span><span>Target</span><span>Variance</span><span>Quality</span><span>Trend / action</span></div>{!visibleContracts.length && <p className="px-4 py-6 text-xs text-slate-500">No contracts match these filters.</p>}{visibleContracts.map((contract) => <ContractRow key={contract.id} contract={contract} onOpenContract={onOpenContract} onOpenPatientWorklist={onOpenPatientWorklist} />)}</div></div><div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 bg-[#fbfcfe] px-4 py-3 text-[11px] text-slate-500"><span>Showing {visibleContracts.length} of {contracts.filter(contract => !payer || contract.payor === payer).length} contracts · HDI-native payer portfolio</span><span className="font-semibold text-[#176b75]">Select a contract for the HDI scorecard →</span></div></section>
   </section>;
 }
