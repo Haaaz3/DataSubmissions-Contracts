@@ -10,6 +10,7 @@ import {
 } from "@/data/synthetic/healthIntelligenceObligations";
 import PortfolioExecutiveSummary from "@/components/health-intelligence/PortfolioExecutiveSummary";
 import { programMeasureCatalogs } from "@/data/reference/programQualityMeasures";
+import { modelViewKeys } from "@/data/synthetic/modelProgram";
 import ProgramOverview from "@/components/health-intelligence/ProgramOverview";
 import HdiContractDetail from "@/components/health-intelligence/HdiContractDetail";
 import SharedMeasurePatientList from "@/components/health-intelligence/SharedMeasurePatientList";
@@ -226,9 +227,10 @@ export default function HealthDataIntelligenceCommandPlane({ onOpenDataSubmissio
     if (nextView !== "contract") url.searchParams.delete("contract");
     url.searchParams.delete("measureFamily");
     url.searchParams.delete("measureObligation");
-    for (const key of ["gapStatus", "q", "provider", "page", "measure", "context", "source"]) url.searchParams.delete(key);
+    for (const key of ["gapStatus", "q", "provider", "page", "measure", "context", "source", ...modelViewKeys]) url.searchParams.delete(key);
     url.searchParams.set("view", nextView);
     window.history.pushState(null, "", url);
+    window.dispatchEvent(new PopStateEvent("popstate"));
   };
 
   const toggleObligation = (id: HdiObligationId) => {
@@ -320,7 +322,15 @@ export default function HealthDataIntelligenceCommandPlane({ onOpenDataSubmissio
     const publishedOwner = hdiObligations.find(program => program.workItems.some(item => item.driver.toLowerCase() === normalized && item.qualityMeasureKey && programMeasureCatalogs[program.id].measures.some(entry => entry.key === item.qualityMeasureKey)));
     if (publishedOwner) {
       openProgram(publishedOwner.id);
-      setNotice("Published measure definition. Patient-level results are not connected for this program.");
+      if (publishedOwner.id === "cms-team" || publishedOwner.id === "ambulatory-specialty-model") {
+        const url = new URL(window.location.href);
+        url.searchParams.set("section", "quality");
+        const item = publishedOwner.workItems.find(item => item.driver.toLowerCase() === normalized);
+        if (item?.qualityMeasureKey) url.searchParams.set("qualityMeasure", item.qualityMeasureKey);
+        window.history.replaceState(null, "", url);
+        window.dispatchEvent(new PopStateEvent("popstate"));
+        setNotice(null);
+      } else setNotice("Published measure definition. Patient-level results are not connected for this program.");
       requestAnimationFrame(() => { document.getElementById("program-quality-measures")?.scrollIntoView({ behavior: "smooth" }); });
       return;
     }

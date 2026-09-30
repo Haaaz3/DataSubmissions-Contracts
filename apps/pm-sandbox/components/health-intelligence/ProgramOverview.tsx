@@ -6,6 +6,7 @@ import {
   type HdiObligationId,
 } from "@/data/synthetic/healthIntelligenceObligations";
 import ProgramQualityMeasures from "./ProgramQualityMeasures";
+import ModelProgramWorkspace from "./ModelProgramWorkspace";
 import VbcContractPortfolio from "@/components/health-intelligence/VbcContractPortfolio";
 
 const money = (value: number) => value >= 1_000_000 ? `$${(value / 1_000_000).toFixed(1)}M` : `$${Math.round(value / 1_000)}K`;
@@ -55,6 +56,9 @@ function DriverTable({ obligation, onWorklist }: { obligation: HdiObligation; on
 export default function ProgramOverview({ obligation, opportunities, onBack, onWorklist, onOpenDataSubmissions, onOpenPatientWorklist, onOpenContract }: { obligation: HdiObligation; opportunities: HdiCrossProgramOpportunity[]; onBack: () => void; onWorklist: (id: HdiObligationId) => void; onOpenDataSubmissions?: () => void; onOpenPatientWorklist: (measure: string) => void; onOpenContract?: (contractId: string) => void }) {
   if (obligation.id === "vbc-contracts") {
     return <VbcContractPortfolio obligation={obligation} onBack={onBack} onOpenPatientWorklist={onOpenPatientWorklist} onOpenContract={onOpenContract ?? (() => undefined)} />;
+  }
+  if (obligation.id === "cms-team" || obligation.id === "ambulatory-specialty-model") {
+    return <ModelProgramWorkspace key={obligation.id} program={obligation.id} onBack={onBack} />;
   }
   const protectedValue = Math.max(0, obligation.atRiskDollars - obligation.recoverableDollars);
   const capture = Math.round((protectedValue / Math.max(1, obligation.atRiskDollars)) * 100);
