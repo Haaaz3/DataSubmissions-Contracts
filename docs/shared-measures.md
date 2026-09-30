@@ -31,7 +31,18 @@ across overlapping obligations. Full licensed measure logic is not run.
 
 Each obligation has six modeled monthly snapshots. The trend uses that obligation's
 numerator/denominator and target, with improvement direction reversed for poor
-control. HEDIS and eCQM rates are not averaged into a family-wide rate.
+control. Compact charts zoom to observed rates with a labeled, padded scale,
+start/end rates and signed percentage-point change. Off-scale targets are labeled
+above/below the plot instead of flattening the trend. Missing rates are not zero
+and do not connect across missing snapshots. HEDIS and eCQM rates are not averaged.
+
+The family summary replaces the large trend selector. It counts unique eligible
+patients, patients with any open gap, shared patients and those with multiple open
+gaps across the currently shown obligations. Search/program filters recalculate
+these counts. The largest target workload ranks whole patients needed to meet an
+individual obligation target, and links to that obligation’s complete open-gap
+list. It does not identify which specific patients must close their gaps. Shared
+patients indicate overlapping eligibility, not automatic credit across measures.
 
 The family patient-list link opens all obligations in HDI. Eligible and open-gap
 counts open the corresponding obligation/status scope. Filters are stored in the
@@ -57,4 +68,7 @@ reload. Patient-list tests verify exact eligible/open/met reconciliation for all
 20 obligations, deduplication, independent obligation results, combined filters,
 URL round-trips and scoped CSV exports. Browser checks verify the existing
 Population table, the combined roster, obligation/open-gap/provider filters,
-pagination and reload/back navigation. All 97 tests, typecheck and lint pass.
+pagination and reload/back navigation. Overview tests cover filtered overlap, deduplicated gaps and target workload;
+trend tests cover zoom, flat/boundary rates and missing denominators. Browser
+checks verify compact layout, scoped summaries and the priority gap-list link.
+All 103 tests, typecheck and lint pass.

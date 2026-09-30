@@ -5,7 +5,8 @@ import { hdiObligations, type HdiObligationId } from "@/data/synthetic/healthInt
 import { sharedMeasureFamilies, type SharedMeasureFamily, type MeasureObligation } from "@/data/synthetic/sharedMeasures";
 import { calculateMeasureImpact, countMeasurePrograms, filterSharedMeasures } from "@/lib/health-intelligence/sharedMeasures";
 import MeasureImpactMetrics from "./MeasureImpactMetrics";
-import MeasureTrend, { MeasureTrendChart } from "./MeasureTrend";
+import { MeasureTrendChart } from "./MeasureTrend";
+import MeasureOverview from "./MeasureOverview";
 import type { MeasurePatientStatus } from "@/lib/health-intelligence/measurePopulation";
 
 type Props = {
@@ -59,7 +60,7 @@ function MeasureFamily({ family, obligations, expanded, onToggle, onOpenObligati
     </button></h4>
     <div className="px-5 pb-3"><button type="button" onClick={() => onOpenPatients(family.id, "all", "all")} className="text-xs font-semibold text-[#176b75] hover:underline">{family.name} patient list · All obligations →</button></div>
     {expanded && <div id={`${headingId}-body`} role="region" aria-labelledby={headingId} className="border-t border-[#dbe9e4] bg-[#f8fbfa] p-4 sm:p-5">
-      <MeasureTrend family={family} obligations={obligations} />
+      <MeasureOverview family={family} obligations={obligations} onOpenGaps={obligationId => onOpenPatients(family.id, obligationId, "open")} />
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div className="max-w-3xl"><p className="text-xs font-bold text-[#28737a]">Shared evidence</p><p className="mt-1 text-sm text-slate-700">{family.reuse}</p><p className="mt-2 text-xs leading-5 text-slate-500"><strong className="text-slate-600">Action:</strong> {family.nextAction}</p></div>
         <button type="button" onClick={() => setComparing(value => !value)} aria-expanded={comparing} aria-controls={`${headingId}-comparison`} className="shrink-0 rounded-lg border border-amber-200 bg-white px-3 py-2 text-xs font-semibold text-amber-900 hover:bg-amber-50">{comparing ? "Hide comparison" : "Compare HEDIS & CQM"}</button>
@@ -78,7 +79,7 @@ function MeasureFamily({ family, obligations, expanded, onToggle, onOpenObligati
             <button type="button" onClick={() => onOpenObligation(family, obligation)} aria-label={`Open ${obligation.label} for ${family.name}`} className="w-fit rounded-lg border border-[#b5d1ca] px-3 py-2 text-xs font-semibold text-[#176b75] hover:bg-[#e8f3ef]">{obligation.contractId ? "Open contract" : "Open program"} →</button>
             </div>
             <MeasureImpactMetrics impact={obligation.impact} direction={definition.direction} onOpenPatients={status => onOpenPatients(family.id, obligation.id, status)} />
-            <div className="mt-3 flex flex-wrap items-end justify-between gap-3"><MeasureTrendChart obligation={obligation} direction={definition.direction} compact /><button type="button" onClick={() => onOpenPatients(family.id, obligation.id, "all")} aria-label={`Patient list for ${family.name} in ${obligation.label}`} className="rounded-lg bg-[#285954] px-3 py-2 text-xs font-semibold text-white">Patient list →</button></div>
+            <div className="mt-3 flex flex-wrap items-end justify-between gap-3"><MeasureTrendChart obligation={obligation} direction={definition.direction} /><button type="button" onClick={() => onOpenPatients(family.id, obligation.id, "all")} aria-label={`Patient list for ${family.name} in ${obligation.label}`} className="rounded-lg bg-[#285954] px-3 py-2 text-xs font-semibold text-white">Patient list →</button></div>
           </li>;
         })}
       </ul>
