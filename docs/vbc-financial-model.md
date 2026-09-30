@@ -27,7 +27,7 @@ The maximum envelope is approximately −$367.35M to +$372.85M. Not every positi
 ## Visual encodings
 
 - Medical expense bars share a zero-based scale within the selected PMPM, PMPY or annual view. A vertical marker is the benchmark. Red indicates expense above benchmark; green indicates expense below benchmark. Dollar and percentage differences are explicit.
-- Settlement bars run from negative (red) through break-even to positive (teal). The dot is the current projection; the outlined diamond is the action scenario. All payer rows use a common dollar scale. Color does not encode a probability.
+- Settlement bars run from negative (red) through break-even to positive (teal). The dot is the current projection; the outlined diamond is the action scenario. All payer rows use a common dollar scale. The obligation overview defaults to each program’s own labeled range so smaller programs remain readable, with a Shared dollars option for absolute-size comparisons. In the default view, compare the printed dollar amounts rather than bar lengths. Color does not encode a probability.
 - Payers default to descending settlement improvement. Users can instead sort by normalized expense variance or annual medical expense. Selecting a payer filters the underlying contracts; each contract opens the same financial model and terms.
 
 ## Primary references
