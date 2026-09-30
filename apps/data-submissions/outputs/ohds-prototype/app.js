@@ -2632,6 +2632,44 @@ function renderVisionTabs(tabs, stateKey) {
 
 const validationCurrentSnapshotLabel = "08/31";
 const validationPriorSnapshotLabel = "08/17";
+const validationRounds = [
+  { id: "07/06", label: "07/06", phase: "Baseline" },
+  { id: "07/20", label: "07/20", phase: "Early period" },
+  { id: "08/03", label: "08/03", phase: "Mid-period" },
+  { id: "08/17", label: "08/17", phase: "Prior round" },
+  { id: "08/31", label: "08/31", phase: "Current round" },
+];
+
+function activeValidationRound() {
+  const requested = state.patientValidationRound === "current"
+    ? validationCurrentSnapshotLabel
+    : state.patientValidationRound === "prior"
+      ? validationPriorSnapshotLabel
+      : state.patientValidationRound;
+  return validationRounds.find((round) => round.id === requested) || validationRounds[validationRounds.length - 1];
+}
+
+function previousValidationRound(round = activeValidationRound()) {
+  const index = validationRounds.findIndex((candidate) => candidate.id === round.id);
+  return validationRounds[Math.max(0, index - 1)] || validationRounds[0];
+}
+
+function validationTimelineForPatient(patient) {
+  const changed = patientHasStateChange(patient);
+  return validationRounds.map((round, index) => ({
+    ...round,
+    status: !changed || index < validationRounds.length - 1 ? patient.priorState : patient.currentState,
+    changed: changed && index === validationRounds.length - 1 && patient.priorState !== patient.currentState,
+  }));
+}
+
+function patientStatusAtRound(patient, round = activeValidationRound()) {
+  return validationTimelineForPatient(patient).find((point) => point.id === round.id)?.status || patient.currentState;
+}
+
+function patientStatusChangedAtRound(patient, round = activeValidationRound()) {
+  return patientStatusAtRound(patient, round) !== patientStatusAtRound(patient, previousValidationRound(round));
+}
 
 function validationMeasureById(measureId) {
   return visionValidationPatientMeasures.find((measure) => measure.id === measureId) || visionValidationPatientMeasures[0];
@@ -2655,10 +2693,13 @@ function fullPopulationCountForMeasure(measure) {
 
 function fullPopulationFilterCounts(measure) {
   const total = fullPopulationCountForMeasure(measure);
-  const numerator = Math.round(total * (currentTrendValue(measure.id) / 100));
+  const round = activeValidationRound();
+  const trend = attestationTrendFor(measure.id);
+  const rate = Number.parseFloat(trend.trend.find((point) => point.label === round.id)?.value ?? trend.current);
+  const numerator = Math.round(total * (rate / 100));
   return {
     all: total,
-    changed: Math.round(total * 0.14),
+    changed: round.id === validationCurrentSnapshotLabel ? Math.round(total * 0.14) : 0,
     numerator,
     denominator: Math.max(0, total - numerator),
     exclusion: Math.round(total * 0.03),
@@ -2675,10 +2716,11 @@ function selectedValidationPatient(measure = selectedValidationMeasure()) {
 
 function patientsForValidationFilter(measure, filter = "all") {
   const patients = validationPatientsForMeasure(measure);
+  const round = activeValidationRound();
   if (["numerator", "denominator", "exclusion"].includes(filter)) {
-    return patients.filter((patient) => patientOutcomeCategory(patient) === filter);
+    return patients.filter((patient) => patientOutcomeCategoryAtRound(patient, round) === filter);
   }
-  if (filter === "changed") return patients.filter(patientHasStateChange);
+  if (filter === "changed") return patients.filter((patient) => patientStatusChangedAtRound(patient, round));
   return patients;
 }
 
@@ -2731,10 +2773,18 @@ function currentTrendValue(measureId) {
 }
 
 function patientOutcomeCategory(patient) {
-  const currentState = String(patient.currentState).toLowerCase();
+  return patientOutcomeCategoryForState(patient.currentState);
+}
+
+function patientOutcomeCategoryForState(stateValue) {
+  const currentState = String(stateValue).toLowerCase();
   if (currentState.includes("exclusion")) return "exclusion";
   if (currentState.includes("numerator")) return "numerator";
   return "denominator";
+}
+
+function patientOutcomeCategoryAtRound(patient, round = activeValidationRound()) {
+  return patientOutcomeCategoryForState(patientStatusAtRound(patient, round));
 }
 
 function patientOutcomeCategoryName(category) {
@@ -2748,14 +2798,61 @@ function patientOutcomeCategoryName(category) {
   return names[category] || "All selected";
 }
 
-function patientOutcomeBadge(patient) {
-  const category = patientOutcomeCategory(patient);
+function patientOutcomeBadge(patient, round = activeValidationRound()) {
+  const category = patientOutcomeCategoryAtRound(patient, round);
   const tone = category === "numerator" ? "good" : category === "exclusion" ? "info" : "warn";
   return visionBadge(patientOutcomeCategoryName(category), tone);
 }
 
 function patientHasStateChange(patient) {
   return patient.change !== "No change";
+}
+
+function patientStatusTone(stateValue) {
+  const normalized = String(stateValue).toLowerCase();
+  if (normalized.includes("numerator")) return "good";
+  if (normalized.includes("exclusion")) return "info";
+  if (normalized.includes("near miss")) return "watch";
+  return "risk";
+}
+
+function renderPatientTimelineCompact(patient) {
+  const active = activeValidationRound();
+  return `
+    <div class="patient-period-mini" aria-label="${escapeHtml(patient.patient)} status across the measurement period">
+      ${validationTimelineForPatient(patient).map((point) => `
+        <span class="patient-period-dot ${patientStatusTone(point.status)} ${point.id === active.id ? "active" : ""}" title="${escapeHtml(`${point.label}: ${point.status}`)}"></span>
+      `).join("")}
+    </div>
+    <span class="subline">${escapeHtml(patientStatusAtRound(patient, active))} · ${active.label}</span>
+  `;
+}
+
+function renderPatientStatusTimeline(patient) {
+  const active = activeValidationRound();
+  const changed = patientHasStateChange(patient);
+  const changePoint = validationTimelineForPatient(patient).find((point) => point.changed);
+  return `
+    <section class="patient-status-timeline" aria-label="${escapeHtml(patient.patient)} measurement period status history">
+      <div class="patient-status-timeline-header">
+        <div>
+          <span class="vision-kicker">Measurement period status</span>
+          <strong>Outcome history across ${validationRounds.length} snapshots</strong>
+        </div>
+        <span class="timeline-window">${validationRounds[0].label} → ${validationRounds[validationRounds.length - 1].label}</span>
+      </div>
+      <div class="patient-status-timeline-track">
+        ${validationTimelineForPatient(patient).map((point) => `
+          <div class="patient-status-timeline-point ${point.id === active.id ? "active" : ""}">
+            <span class="patient-period-dot ${patientStatusTone(point.status)} ${point.id === active.id ? "active" : ""}"></span>
+            <strong>${escapeHtml(point.status)}</strong>
+            <em>${point.label}${point.changed ? " · changed" : ""}</em>
+          </div>
+        `).join("")}
+      </div>
+      <p class="patient-status-timeline-note">${changed ? `The modeled outcome changes at ${changePoint?.label || validationCurrentSnapshotLabel}: ${escapeHtml(patient.priorState.toLowerCase())} → ${escapeHtml(patient.currentState.toLowerCase())}.` : "No outcome movement was detected across the selected snapshots."}</p>
+    </section>
+  `;
 }
 
 function changedPatientCountForMeasure(measure) {
@@ -3446,6 +3543,7 @@ function renderVisionPatientOutcomePanel(measure, patient, options = {}) {
         <div><span>Prior state</span><strong>${patient.priorState}</strong></div>
         <div><span>Change</span><strong>${patient.change}</strong></div>
       </div>
+      ${renderPatientStatusTimeline(patient)}
       <div class="patient-outcome-answer">
         <strong>Why is this patient in this outcome state?</strong>
         <p>${patientOutcomeAnswer(patient, measure)}</p>
@@ -3477,6 +3575,7 @@ function patientValidationRowsForMeasure(measure) {
 
 function sortPatientValidationRows(patients) {
   const sort = state.patientValidationSort || "changed-first";
+  const round = activeValidationRound();
   const rows = [...patients];
   const outcomeOrder = { numerator: 0, denominator: 1, exclusion: 2 };
   if (sort === "patient-id") {
@@ -3484,12 +3583,12 @@ function sortPatientValidationRows(patients) {
   }
   if (sort === "outcome") {
     return rows.sort((first, second) =>
-      outcomeOrder[patientOutcomeCategory(first)] - outcomeOrder[patientOutcomeCategory(second)]
+      outcomeOrder[patientOutcomeCategoryAtRound(first, round)] - outcomeOrder[patientOutcomeCategoryAtRound(second, round)]
       || first.patient.localeCompare(second.patient),
     );
   }
   return rows.sort((first, second) =>
-    Number(patientHasStateChange(second)) - Number(patientHasStateChange(first))
+    Number(patientStatusChangedAtRound(second, round)) - Number(patientStatusChangedAtRound(first, round))
     || first.patient.localeCompare(second.patient),
   );
 }
@@ -3499,10 +3598,10 @@ function patientValidationFilterCounts(measure) {
   const patients = validationPatientsForMeasure(measure);
   return {
     all: patients.length,
-    changed: patients.filter(patientHasStateChange).length,
-    numerator: patients.filter((patient) => patientOutcomeCategory(patient) === "numerator").length,
-    denominator: patients.filter((patient) => patientOutcomeCategory(patient) === "denominator").length,
-    exclusion: patients.filter((patient) => patientOutcomeCategory(patient) === "exclusion").length,
+    changed: patients.filter((patient) => patientStatusChangedAtRound(patient)).length,
+    numerator: patients.filter((patient) => patientOutcomeCategoryAtRound(patient) === "numerator").length,
+    denominator: patients.filter((patient) => patientOutcomeCategoryAtRound(patient) === "denominator").length,
+    exclusion: patients.filter((patient) => patientOutcomeCategoryAtRound(patient) === "exclusion").length,
   };
 }
 
@@ -3513,6 +3612,9 @@ function renderPatientValidationFilterButton(filter, label, count, showCount = f
 
 function renderVisionSelectedPatientsTab() {
   const selected = selectedValidationMeasure();
+  const activeRound = activeValidationRound();
+  const priorRound = previousValidationRound(activeRound);
+  const selectedPatient = selectedValidationPatient(selected);
   const searchValue = escapeHtml(state.patientValidationSearch);
   const visiblePatients = patientValidationRowsForMeasure(selected);
   const filterCounts = patientValidationFilterCounts(selected);
@@ -3572,10 +3674,12 @@ function renderVisionSelectedPatientsTab() {
             <p>${selected.code} · ${selected.mvp} · showing ${visiblePatients.length} representative rows of ${selectedTotal} ${populationLabel}${activeFilter === "all" ? "" : ` filtered to ${patientOutcomeCategoryName(activeFilter).toLowerCase()}`}</p>
           </div>
           <div class="validation-snapshot-note">
-            <span>Comparison window</span>
-            <strong>${validationPriorSnapshotLabel} -> ${validationCurrentSnapshotLabel}</strong>
+            <span>Active round</span>
+            <strong>${activeRound.label}</strong>
+            <small>${activeRound.phase}</small>
           </div>
       </div>
+      ${renderPatientStatusTimeline(selectedPatient)}
       <div class="validation-worklist-controls">
         <div class="validation-filter-group" aria-label="Patient validation filters">
           ${renderPatientValidationFilterButton("all", "All patients", filterCounts.all, true)}
@@ -3594,29 +3698,29 @@ function renderVisionSelectedPatientsTab() {
           <label class="validation-sort-control">
             <span>Round</span>
             <select data-validation-round>
-              <option value="current" ${state.patientValidationRound === "current" ? "selected" : ""}>Current round</option>
-              <option value="prior" ${state.patientValidationRound === "prior" ? "selected" : ""}>Prior round</option>
+              ${validationRounds.map((round) => `<option value="${round.id}" ${activeRound.id === round.id ? "selected" : ""}>${round.label} · ${round.phase}</option>`).join("")}
             </select>
           </label>
         </div>
       </div>
       <table class="vision-table selected-patient-table validation-queue-table">
-        <thead><tr><th>Patient</th><th>Provider / specialty</th><th>Outcome</th><th>Current (${validationCurrentSnapshotLabel})</th><th>Prior (${validationPriorSnapshotLabel})</th><th>State change</th><th>Evidence summary</th><th>Sources</th><th></th></tr></thead>
+        <thead><tr><th>Patient</th><th>Provider / specialty</th><th>Period status</th><th>Outcome</th><th>Status (${activeRound.label})</th><th>Prior (${priorRound.label})</th><th>State change</th><th>Evidence summary</th><th>Sources</th><th></th></tr></thead>
         <tbody>
           ${visiblePatients.length ? visiblePatients.map((row) => `
-              <tr class="${patientHasStateChange(row) ? "state-changed" : ""}">
+              <tr class="${patientStatusChangedAtRound(row, activeRound) ? "state-changed" : ""}">
                 <td><strong>${row.patient}</strong><span class="subline">${selected.code}</span></td>
                 <td><strong>${row.provider}</strong><span class="subline">${row.specialty}</span></td>
-                <td>${patientOutcomeBadge(row)}</td>
-                <td><strong>${row.currentState}</strong></td>
-                <td>${row.priorState}</td>
-                <td>${visionBadge(row.change, row.changeTone)}</td>
+                <td>${renderPatientTimelineCompact(row)}</td>
+                <td>${patientOutcomeBadge(row, activeRound)}</td>
+                <td><strong>${escapeHtml(patientStatusAtRound(row, activeRound))}</strong></td>
+                <td>${escapeHtml(patientStatusAtRound(row, priorRound))}</td>
+                <td>${patientStatusChangedAtRound(row, activeRound) ? visionBadge(`${patientStatusAtRound(row, priorRound)} → ${patientStatusAtRound(row, activeRound)}`, row.changeTone) : visionBadge("No change", "info")}</td>
                 <td>${row.evidence}</td>
                 <td>${patientDataSources(row)}</td>
                 <td><button class="vision-row-button" data-open-patient-explanation="${row.patient}" type="button">Explain</button></td>
               </tr>
           `).join("") : `
-            <tr><td colspan="9"><div class="empty-state">No patients match this outcome filter.</div></td></tr>
+            <tr><td colspan="10"><div class="empty-state">No patients match this outcome filter.</div></td></tr>
           `}
         </tbody>
       </table>

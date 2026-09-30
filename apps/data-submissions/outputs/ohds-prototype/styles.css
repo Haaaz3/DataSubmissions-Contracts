@@ -330,12 +330,140 @@
   margin-top: 3px;
 }
 
-.validation-queue-table {
-  min-width: 1180px;
+.validation-snapshot-note small {
+  color: var(--vision-muted);
+  display: block;
+  font-size: 10px;
+  font-weight: 750;
+  margin-top: 2px;
 }
 
-.validation-queue-table th:nth-child(7),
-.validation-queue-table td:nth-child(7) {
+.patient-status-timeline {
+  background: #fbfcfe;
+  border: 1px solid #e1e7ef;
+  border-radius: 12px;
+  margin: 0 0 12px;
+  padding: 11px 13px 10px;
+}
+
+.patient-status-timeline-header {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.patient-status-timeline-header strong {
+  color: var(--vision-ink);
+  display: block;
+  font-size: 13px;
+  margin-top: 2px;
+}
+
+.timeline-window {
+  color: var(--vision-muted);
+  font-size: 11px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.patient-status-timeline-track {
+  align-items: start;
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin-top: 12px;
+  position: relative;
+}
+
+.patient-status-timeline-track::before {
+  background: #d7e0ec;
+  content: "";
+  height: 2px;
+  left: 6%;
+  position: absolute;
+  right: 6%;
+  top: 7px;
+}
+
+.patient-status-timeline-point {
+  color: var(--vision-muted);
+  min-width: 0;
+  position: relative;
+  text-align: center;
+  z-index: 1;
+}
+
+.patient-status-timeline-point.active {
+  color: var(--vision-ink);
+}
+
+.patient-status-timeline-point strong,
+.patient-status-timeline-point em {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.patient-status-timeline-point strong {
+  font-size: 10px;
+  margin-top: 5px;
+}
+
+.patient-status-timeline-point em {
+  font-size: 9px;
+  font-style: normal;
+  margin-top: 2px;
+}
+
+.patient-status-timeline-note {
+  color: var(--vision-muted);
+  font-size: 11px;
+  line-height: 1.35;
+  margin: 9px 0 0;
+}
+
+.patient-period-dot {
+  background: #8291a7;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px #c9d3df;
+  display: inline-block;
+  height: 14px;
+  position: relative;
+  width: 14px;
+}
+
+.patient-period-dot.active {
+  box-shadow: 0 0 0 2px var(--vision-blue);
+}
+
+.patient-period-dot.good { background: #27894f; }
+.patient-period-dot.info { background: #6c7d94; }
+.patient-period-dot.watch { background: #d99500; }
+.patient-period-dot.risk { background: #b54747; }
+
+.patient-period-mini {
+  align-items: center;
+  display: flex;
+  gap: 5px;
+  margin-bottom: 3px;
+  min-width: 84px;
+}
+
+.patient-period-mini .patient-period-dot {
+  border-width: 1px;
+  height: 9px;
+  width: 9px;
+}
+
+.validation-queue-table {
+  min-width: 1380px;
+}
+
+.validation-queue-table th:nth-child(8),
+.validation-queue-table td:nth-child(8) {
   min-width: 270px;
 }
 
