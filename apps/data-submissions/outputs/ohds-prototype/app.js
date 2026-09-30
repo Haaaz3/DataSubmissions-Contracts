@@ -17,12 +17,28 @@ const state = {
   visionSubmissionTab: "package",
   visionEvidenceTab: "evaluation",
   selectedValidationMeasure: "cms349",
+  expandedValidationMeasure: "cms349",
   selectedValidationPatient: "HY-10482",
+  expandedOutcomePatient: "",
+  expandedStatusPatient: "",
+  outcomeExplainTab: "logic",
   patientValidationSearch: "",
   patientValidationFilter: "all",
-  patientValidationScope: "all",
+  patientValidationChangeDate: "all",
   patientValidationSort: "changed-first",
+  patientValidationSortDirection: "desc",
+  patientValidationPage: 1,
+  patientValidationPageSize: 35,
   patientValidationRound: "current",
+  addPatientSearch: "",
+  validationAddedPatients: {},
+  acceptedValidationChanges: {},
+  journeyTimelineRange: "six-months",
+  openQualityPopulationMeasure: "",
+  qualityPopulationFilter: "all",
+  qualityPopulationSort: "opportunity-first",
+  qualityPopulationPage: 1,
+  expandedQualityPopulationPatient: "",
   qualityTargets: {
     cms349: 85,
     cms2: 85,
@@ -609,9 +625,9 @@ const visionMeasureOpportunityRows = [
     nearMiss: "84",
     closeness: "82%",
     lift: "+0.8 pts",
-    issue: "Registry evidence found, source reconciliation incomplete",
-    representativePatient: "HY-14013",
-    focus: "Registry reconciliation",
+    issue: "Hospice services rendered source fact incorrectly excludes a patient with valid screening evidence",
+    representativePatient: "HY-14729",
+    focus: "Incorrect exclusion source data",
   },
   {
     measureId: "cms122",
@@ -651,20 +667,23 @@ const visionValidationPatientMeasures = [
     selected: 50,
     reviewComplete: "62%",
     changed: 18,
-    coverage: "High evidence density with focused fall-out review",
+    coverage: "High evidence density with focused status-change review",
     patients: [
       {
         patient: "HY-10482",
         provider: "Jane Coleman, MD",
         specialty: "Infectious Disease",
-        currentState: "Near miss",
+        currentState: "Denominator",
+        opportunity: "Near miss",
         satisfaction: "Not satisfied",
         satisfactionTone: "warn",
+        lockedState: "Denominator",
+        lockedDate: "07/27",
         priorState: "Denominator only",
         change: "External lab evidence found",
         changeTone: "info",
         closeness: "83%",
-        whySelected: "Fall-out with the most supporting source evidence",
+        whySelected: "Patient opportunity with the most supporting source evidence",
         evidence: "LOINC mapping missing from supported lab feed",
         review: "Mapping review",
       },
@@ -675,6 +694,8 @@ const visionValidationPatientMeasures = [
         currentState: "Numerator",
         satisfaction: "Satisfied",
         satisfactionTone: "good",
+        lockedState: "Numerator",
+        lockedDate: "07/27",
         priorState: "Numerator",
         change: "No change",
         changeTone: "info",
@@ -690,6 +711,8 @@ const visionValidationPatientMeasures = [
         currentState: "Denominator",
         satisfaction: "Not satisfied",
         satisfactionTone: "bad",
+        lockedState: "Initial population",
+        lockedDate: "07/27",
         priorState: "Not in population",
         change: "New denominator",
         changeTone: "warn",
@@ -697,6 +720,12 @@ const visionValidationPatientMeasures = [
         whySelected: "Newly attributed denominator patient after roster refresh",
         evidence: "Claim attribution changed; screening evidence absent",
         review: "Chart chase",
+        statusHistory: [
+          { date: "07/27", status: "Initial population", label: "Cohort locked", detail: "Patient was locked for validation as initial population only.", source: "Claims", version: "Locked cohort" },
+          { date: "08/06", status: "Initial population", label: "Attribution feed received", detail: "Billing attribution candidate arrived, but denominator encounter was not yet accepted.", source: "Claims", version: "Attribution feed v11" },
+          { date: "08/22", status: "Denominator", label: "Qualifying encounter accepted", detail: "Claim attribution changed and the patient moved into the denominator without HIV screening evidence.", source: "Claims", version: "Outcome v43" },
+          { date: "08/31", status: "Denominator", label: "Current calculation", detail: "Current calculation remains denominator because screening evidence is absent.", source: "Claims", version: "Current outcome snapshot" },
+        ],
       },
       {
         patient: "HY-11645",
@@ -705,26 +734,40 @@ const visionValidationPatientMeasures = [
         currentState: "Exclusion",
         satisfaction: "Excluded",
         satisfactionTone: "info",
-        priorState: "Denominator",
-        change: "Exclusion added",
+        lockedState: "Numerator",
+        lockedDate: "07/27",
+        priorState: "Exclusion",
+        change: "Moved from locked numerator to exclusion",
         changeTone: "good",
         closeness: "N/A",
         whySelected: "Representative exclusion record",
         evidence: "Documented exclusion found in EHR problem list",
         review: "Validated",
+        statusHistory: [
+          { date: "05/14", status: "Initial population", label: "Measurement-period baseline", detail: "Patient was present in the attributed population, but no qualifying denominator encounter was accepted yet.", source: "Attribution roster", version: "Outcome v37" },
+          { date: "06/03", status: "Denominator", label: "Qualifying encounter accepted", detail: "Infectious-disease encounter and age criteria moved the patient from initial population to denominator.", source: "EHR encounter feed", version: "Outcome v38" },
+          { date: "06/28", status: "Numerator", label: "Screening result accepted", detail: "HIV screening result was mapped to an accepted lab concept and satisfied numerator logic.", source: "Lab + EHR", version: "Outcome v39" },
+          { date: "07/27", status: "Numerator", label: "Cohort locked", detail: "Patient was locked as a numerator control for validation.", source: "EHR + Lab", version: "Locked cohort", locked: true },
+          { date: "08/15", status: "Exclusion", label: "Exclusion evidence accepted", detail: "Documented exclusion was found in the EHR problem list and changed the calculated outcome.", source: "EHR problem list", version: "Outcome v42" },
+          { date: "08/31", status: "Exclusion", label: "Current calculation", detail: "Patient remains excluded in the current calculation.", source: "EHR problem list", version: "Current outcome snapshot" },
+        ],
       },
       {
         patient: "HY-12214",
         provider: "Marcus Bell, NP",
         specialty: "Infectious Disease",
-        currentState: "Near miss",
+        currentState: "Denominator",
+        opportunity: "Near miss",
         satisfaction: "Not satisfied",
         satisfactionTone: "warn",
-        priorState: "Near miss",
+        lockedState: "Denominator",
+        lockedDate: "07/27",
+        priorState: "Denominator",
+        priorOpportunity: "Near miss",
         change: "No change",
         changeTone: "info",
         closeness: "76%",
-        whySelected: "Fall-out with registry evidence that needs EMR confirmation",
+        whySelected: "Patient opportunity with registry evidence that needs EMR confirmation",
         evidence: "Registry says screened; EMR source event not linked",
         review: "Customer review",
       },
@@ -739,7 +782,7 @@ const visionValidationPatientMeasures = [
     selected: 32,
     reviewComplete: "71%",
     changed: 7,
-    coverage: "Balanced controls plus changed-outcome patients",
+    coverage: "Balanced controls plus status-change patients",
     patients: [
       {
         patient: "HY-11790",
@@ -748,6 +791,8 @@ const visionValidationPatientMeasures = [
         currentState: "Denominator",
         satisfaction: "Not satisfied",
         satisfactionTone: "bad",
+        lockedState: "Numerator",
+        lockedDate: "07/27",
         priorState: "Numerator",
         change: "Follow-up concept changed",
         changeTone: "warn",
@@ -763,6 +808,8 @@ const visionValidationPatientMeasures = [
         currentState: "Numerator",
         satisfaction: "Satisfied",
         satisfactionTone: "good",
+        lockedState: "Denominator",
+        lockedDate: "07/02",
         priorState: "Denominator",
         change: "Documentation recovered",
         changeTone: "good",
@@ -770,19 +817,48 @@ const visionValidationPatientMeasures = [
         whySelected: "Recovered numerator validates documentation logic",
         evidence: "Screening and follow-up plan both coded",
         review: "Validated",
+        numeratorEvidence: [
+          {
+            title: "Accepted depression screening event",
+            details: [
+              ["Instrument", "PHQ-9"],
+              ["Screening date", "2026-08-24"],
+              ["Source", "EHR structured behavioral health note"],
+              ["Provider", "Caroline Meyer, LCSW"],
+            ],
+            note: "Screening evidence placed Elena in the denominator at lock and remains accepted.",
+          },
+          {
+            title: "Follow-up care plan accepted",
+            details: [
+              ["Encounter date", "2026-08-24"],
+              ["Source", "EHR structured behavioral health note"],
+              ["Provider", "Caroline Meyer, LCSW"],
+              ["Concept", "Follow-up care planned"],
+            ],
+            note: "This clinical evidence satisfied the numerator criterion and moved Elena from Denominator to Numerator on 08/31.",
+          },
+        ],
+        statusHistory: [
+          { date: "05/20", status: "Initial population", label: "Measurement-period baseline", detail: "Behavioral-health attribution was present, but a qualifying depression screening encounter had not been accepted.", source: "Roster + EHR", version: "Outcome v35" },
+          { date: "06/17", status: "Denominator", label: "Screening event accepted", detail: "PHQ-9 screening moved the patient into the denominator, but no accepted follow-up plan was linked.", source: "EHR structured behavioral health note", version: "Outcome v37" },
+          { date: "07/02", status: "Denominator", label: "Cohort locked", detail: "Screening was present, but the follow-up plan numerator criterion was not satisfied.", source: "EHR", version: "Locked cohort", locked: true },
+          { date: "08/31", status: "Numerator", label: "Follow-up plan evidence accepted", detail: "Follow-up plan documented for the positive screening was accepted as numerator evidence.", source: "EHR structured behavioral health note", version: "Current outcome snapshot" },
+        ],
       },
       {
         patient: "HY-12372",
         provider: "Avery Nelson, NP",
         specialty: "Mental Health",
-        currentState: "Near miss",
+        currentState: "Denominator",
+        opportunity: "Near miss",
         satisfaction: "Not satisfied",
         satisfactionTone: "warn",
         priorState: "Denominator",
         change: "One criterion improved",
         changeTone: "info",
         closeness: "79%",
-        whySelected: "Fall-out near benchmark threshold",
+        whySelected: "Patient opportunity near benchmark threshold",
         evidence: "Screening present; follow-up plan in note text only",
         review: "Note review",
       },
@@ -790,7 +866,8 @@ const visionValidationPatientMeasures = [
         patient: "HY-12944",
         provider: "Jane Coleman, MD",
         specialty: "Infectious Disease",
-        currentState: "Exclusion candidate",
+        currentState: "Denominator",
+        opportunity: "Potential exclusion",
         satisfaction: "Needs review",
         satisfactionTone: "warn",
         priorState: "Not met",
@@ -812,7 +889,7 @@ const visionValidationPatientMeasures = [
     selected: 27,
     reviewComplete: "81%",
     changed: 5,
-    coverage: "Small-stratum validation with high-risk fall-outs",
+    coverage: "Small-stratum validation with high-risk status changes",
     patients: [
       {
         patient: "HY-12104",
@@ -848,14 +925,15 @@ const visionValidationPatientMeasures = [
         patient: "HY-12812",
         provider: "Lena Ortiz, NP",
         specialty: "Obstetrics",
-        currentState: "Near miss",
+        currentState: "Denominator",
+        opportunity: "Near miss",
         satisfaction: "Not satisfied",
         satisfactionTone: "warn",
         priorState: "Denominator",
         change: "Lab source added",
         changeTone: "info",
         closeness: "74%",
-        whySelected: "Fall-out with a newly arrived lab source",
+        whySelected: "Patient opportunity with a newly arrived lab source",
         evidence: "Lab present; result date outside accepted window",
         review: "Date review",
       },
@@ -894,6 +972,8 @@ const visionValidationPatientMeasures = [
         currentState: "Numerator",
         satisfaction: "Satisfied",
         satisfactionTone: "good",
+        lockedState: "Numerator",
+        lockedDate: "07/16",
         priorState: "Denominator",
         change: "BP evidence recovered",
         changeTone: "good",
@@ -901,6 +981,13 @@ const visionValidationPatientMeasures = [
         whySelected: "Outcome changed after vitals feed update",
         evidence: "Most recent controlled BP now linked to qualifying encounter",
         review: "Validated",
+        statusHistory: [
+          { date: "05/08", status: "Initial population", label: "Measurement-period baseline", detail: "Patient was attributed to the APP Plus population before denominator encounter evidence was accepted.", source: "APM attribution roster", version: "Outcome v34" },
+          { date: "06/06", status: "Denominator", label: "Hypertension encounter accepted", detail: "Diagnosis and qualifying encounter moved the patient into the denominator.", source: "EHR encounter + problem list", version: "Outcome v36" },
+          { date: "07/02", status: "Numerator", label: "Controlled BP evidence linked", detail: "Most recent controlled blood pressure was linked to the qualifying encounter and satisfied numerator logic.", source: "Vitals feed + EHR encounter", version: "Outcome v39" },
+          { date: "07/16", status: "Numerator", label: "Cohort locked", detail: "Patient locked as numerator after controlled blood pressure evidence was accepted.", source: "Vitals feed + EHR encounter", version: "Locked cohort", locked: true },
+          { date: "08/31", status: "Numerator", label: "Current calculation", detail: "Patient remains numerator with controlled blood pressure evidence accepted.", source: "Vitals feed + EHR encounter", version: "Current outcome snapshot" },
+        ],
       },
       {
         patient: "HY-13540",
@@ -921,7 +1008,8 @@ const visionValidationPatientMeasures = [
         patient: "HY-13822",
         provider: "Robert Kane, PA",
         specialty: "Cardiology",
-        currentState: "Near miss",
+        currentState: "Denominator",
+        opportunity: "Near miss",
         satisfaction: "Not satisfied",
         satisfactionTone: "warn",
         priorState: "Not in population",
@@ -943,13 +1031,14 @@ const visionValidationPatientMeasures = [
     selected: 41,
     reviewComplete: "69%",
     changed: 9,
-    coverage: "Registry reconciliation sample with changed outcomes",
+    coverage: "Registry reconciliation sample with status-change patients",
     patients: [
       {
         patient: "HY-14013",
         provider: "Thomas Riley, MD",
         specialty: "Family Medicine",
-        currentState: "Near miss",
+        currentState: "Denominator",
+        opportunity: "Near miss",
         satisfaction: "Not satisfied",
         satisfactionTone: "warn",
         priorState: "Denominator",
@@ -980,15 +1069,61 @@ const visionValidationPatientMeasures = [
         provider: "Alicia Nguyen, NP",
         specialty: "Primary Care",
         currentState: "Exclusion",
-        satisfaction: "Excluded",
-        satisfactionTone: "info",
-        priorState: "Denominator",
-        change: "Hospice exclusion added",
-        changeTone: "good",
+        satisfaction: "Excluded - review",
+        satisfactionTone: "warn",
+        lockedState: "Numerator",
+        lockedDate: "07/27",
+        priorState: "Numerator",
+        change: "Hospice source fact added",
+        changeTone: "warn",
         closeness: "N/A",
-        whySelected: "Representative exclusion changed since last snapshot",
-        evidence: "Hospice record now available in EHR source",
-        review: "Validated",
+        whySelected: "Incorrect hospice exclusion changed a valid numerator patient to excluded",
+        evidence: "Hospice services rendered source fact appears mismatched; colonoscopy numerator evidence is present",
+        review: "Source correction",
+        expectedOutcome: "Numerator",
+        numeratorEvidence: [
+          {
+            title: "Accepted colorectal screening event",
+            details: [
+              ["Procedure", "Colonoscopy, CPT 45378"],
+              ["Date", "2024-11-18"],
+              ["Source", "EHR procedure history + registry reconciliation"],
+              ["Provider", "Alicia Nguyen, NP"],
+            ],
+            note: "Screening evidence is linked to Denise Foster's Hyperion MRN and should satisfy numerator criteria.",
+          },
+          {
+            title: "Screening date within allowed lookback",
+            details: [
+              ["Measurement period", "PY 2026"],
+              ["Lookback status", "Within CMS130 accepted lookback window"],
+              ["Evidence link", "Procedure record, encounter attribution, and registry entry agree"],
+            ],
+          },
+        ],
+        sourceIssue: {
+          title: "Incorrect hospice exclusion",
+          fact: "Hospice services rendered",
+          source: "Claims supplemental feed",
+          sourceId: "CLM-HSP-88341",
+          serviceDate: "2026-07-18",
+          received: "2026-08-29 04:12 ET",
+          organization: "Harbor Hospice Services",
+          code: "HCPCS Q5001 / revenue 0651",
+          matchReason: "Matched by name and date of birth only; source MRN HSP-557219 does not match Hyperion MRN MRN-4114729.",
+          issue: "The hospice services rendered fact was attached to Denise Foster's quality record, but no hospice election, discharge, or palliative-care documentation exists in Hyperion's chart.",
+          expectedFix: "Reject the hospice exclusion fact and recalculate CMS130v14. With the hospice exclusion removed, Denise should return to Numerator / MET.",
+        },
+        sources: ["EHR", "Registry", "Claims"],
+        statusHistory: [
+          { date: "05/06", status: "Initial population", label: "Measurement-period baseline", detail: "Denise was attributed to the APP Plus population before colorectal denominator evidence was accepted.", source: "APM attribution roster", version: "Outcome v34" },
+          { date: "05/29", status: "Denominator", label: "Denominator encounter accepted", detail: "Age and qualifying encounter criteria moved Denise from initial population to denominator.", source: "EHR encounter feed", version: "Outcome v35" },
+          { date: "06/18", status: "Numerator", label: "Colonoscopy evidence matched", detail: "Colonoscopy evidence linked to Denise Foster's Hyperion MRN and satisfied numerator criteria.", source: "EHR procedure history + registry reconciliation", version: "Outcome v37" },
+          { date: "07/27", status: "Numerator", label: "Cohort locked", detail: "Denise was locked as a numerator patient with accepted colorectal screening evidence.", source: "EHR procedure history + registry reconciliation", version: "Locked cohort", locked: true },
+          { date: "08/17", status: "Numerator", label: "Prior validation snapshot", detail: "Colonoscopy evidence remained accepted and the patient stayed numerator.", source: "EHR + Registry", version: "Prior outcome snapshot" },
+          { date: "08/29", status: "Exclusion", label: "Hospice source fact added", detail: "Claims supplemental feed attached a hospice services rendered fact by name and date of birth only.", source: "Claims supplemental feed", version: "Source load CLM-HSP-88341" },
+          { date: "08/31", status: "Exclusion", label: "Current calculation", detail: "Current calculation remains excluded until the mismatched hospice fact is rejected and CMS130v14 is recalculated.", source: "Claims + EHR + Registry", version: "Current outcome snapshot" },
+        ],
       },
     ],
   },
@@ -1001,7 +1136,7 @@ const visionValidationPatientMeasures = [
     selected: 36,
     reviewComplete: "58%",
     changed: 8,
-    coverage: "Fall-outs weighted by benchmark proximity and lab-source density",
+    coverage: "Opportunities weighted by benchmark proximity and lab-source density",
     patients: [
       {
         patient: "HY-15086",
@@ -1010,7 +1145,8 @@ const visionValidationPatientMeasures = [
         currentState: "Numerator",
         satisfaction: "Satisfied",
         satisfactionTone: "good",
-        priorState: "Near miss",
+        priorState: "Denominator",
+        priorOpportunity: "Near miss",
         change: "A1c result mapped",
         changeTone: "good",
         closeness: "100%",
@@ -1022,14 +1158,15 @@ const visionValidationPatientMeasures = [
         patient: "HY-15319",
         provider: "Thomas Riley, MD",
         specialty: "Family Medicine",
-        currentState: "Near miss",
+        currentState: "Denominator",
+        opportunity: "Near miss",
         satisfaction: "Not satisfied",
         satisfactionTone: "warn",
         priorState: "Denominator",
         change: "One criterion improved",
         changeTone: "info",
         closeness: "77%",
-        whySelected: "Fall-out one criterion away from satisfying numerator logic",
+        whySelected: "Near miss one criterion away from satisfying numerator logic",
         evidence: "Assessment present; result value missing from feed",
         review: "Data review",
       },
@@ -1044,7 +1181,7 @@ const visionValidationPatientMeasures = [
         change: "No change",
         changeTone: "info",
         closeness: "42%",
-        whySelected: "Low-confidence denominator control for cross-specialty attribution",
+        whySelected: "Cross-specialty denominator control for attribution review",
         evidence: "Diabetes diagnosis present; glycemic assessment absent",
         review: "Chart chase",
       },
@@ -1110,9 +1247,9 @@ const visionAttestationTrends = {
     ],
   },
   cms130: {
-    current: "69%",
-    wowChange: "+1.5%",
-    wowTone: "warn",
+    current: "66%",
+    wowChange: "-2.0%",
+    wowTone: "bad",
     target: 85,
     action: "Reconcile registry evidence",
     trend: [
@@ -1120,7 +1257,7 @@ const visionAttestationTrends = {
       { label: "07/20", value: 67 },
       { label: "08/03", value: 66 },
       { label: "08/17", value: 68 },
-      { label: "08/31", value: 69 },
+      { label: "08/31", value: 66 },
     ],
   },
   cms122: {
@@ -1139,10 +1276,56 @@ const visionAttestationTrends = {
   },
 };
 
+const visionValidationSignals = {
+  cms349: {
+    status: "Review mapping",
+    risk: "Lab source mapping",
+    rationale: "HIV numerator review depends on external lab evidence and accepted LOINC mapping.",
+    actionType: "changes",
+    actionLabel: "Review status changes",
+  },
+  cms2: {
+    status: "Review documentation",
+    risk: "Follow-up plan coding",
+    rationale: "Several patients moved after the follow-up-plan concept update.",
+    actionType: "changes",
+    actionLabel: "Review status changes",
+  },
+  cms153: {
+    status: "Ready",
+    risk: "Small-volume monitoring",
+    rationale: "Outcome movement is low and source evidence is stable across the selected women’s health cohort.",
+    actionType: "patients",
+    actionLabel: "Open population",
+  },
+  cms165: {
+    status: "Review attribution",
+    risk: "Vitals feed and billing attribution",
+    rationale: "Some controlled BP evidence appears under encounters that need attribution confirmation.",
+    actionType: "opportunities",
+    actionLabel: "Open opportunities",
+  },
+  cms130: {
+    status: "Reconcile registry",
+    risk: "Incorrect hospice exclusion",
+    rationale: "A hospice services rendered source fact appears mismatched and is excluding a patient with valid colorectal screening evidence.",
+    actionType: "changes",
+    actionLabel: "Review status changes",
+    spotlightPatient: "HY-14729",
+  },
+  cms122: {
+    status: "Resolve mapping",
+    risk: "A1c result value mapping",
+    rationale: "The measure remains below target and has lab-value mapping issues that affect numerator calculation.",
+    actionType: "opportunities",
+    actionLabel: "Open opportunities",
+  },
+};
+
 const visionOutcomeShiftRows = [
-  { patient: "HY-10482", measure: "CMS349v8 HIV Screening", prior: "Denominator only", current: "Near miss", cause: "Data change", version: "outcome v42 -> v43", action: "Map lab result" },
-  { patient: "HY-11790", measure: "CMS2v15 Depression Screening", prior: "Numerator", current: "Not met", cause: "Concept change", version: "context v18 -> v19", action: "Review follow-up code" },
-  { patient: "HY-12104", measure: "CMS153v14 Chlamydia Screening", prior: "Excluded", current: "Denominator", cause: "Measure logic", version: "measure v14.1 -> v14.2", action: "Reconcile criteria" },
+  { patient: "HY-11106", measure: "CMS349v8 HIV Screening", prior: "Initial population", current: "Denominator", cause: "Attribution change", version: "outcome v42 -> v43", action: "Confirm roster attribution" },
+  { patient: "HY-11790", measure: "CMS2v15 Depression Screening", prior: "Numerator", current: "Denominator", cause: "Concept change", version: "context v18 -> v19", action: "Review follow-up code" },
+  { patient: "HY-12104", measure: "CMS153v14 Chlamydia Screening", prior: "Exclusion", current: "Denominator", cause: "Measure logic", version: "measure v14.1 -> v14.2", action: "Reconcile criteria" },
 ];
 
 const periods = {
@@ -2618,6 +2801,66 @@ function escapeHtml(value) {
     .replaceAll("'", "&#39;");
 }
 
+function percentNumber(value) {
+  const parsed = Number.parseFloat(String(value || "").replace("%", ""));
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function mixNumber(start, end, strength) {
+  return Math.round(start + (end - start) * strength);
+}
+
+function mixRgb(start, end, strength) {
+  return `rgb(${mixNumber(start[0], end[0], strength)}, ${mixNumber(start[1], end[1], strength)}, ${mixNumber(start[2], end[2], strength)})`;
+}
+
+function wowChangeDomain() {
+  const values = Object.values(visionAttestationTrends).map((trend) => percentNumber(trend.wowChange));
+  return {
+    positive: Math.max(1, ...values.filter((value) => value > 0)),
+    negative: Math.max(1, ...values.filter((value) => value < 0).map((value) => Math.abs(value))),
+  };
+}
+
+function wowChangeHeatStyle(change) {
+  const value = percentNumber(change);
+  const domain = wowChangeDomain();
+  if (value === 0) {
+    return "background:#f2f4f7;border-color:#d8dee8;color:#26364d;";
+  }
+
+  const isPositive = value > 0;
+  const max = isPositive ? domain.positive : domain.negative;
+  const strength = Math.min(1, Math.max(0.08, Math.abs(value) / max));
+  const fillStrength = 0.12 + (strength * 0.88);
+  const edgeStrength = Math.min(1, fillStrength + 0.12);
+  const palette = isPositive
+    ? {
+      light: [232, 247, 237],
+      strong: [0, 108, 48],
+      border: [24, 128, 67],
+      text: "#0f3f23",
+    }
+    : {
+      light: [255, 235, 232],
+      strong: [171, 31, 24],
+      border: [196, 45, 35],
+      text: "#651b16",
+    };
+  const start = mixRgb(palette.light, palette.strong, fillStrength);
+  const end = mixRgb(palette.light, palette.strong, edgeStrength);
+  const border = mixRgb(palette.light, palette.border, Math.min(1, fillStrength + 0.08));
+  const text = fillStrength >= 0.42 ? "#fff" : palette.text;
+  return `background:linear-gradient(90deg, ${start} 0%, ${end} 100%);border-color:${border};color:${text};`;
+}
+
+function renderWowChangeHeat(change, tone = "neutral") {
+  const value = percentNumber(change);
+  const direction = value > 0 ? "increase" : value < 0 ? "decrease" : "no change";
+  return `<strong class="delta-heat value-scale ${tone}" style="${wowChangeHeatStyle(change)}" aria-label="${escapeHtml(`${change} week-over-week ${direction}`)}">${escapeHtml(change)}</strong>`;
+}
+
+
 function renderVisionTabs(tabs, stateKey) {
   const rawActiveValue = state[stateKey] || tabs[0]?.id;
   const activeValue = stateKey === "visionPerformanceTab" ? normalizeVisionPerformanceTab(rawActiveValue) : rawActiveValue;
@@ -2632,78 +2875,76 @@ function renderVisionTabs(tabs, stateKey) {
 
 const validationCurrentSnapshotLabel = "08/31";
 const validationPriorSnapshotLabel = "08/17";
-const validationRounds = [
-  { id: "07/06", label: "07/06", phase: "Baseline" },
-  { id: "07/20", label: "07/20", phase: "Early period" },
-  { id: "08/03", label: "08/03", phase: "Mid-period" },
-  { id: "08/17", label: "08/17", phase: "Prior round" },
-  { id: "08/31", label: "08/31", phase: "Current round" },
-];
+const validationLockedSnapshotLabel = "07/27";
+const validationLockDateOptions = ["05/08", "05/21", "06/04", "06/18", "07/02", "07/16", "07/27"];
+const patientValidationPageSizeOptions = [20, 35, 50];
+const defaultPatientValidationPageSize = 35;
+const qualityPopulationPageSize = 35;
 
-function activeValidationRound() {
-  const requested = state.patientValidationRound === "current"
-    ? validationCurrentSnapshotLabel
-    : state.patientValidationRound === "prior"
-      ? validationPriorSnapshotLabel
-      : state.patientValidationRound;
-  return validationRounds.find((round) => round.id === requested) || validationRounds[validationRounds.length - 1];
-}
-
-function previousValidationRound(round = activeValidationRound()) {
-  const index = validationRounds.findIndex((candidate) => candidate.id === round.id);
-  return validationRounds[Math.max(0, index - 1)] || validationRounds[0];
-}
-
-function validationTimelineForPatient(patient) {
-  const changed = patientHasStateChange(patient);
-  return validationRounds.map((round, index) => ({
-    ...round,
-    status: !changed || index < validationRounds.length - 1 ? patient.priorState : patient.currentState,
-    changed: changed && index === validationRounds.length - 1 && patient.priorState !== patient.currentState,
-  }));
-}
-
-function patientStatusAtRound(patient, round = activeValidationRound()) {
-  return validationTimelineForPatient(patient).find((point) => point.id === round.id)?.status || patient.currentState;
-}
-
-function patientStatusChangedAtRound(patient, round = activeValidationRound()) {
-  return patientStatusAtRound(patient, round) !== patientStatusAtRound(patient, previousValidationRound(round));
-}
+const validationAddPatientCandidates = {
+  cms349: [
+    {
+      patient: "HY-10977",
+      provider: "Rita Holmes, PA",
+      specialty: "Immunology",
+      currentState: "Exclusion",
+      satisfaction: "Excluded",
+      satisfactionTone: "info",
+      lockedState: "Numerator",
+      lockedDate: "07/27",
+      priorState: "Exclusion",
+      change: "Hospice evidence added after cohort lock",
+      changeTone: "good",
+      closeness: "N/A",
+      whySelected: "Manual add: status changed from locked numerator to current exclusion",
+      evidence: "Hospice services documented after the validation cohort was frozen.",
+      review: "Added to validation",
+      sources: ["EHR", "Claims"],
+    },
+    {
+      patient: "HY-11248",
+      provider: "Jane Coleman, MD",
+      specialty: "Infectious Disease",
+      currentState: "Denominator",
+      opportunity: "Near miss",
+      satisfaction: "Not satisfied",
+      satisfactionTone: "warn",
+      lockedState: "Denominator",
+      lockedDate: "07/27",
+      priorState: "Denominator",
+      change: "New external lab candidate",
+      changeTone: "info",
+      closeness: "89%",
+      whySelected: "Manual add: high-value near miss with outside lab evidence",
+      evidence: "External lab evidence appears in registry feed but not in accepted eCQM source.",
+      review: "Added to validation",
+      sources: ["Registry", "Lab"],
+    },
+  ],
+  cms2: [
+    {
+      patient: "HY-11842",
+      provider: "Elena Morales, MD",
+      specialty: "Psychiatry",
+      currentState: "Numerator",
+      satisfaction: "Satisfied",
+      satisfactionTone: "good",
+      lockedState: "Denominator",
+      lockedDate: "07/27",
+      priorState: "Denominator",
+      change: "Follow-up note codified",
+      changeTone: "good",
+      closeness: "100%",
+      whySelected: "Manual add: recovered numerator after documentation mapping update",
+      evidence: "Follow-up plan was codified from structured documentation after mapping refresh.",
+      review: "Added to validation",
+      sources: ["EHR"],
+    },
+  ],
+};
 
 function validationMeasureById(measureId) {
   return visionValidationPatientMeasures.find((measure) => measure.id === measureId) || visionValidationPatientMeasures[0];
-}
-
-// The patient-level workspace is an operational view of the full denominator.
-// Keep a bounded representative table for prototype performance, while every
-// filter count and header reflects the complete eligible measure population.
-const fullPopulationByMeasure = {
-  cms349: 4820,
-  cms2: 6240,
-  cms153: 9580,
-  cms130: 7840,
-  cms165: 11420,
-  cms122: 8760,
-};
-
-function fullPopulationCountForMeasure(measure) {
-  return fullPopulationByMeasure[measure.id] || Math.max(measure.selected || 0, 1000);
-}
-
-function fullPopulationFilterCounts(measure) {
-  const total = fullPopulationCountForMeasure(measure);
-  const round = activeValidationRound();
-  const trend = attestationTrendFor(measure.id);
-  const rate = Number.parseFloat(trend.trend.find((point) => point.label === round.id)?.value ?? trend.current);
-  const numerator = Math.round(total * (rate / 100));
-  return {
-    all: total,
-    changed: round.id === validationCurrentSnapshotLabel ? Math.round(total * 0.14) : 0,
-    numerator,
-    denominator: Math.max(0, total - numerator),
-    exclusion: Math.round(total * 0.03),
-  };
 }
 
 function selectedValidationMeasure() {
@@ -2716,25 +2957,37 @@ function selectedValidationPatient(measure = selectedValidationMeasure()) {
 
 function patientsForValidationFilter(measure, filter = "all") {
   const patients = validationPatientsForMeasure(measure);
-  const round = activeValidationRound();
+  let filteredPatients = patients;
   if (["numerator", "denominator", "exclusion"].includes(filter)) {
-    return patients.filter((patient) => patientOutcomeCategoryAtRound(patient, round) === filter);
+    filteredPatients = patients.filter((patient) => patientOutcomeCategory(patient) === filter);
+  } else if (filter === "changed") {
+    filteredPatients = patients.filter(patientHasStateChange);
   }
-  if (filter === "changed") return patients.filter((patient) => patientStatusChangedAtRound(patient, round));
-  return patients;
+
+  const changeDate = selectedPatientValidationChangeDate(measure);
+  if (changeDate !== "all") {
+    filteredPatients = filteredPatients.filter((patient) => patientLatestStatusChangeDate(patient) === changeDate);
+  }
+  return filteredPatients;
 }
 
 function focusValidationMeasure(measureId, options = {}) {
   const measure = validationMeasureById(measureId);
   const filter = options.filter || "all";
+  state.patientValidationChangeDate = options.changeDate || "all";
   const matchingPatients = patientsForValidationFilter(measure, filter);
   const fallbackPatient = matchingPatients[0] || validationPatientsForMeasure(measure)[0];
   state.selectedValidationMeasure = measure.id;
+  state.expandedValidationMeasure = measure.id;
   state.selectedValidationPatient = options.patientId || fallbackPatient?.patient || state.selectedValidationPatient;
   state.patientValidationFilter = filter;
-  state.patientValidationScope = options.scope || "all";
   state.patientValidationSearch = options.patientId || "";
   state.patientValidationSort = options.sort || state.patientValidationSort || "changed-first";
+  state.patientValidationSortDirection = options.sortDirection || state.patientValidationSortDirection || "desc";
+  state.patientValidationPage = 1;
+  state.expandedOutcomePatient = options.openOutcome ? state.selectedValidationPatient : "";
+  state.expandedStatusPatient = options.openStatus ? state.selectedValidationPatient : "";
+  state.outcomeExplainTab = "logic";
 }
 
 function allValidationPatients() {
@@ -2747,17 +3000,150 @@ function patientValidationSearchMatch(query) {
   const normalizedQuery = query.trim().toLowerCase();
   if (!normalizedQuery) return null;
   return allValidationPatients().find(({ patient, measure }) =>
-    [
-      patient.patient,
-      patient.provider,
-      patient.specialty,
-      patient.currentState,
-      patient.evidence,
-      measure.measure,
-      measure.code,
-      measure.subgroup,
-    ].some((value) => String(value).toLowerCase().includes(normalizedQuery)),
+    validationPatientSearchValues(patient, measure).some((value) => String(value).toLowerCase().includes(normalizedQuery)),
   );
+}
+
+function validationPatientSearchValues(patient, measure) {
+  return [
+    patient.patient,
+    patientDisplayName(patient),
+    patientMrn(patient),
+    patient.provider,
+    patient.specialty,
+    patient.currentState,
+    patient.priorState,
+    patient.lockedState,
+    patientLatestStatusChangeDate(patient),
+    patientCurrentOutcome(patient),
+    patientPriorOutcome(patient),
+    patientLockedOutcome(patient),
+    patientStatusTimelineText(patient),
+    patientOpportunityLabel(patient),
+    patient.evidence,
+    patient.change,
+    patient.review,
+    patientDataSources(patient),
+    patientSourceIssueSearchText(patient),
+    measure.measure,
+    measure.code,
+    measure.subgroup,
+  ];
+}
+
+function patientSourceIssueSearchText(patient) {
+  return patient.sourceIssue ? Object.values(patient.sourceIssue).join(" ") : "";
+}
+
+function validationAddedPatientsForMeasure(measureId) {
+  return state.validationAddedPatients?.[measureId] || [];
+}
+
+function validationCandidatePoolForMeasure(measure) {
+  const selectedIds = new Set(validationPatientsForMeasure(measure).map((patient) => patient.patient));
+  const curated = validationAddPatientCandidates[measure.id] || [];
+  const generated = Array.from({ length: 18 }, (_, index) => generatedPatientForMeasure(measure, measure.selected + index + 1));
+  return [...curated, ...generated]
+    .map((patient) => ({
+      ...patient,
+      lockedDate: patient.lockedDate || validationLockedSnapshotLabel,
+      lockedState: patient.lockedState || patient.priorState || patient.currentState,
+      candidate: true,
+    }))
+    .filter((patient, index, patients) =>
+      !selectedIds.has(patient.patient)
+      && patients.findIndex((candidate) => candidate.patient === patient.patient) === index,
+    );
+}
+
+function validationCandidateSearchMatch(query, measure = selectedValidationMeasure()) {
+  const normalizedQuery = query.trim().toLowerCase();
+  const candidates = validationCandidatePoolForMeasure(measure);
+  if (!normalizedQuery) return candidates[0] ? { measure, patient: candidates[0], alreadySelected: false } : null;
+
+  const selectedMatch = validationPatientsForMeasure(measure).find((patient) =>
+    validationPatientSearchValues(patient, measure).some((value) => String(value).toLowerCase().includes(normalizedQuery)),
+  );
+  if (selectedMatch) return { measure, patient: selectedMatch, alreadySelected: true };
+
+  const measureCandidate = candidates.find((patient) =>
+    validationPatientSearchValues(patient, measure).some((value) => String(value).toLowerCase().includes(normalizedQuery)),
+  );
+  if (measureCandidate) return { measure, patient: measureCandidate, alreadySelected: false };
+
+  const crossMeasureMatch = allValidationPatients().find(({ patient, measure: sourceMeasure }) =>
+    validationPatientSearchValues(patient, sourceMeasure).some((value) => String(value).toLowerCase().includes(normalizedQuery)),
+  );
+  if (!crossMeasureMatch) return null;
+  return {
+    measure,
+    patient: {
+      ...crossMeasureMatch.patient,
+      whySelected: `Manual add: patient found in ${crossMeasureMatch.measure.code} and added for ${measure.code} validation review`,
+      review: "Added to validation",
+    },
+    alreadySelected: false,
+  };
+}
+
+function addPatientToValidationMeasure(measureId, patient) {
+  const measure = validationMeasureById(measureId);
+  if (validationPatientsForMeasure(measure).some((selected) => selected.patient === patient.patient)) {
+    focusValidationMeasure(measureId, { patientId: patient.patient, filter: "all", openStatus: true });
+    return { added: false, reason: "already-selected", patient };
+  }
+
+  const addedPatient = {
+    ...patient,
+    added: true,
+    candidate: false,
+    generated: false,
+    lockedDate: patient.lockedDate || validationLockedSnapshotLabel,
+    lockedState: patient.lockedState || patient.priorState || patient.currentState,
+    priorState: patient.priorState || patient.currentState,
+    whySelected: String(patient.whySelected || "").startsWith("Manual add")
+      ? patient.whySelected
+      : `Manual add: ${patient.whySelected || "customer selected this patient for validation"}`,
+    review: "Added to validation",
+  };
+  state.validationAddedPatients = {
+    ...state.validationAddedPatients,
+    [measureId]: [...validationAddedPatientsForMeasure(measureId), addedPatient],
+  };
+  focusValidationMeasure(measureId, { patientId: addedPatient.patient, filter: "all", openStatus: true });
+  return { added: true, patient: addedPatient };
+}
+
+function acceptValidationStatusChange(measureId, patientId) {
+  const measure = validationMeasureById(measureId);
+  const patient = validationPatientsForMeasure(measure).find((candidate) => candidate.patient === patientId);
+  if (!patient) return { accepted: false, reason: "missing-patient" };
+
+  const latestMovement = patientLatestStatusMovement(patient);
+  if (!latestMovement) return { accepted: false, reason: "no-status-change", patient };
+
+  const acceptedDate = "09/09";
+  state.acceptedValidationChanges = {
+    ...state.acceptedValidationChanges,
+    [patient.patient]: {
+      acceptedDate,
+      status: patientCurrentOutcome(patient),
+      movement: latestMovement.movement,
+      originalLockedDate: patientOriginalLockedSnapshot(patient),
+      originalLockedState: patientOriginalLockedOutcome(patient),
+      label: latestMovement.label,
+      reason: latestMovement.detail,
+      acceptedBy: "Quality manager",
+    },
+  };
+  state.selectedValidationMeasure = measure.id;
+  state.selectedValidationPatient = patient.patient;
+  state.patientValidationFilter = "all";
+  state.patientValidationChangeDate = "all";
+  state.patientValidationPage = 1;
+  state.expandedStatusPatient = patient.patient;
+  state.expandedOutcomePatient = "";
+  return { accepted: true, patient, acceptedDate };
 }
 
 function attestationTrendFor(measureId) {
@@ -2772,25 +3158,233 @@ function currentTrendValue(measureId) {
   return Number.parseInt(attestationTrendFor(measureId).current, 10);
 }
 
+function canonicalOutcomeState(value) {
+  const stateText = String(value || "").toLowerCase();
+  if (stateText.includes("not in population") || stateText.includes("initial population")) return "Initial population";
+  if (stateText.includes("not met") || stateText.includes("denominator only")) return "Denominator";
+  if (stateText.includes("numerator") || stateText.includes("met")) return "Numerator";
+  if ((stateText.includes("exclusion") || stateText.includes("excluded")) && !stateText.includes("candidate")) return "Exclusion";
+  return "Denominator";
+}
+
+function patientCurrentOutcome(patient) {
+  return canonicalOutcomeState(patient.currentState);
+}
+
+function patientPriorOutcome(patient) {
+  return canonicalOutcomeState(patient.priorState);
+}
+
+function acceptedValidationChangeForPatient(patient) {
+  return state.acceptedValidationChanges?.[patient.patient] || null;
+}
+
+function patientOriginalLockedSnapshot(patient) {
+  return patient.lockedDate || validationLockedSnapshotLabel;
+}
+
+function patientOriginalLockedOutcome(patient) {
+  return canonicalOutcomeState(patient.lockedState || patient.priorState || patient.currentState);
+}
+
+function patientLockedSnapshot(patient) {
+  const accepted = acceptedValidationChangeForPatient(patient);
+  return accepted?.acceptedDate || patientOriginalLockedSnapshot(patient);
+}
+
+function patientLockedOutcome(patient) {
+  const accepted = acceptedValidationChangeForPatient(patient);
+  return accepted?.status || patientOriginalLockedOutcome(patient);
+}
+
+function patientLockedStatusSubline(patient) {
+  const accepted = acceptedValidationChangeForPatient(patient);
+  return accepted
+    ? `Accepted ${accepted.acceptedDate}`
+    : `Locked ${patientOriginalLockedSnapshot(patient)}`;
+}
+
+function patientStatusMovementSubline(patient) {
+  const accepted = acceptedValidationChangeForPatient(patient);
+  return accepted
+    ? `Original lock ${accepted.originalLockedDate}`
+    : `Since ${patientStatusHistoryStartDate(patient)}`;
+}
+
+function patientStatusHistoryStartDate(patient) {
+  return patientStatusHistory(patient)[0]?.date || patientOriginalLockedSnapshot(patient);
+}
+
+function validationLockDateForSeed(seed, offset = 0) {
+  return validationLockDateOptions[(Math.abs(seed) + offset) % validationLockDateOptions.length];
+}
+
+function statusDateSortValue(dateText) {
+  const [month, day] = String(dateText || "").split("/").map((part) => Number.parseInt(part, 10));
+  return (month || 0) * 100 + (day || 0);
+}
+
+function normalizePatientStatusEvent(event, fallbackPatient, index) {
+  return {
+    date: event.date || (index === 0 ? patientOriginalLockedSnapshot(fallbackPatient) : validationCurrentSnapshotLabel),
+    status: canonicalOutcomeState(event.status || event.state || event.outcome || fallbackPatient.currentState),
+    label: event.label || event.reason || "Outcome calculation",
+    detail: event.detail || event.evidence || fallbackPatient.evidence || "Outcome recalculated for the locked validation cohort.",
+    source: event.source || patientDataSources(fallbackPatient),
+    version: event.version || "Outcome refresh",
+    locked: Boolean(event.locked),
+    accepted: Boolean(event.accepted),
+  };
+}
+
+function withAcceptedStatusHistory(events, patient) {
+  const accepted = acceptedValidationChangeForPatient(patient);
+  if (!accepted) return events;
+  return [
+    ...events,
+    {
+      date: accepted.acceptedDate,
+      status: accepted.status,
+      label: "Status change accepted",
+      detail: `${accepted.movement} accepted. ${accepted.status} is now the locked validation status.`,
+      source: accepted.acceptedBy || "Quality manager",
+      version: "Accepted validation baseline",
+      accepted: true,
+    },
+  ].sort((first, second) => statusDateSortValue(first.date) - statusDateSortValue(second.date));
+}
+
+function patientStatusHistory(patient) {
+  if (Array.isArray(patient.statusHistory) && patient.statusHistory.length) {
+    const events = patient.statusHistory
+      .map((event, index) => normalizePatientStatusEvent(event, patient, index))
+      .sort((first, second) => statusDateSortValue(first.date) - statusDateSortValue(second.date));
+    return withAcceptedStatusHistory(events, patient);
+  }
+
+  const locked = patientOriginalLockedOutcome(patient);
+  const prior = patientPriorOutcome(patient);
+  const current = patientCurrentOutcome(patient);
+  const sources = patientDataSources(patient);
+  const events = [
+    {
+      date: patientOriginalLockedSnapshot(patient),
+      status: locked,
+      label: "Cohort locked",
+      detail: "Patient entered the frozen validation cohort with this calculated status.",
+      source: sources,
+      version: "Locked cohort",
+    },
+  ];
+
+  if (locked !== prior) {
+    events.push({
+      date: "08/10",
+      status: prior,
+      label: statusMovementLabelForPatient(patient, locked, prior),
+      detail: statusMovementDetailForPatient(patient, locked, prior),
+      source: statusMovementSourceForPatient(patient, sources),
+      version: statusMovementVersionForPatient(patient, "Outcome refresh"),
+    });
+  }
+
+  events.push({
+    date: validationPriorSnapshotLabel,
+    status: prior,
+    label: "Prior validation snapshot",
+    detail: prior === events[events.length - 1].status
+      ? "Status was unchanged at the prior review point."
+      : `Prior snapshot calculated as ${prior}.`,
+    source: sources,
+    version: "Prior outcome snapshot",
+  });
+
+  events.push({
+    date: validationCurrentSnapshotLabel,
+    status: current,
+    label: prior === current ? "Current calculation" : statusMovementLabelForPatient(patient, prior, current),
+    detail: prior === current
+      ? "No status movement from the prior review point to the current calculation."
+      : statusMovementDetailForPatient(patient, prior, current),
+    source: statusMovementSourceForPatient(patient, sources),
+    version: statusMovementVersionForPatient(patient, "Current outcome snapshot"),
+  });
+
+  return withAcceptedStatusHistory(events, patient);
+}
+
+function patientStatusTimelineRows(patient) {
+  const events = patientStatusHistory(patient);
+  return events.map((event, index) => {
+    const previous = index > 0 ? events[index - 1] : null;
+    const changed = previous ? previous.status !== event.status : false;
+    return {
+      ...event,
+      changed,
+      from: previous?.status || event.status,
+      locked: event.locked || /lock/i.test(event.label) || event.version === "Locked cohort",
+      movement: event.accepted
+        ? "Accepted as locked status"
+        : event.locked || /lock/i.test(event.label) || event.version === "Locked cohort"
+          ? "Validation cohort locked"
+          : changed ? `${previous.status} -> ${event.status}` : index === 0 ? "Measurement baseline" : "No status change",
+    };
+  });
+}
+
+function patientStatusChangeCount(patient) {
+  return patientStatusTimelineRows(patient).filter((event) => event.changed).length;
+}
+
+function patientStatusMovementFlag(patient) {
+  const changeCount = patientStatusChangeCount(patient);
+  return changeCount >= 3
+    ? `<span class="status-change-flag">High movement · ${changeCount} changes</span>`
+    : "";
+}
+
+function patientLatestStatusMovement(patient) {
+  return [...patientStatusTimelineRows(patient)].reverse().find((event) => event.changed) || null;
+}
+
+function patientLatestStatusChange(patient) {
+  return acceptedValidationChangeForPatient(patient) ? null : patientLatestStatusMovement(patient);
+}
+
+function patientLatestStatusChangeDate(patient) {
+  return patientLatestStatusChange(patient)?.date || "";
+}
+
+function patientValidationChangeDateDisplay(patient) {
+  const accepted = acceptedValidationChangeForPatient(patient);
+  if (accepted) return { date: accepted.acceptedDate, label: "Accepted" };
+  const latestChange = patientLatestStatusChange(patient);
+  return {
+    date: latestChange?.date || "-",
+    label: latestChange?.label || "No movement",
+  };
+}
+
+function patientStatusTimelineText(patient) {
+  return patientStatusTimelineRows(patient)
+    .filter((event, index) => index === 0 || event.changed || event.locked || event.accepted)
+    .map((event) => `${event.date}: ${event.movement}`)
+    .join("; ");
+}
+
 function patientOutcomeCategory(patient) {
-  return patientOutcomeCategoryForState(patient.currentState);
-}
-
-function patientOutcomeCategoryForState(stateValue) {
-  const currentState = String(stateValue).toLowerCase();
-  if (currentState.includes("exclusion")) return "exclusion";
-  if (currentState.includes("numerator")) return "numerator";
+  const currentState = patientCurrentOutcome(patient);
+  if (currentState === "Initial population") return "initial";
+  if (currentState === "Exclusion") return "exclusion";
+  if (currentState === "Numerator") return "numerator";
   return "denominator";
-}
-
-function patientOutcomeCategoryAtRound(patient, round = activeValidationRound()) {
-  return patientOutcomeCategoryForState(patientStatusAtRound(patient, round));
 }
 
 function patientOutcomeCategoryName(category) {
   const names = {
     all: "All selected",
     changed: "Status changed",
+    initial: "Initial population",
     numerator: "Numerator",
     denominator: "Denominator",
     exclusion: "Exclusion",
@@ -2798,65 +3392,124 @@ function patientOutcomeCategoryName(category) {
   return names[category] || "All selected";
 }
 
-function patientOutcomeBadge(patient, round = activeValidationRound()) {
-  const category = patientOutcomeCategoryAtRound(patient, round);
-  const tone = category === "numerator" ? "good" : category === "exclusion" ? "info" : "warn";
+function patientOutcomeBadge(patient) {
+  const category = patientOutcomeCategory(patient);
+  const tone = category === "numerator" ? "good" : category === "exclusion" ? "info" : category === "initial" ? "neutral" : "warn";
   return visionBadge(patientOutcomeCategoryName(category), tone);
 }
 
+function outcomeStatusTone(status) {
+  const category = patientOutcomeCategory({ currentState: status });
+  if (category === "numerator") return "good";
+  if (category === "exclusion") return "info";
+  if (category === "initial") return "neutral";
+  return "warn";
+}
+
+function patientIsNearMiss(patient) {
+  if (patientCurrentOutcome(patient) !== "Denominator") return false;
+  const opportunity = String(patient.opportunity || "").toLowerCase();
+  const evidence = String(patient.evidence || "").toLowerCase();
+  const change = String(patient.change || "").toLowerCase();
+  const closeness = Number.parseInt(patient.closeness, 10);
+  return opportunity.includes("near miss")
+    || evidence.includes("one numerator")
+    || change.includes("one criterion")
+    || closeness >= 75;
+}
+
+function patientOpportunityLabel(patient) {
+  if (patientCurrentOutcome(patient) === "Numerator") return "Met";
+  if (patientCurrentOutcome(patient) === "Exclusion") return "Excluded";
+  if (patientCurrentOutcome(patient) === "Initial population") return "IPP only";
+  if (patient.opportunity === "Potential exclusion") return "Potential exclusion";
+  return patientIsNearMiss(patient) ? "Near miss" : "Opportunity";
+}
+
+function patientOpportunityBadge(patient) {
+  const label = patientOpportunityLabel(patient);
+  const tone = label === "Met" ? "good" : label === "Excluded" ? "info" : label === "Near miss" ? "warn" : "neutral";
+  return visionBadge(label, tone);
+}
+
+function patientCriteriaProgress(patient) {
+  const current = patientCurrentOutcome(patient);
+  if (current === "Numerator") return "Numerator criteria satisfied";
+  if (current === "Exclusion") return "Exclusion criteria evidenced";
+  if (current === "Initial population") return "In IP only";
+  if (patientIsNearMiss(patient)) return "One numerator criterion missing";
+  if (patient.opportunity === "Potential exclusion") return "Potential exclusion evidence";
+  return "Numerator evidence missing";
+}
+
+function patientStatusChangeLabel(patient) {
+  const accepted = acceptedValidationChangeForPatient(patient);
+  if (accepted) return `Accepted as ${accepted.status}`;
+  const latestChange = patientLatestStatusChange(patient);
+  return latestChange ? latestChange.movement : "No status change";
+}
+
+function patientStatusChangeTone(patient) {
+  if (acceptedValidationChangeForPatient(patient)) return "good";
+  const latestChange = patientLatestStatusChange(patient);
+  if (!latestChange) return "neutral";
+  if (patient.sourceIssue) return "warn";
+  const current = latestChange.status;
+  if (current === "Numerator" || current === "Exclusion") return "good";
+  if (current === "Denominator") return "warn";
+  return "info";
+}
+
+function patientHasStatusChange(patient) {
+  return Boolean(patientLatestStatusChange(patient));
+}
+
 function patientHasStateChange(patient) {
-  return patient.change !== "No change";
-}
-
-function patientStatusTone(stateValue) {
-  const normalized = String(stateValue).toLowerCase();
-  if (normalized.includes("numerator")) return "good";
-  if (normalized.includes("exclusion")) return "info";
-  if (normalized.includes("near miss")) return "watch";
-  return "risk";
-}
-
-function renderPatientTimelineCompact(patient) {
-  const active = activeValidationRound();
-  return `
-    <div class="patient-period-mini" aria-label="${escapeHtml(patient.patient)} status across the measurement period">
-      ${validationTimelineForPatient(patient).map((point) => `
-        <span class="patient-period-dot ${patientStatusTone(point.status)} ${point.id === active.id ? "active" : ""}" title="${escapeHtml(`${point.label}: ${point.status}`)}"></span>
-      `).join("")}
-    </div>
-    <span class="subline">${escapeHtml(patientStatusAtRound(patient, active))} · ${active.label}</span>
-  `;
-}
-
-function renderPatientStatusTimeline(patient) {
-  const active = activeValidationRound();
-  const changed = patientHasStateChange(patient);
-  const changePoint = validationTimelineForPatient(patient).find((point) => point.changed);
-  return `
-    <section class="patient-status-timeline" aria-label="${escapeHtml(patient.patient)} measurement period status history">
-      <div class="patient-status-timeline-header">
-        <div>
-          <span class="vision-kicker">Measurement period status</span>
-          <strong>Outcome history across ${validationRounds.length} snapshots</strong>
-        </div>
-        <span class="timeline-window">${validationRounds[0].label} → ${validationRounds[validationRounds.length - 1].label}</span>
-      </div>
-      <div class="patient-status-timeline-track">
-        ${validationTimelineForPatient(patient).map((point) => `
-          <div class="patient-status-timeline-point ${point.id === active.id ? "active" : ""}">
-            <span class="patient-period-dot ${patientStatusTone(point.status)} ${point.id === active.id ? "active" : ""}"></span>
-            <strong>${escapeHtml(point.status)}</strong>
-            <em>${point.label}${point.changed ? " · changed" : ""}</em>
-          </div>
-        `).join("")}
-      </div>
-      <p class="patient-status-timeline-note">${changed ? `The modeled outcome changes at ${changePoint?.label || validationCurrentSnapshotLabel}: ${escapeHtml(patient.priorState.toLowerCase())} → ${escapeHtml(patient.currentState.toLowerCase())}.` : "No outcome movement was detected across the selected snapshots."}</p>
-    </section>
-  `;
+  return patientHasStatusChange(patient);
 }
 
 function changedPatientCountForMeasure(measure) {
   return validationPatientsForMeasure(measure).filter(patientHasStateChange).length;
+}
+
+function validationSignalForMeasure(measureOrId) {
+  const measureId = typeof measureOrId === "string" ? measureOrId : measureOrId.id;
+  return visionValidationSignals[measureId] || {
+    status: "Review",
+    risk: "Validation review needed",
+    rationale: "Review selected patient outcomes before submission approval.",
+    actionType: "patients",
+    actionLabel: "Open population",
+  };
+}
+
+function compactValidationActionLabel(label) {
+  return {
+    "Review status changes": "Changes",
+    "Review mapping": "Mapping",
+    "Review documentation": "Docs",
+    "Open opportunities": "Opportunities",
+    "Open population": "Patients",
+  }[label] || label;
+}
+
+function renderValidationActionStack(measure, options = {}) {
+  const signal = validationSignalForMeasure(measure);
+  const actionLabel = options.compact ? compactValidationActionLabel(signal.actionLabel) : signal.actionLabel;
+  const primaryAction = signal.actionType === "opportunities"
+    ? `data-workbench-opportunities="${measure.id}"`
+    : signal.actionType === "changes"
+      ? `data-validation-changes="${measure.id}"`
+      : `data-validation-measure="${measure.id}"`;
+  const secondaryAction = signal.actionType === "patients"
+    ? ""
+    : `<button class="grid-link" data-validation-measure="${measure.id}" type="button">Patients</button>`;
+  return `
+    <div class="grid-action-links ${options.compact ? "compact" : ""}">
+      <button class="grid-link primary" ${primaryAction} type="button">${actionLabel}</button>
+      ${secondaryAction}
+    </div>
+  `;
 }
 
 function patientDataSources(patient) {
@@ -2885,46 +3538,74 @@ function generatedPatientForMeasure(measure, index) {
     specialty: "Primary Care",
   };
   const number = 20000 + (measureIndex * 1000) + (categoryOffsets[category] || 0) + index;
-  const changed = index % 9 === 0;
+  const denominatorToNumerator = category === "numerator" && index % 3 === 1;
+  const numeratorFallout = category === "denominator" && index % 13 === 0;
+  const populationAdd = category === "denominator" && !numeratorFallout && index % 9 === 0;
+  const exclusionChange = category === "exclusion" && index % 22 === 0;
+  const removedEvidence = numeratorFallout ? removedNumeratorEvidenceForMeasure(measure, { patient: `HY-${number}`, evidence: base.evidence || "", sources: base.sources }) : null;
   const templates = {
     numerator: {
       currentState: "Numerator",
       satisfaction: "Satisfied",
       satisfactionTone: "good",
-      priorState: changed ? "Denominator" : "Numerator",
-      change: changed ? "Numerator evidence added" : "No change",
-      changeTone: changed ? "good" : "info",
-      evidence: `${measure.code} numerator evidence, qualifying encounter, and attribution are present.`,
+      priorState: denominatorToNumerator ? "Denominator" : "Numerator",
+      change: denominatorToNumerator ? "Numerator evidence accepted" : "No change",
+      changeTone: denominatorToNumerator ? "good" : "info",
+      evidence: denominatorToNumerator
+        ? `${measure.code} numerator evidence was accepted after cohort lock and moved the patient from denominator to numerator.`
+        : `${measure.code} numerator evidence, qualifying encounter, and attribution are present.`,
       sources: ["EHR", "Lab"],
+      statusMovementLabel: denominatorToNumerator ? "Numerator evidence accepted" : "",
+      statusMovementDetail: denominatorToNumerator
+        ? `${measure.code} numerator evidence was accepted into the current calculation and changed the patient from Denominator to Numerator.`
+        : "",
+      statusMovementSource: denominatorToNumerator ? "EHR + Lab" : "",
+      statusMovementVersion: denominatorToNumerator ? "Current outcome snapshot" : "",
     },
     denominator: {
-      currentState: index % 6 === 0 ? "Near miss" : "Denominator",
+      currentState: "Denominator",
+      opportunity: index % 6 === 0 ? "Near miss" : "Opportunity",
       satisfaction: "Not satisfied",
       satisfactionTone: index % 6 === 0 ? "warn" : "bad",
-      priorState: changed ? "Not in population" : "Denominator",
-      change: changed ? "New denominator" : "No change",
-      changeTone: changed ? "warn" : "info",
-      evidence: index % 6 === 0
+      priorState: numeratorFallout ? "Denominator" : populationAdd ? "Not in population" : "Denominator",
+      change: numeratorFallout ? "Numerator evidence removed" : populationAdd ? "New denominator" : "No change",
+      changeTone: numeratorFallout || populationAdd ? "warn" : "info",
+      evidence: numeratorFallout
+        ? `${measure.code} denominator criteria are still met; previously accepted numerator evidence was removed from the current calculation.`
+        : index % 6 === 0
         ? `${measure.code} denominator criteria are met; one numerator evidence condition is missing.`
         : `${measure.code} denominator criteria are met; numerator evidence is not present in the calculation.`,
-      sources: index % 5 === 0 ? ["EHR", "Claims"] : ["EHR"],
+      sources: numeratorFallout ? ["EHR", "Lab"] : index % 5 === 0 ? ["EHR", "Claims"] : ["EHR"],
+      statusMovementLabel: numeratorFallout ? "Numerator evidence removed" : populationAdd ? "Denominator evidence accepted" : "",
+      statusMovementDetail: numeratorFallout
+        ? removedEvidence.shortReason.charAt(0).toUpperCase() + removedEvidence.shortReason.slice(1) + "; denominator criteria still pass."
+        : populationAdd ? `${measure.code} denominator evidence was accepted after cohort lock.` : "",
+      statusMovementSource: numeratorFallout ? removedEvidence.source : populationAdd ? "Claims + EHR" : "",
+      statusMovementVersion: numeratorFallout ? removedEvidence.version : populationAdd ? "Outcome refresh v43" : "",
     },
     exclusion: {
       currentState: "Exclusion",
       satisfaction: "Excluded",
       satisfactionTone: "info",
-      priorState: changed ? "Denominator" : "Exclusion",
-      change: changed ? "Exclusion evidence added" : "No change",
-      changeTone: changed ? "good" : "info",
+      priorState: exclusionChange ? "Denominator" : "Exclusion",
+      change: exclusionChange ? "Exclusion evidence added" : "No change",
+      changeTone: exclusionChange ? "good" : "info",
       evidence: `${measure.code} exclusion evidence is present and linked to the qualifying population.`,
       sources: ["EHR"],
+      statusMovementLabel: exclusionChange ? "Exclusion evidence accepted" : "",
+      statusMovementDetail: exclusionChange ? `${measure.code} exclusion evidence was accepted and moved the patient out of denominator reporting.` : "",
+      statusMovementSource: exclusionChange ? "EHR" : "",
+      statusMovementVersion: exclusionChange ? "Current outcome snapshot" : "",
     },
   };
+  const lockedState = numeratorFallout ? "Numerator" : templates[category].priorState;
   return {
     ...templates[category],
     patient: `HY-${number}`,
     provider: base.provider,
     specialty: base.specialty,
+    lockedDate: validationLockDateForSeed(number, measureIndex),
+    lockedState,
     closeness: category === "numerator" ? "100%" : category === "denominator" ? `${58 + (index % 30)}%` : "N/A",
     whySelected: `${patientOutcomeCategoryName(category)} validation patient`,
     review: "Available",
@@ -2933,19 +3614,66 @@ function generatedPatientForMeasure(measure, index) {
 }
 
 function validationPatientsForMeasure(measure) {
-  const seededPatients = measure.patients.map((patient) => ({ ...patient, generated: false }));
+  const seededPatients = measure.patients.map((patient, index) => ({
+    lockedDate: patient.lockedDate || validationLockDateForSeed(patientNumericSeed(patient), index),
+    lockedState: patient.lockedState || patient.priorState || patient.currentState,
+    ...patient,
+    generated: false,
+  }));
   const needed = Math.max(0, measure.selected - seededPatients.length);
   const generatedPatients = Array.from({ length: needed }, (_, index) => generatedPatientForMeasure(measure, index));
-  return [...seededPatients, ...generatedPatients].slice(0, measure.selected).sort((first, second) => {
+  const baseSelection = [...seededPatients, ...generatedPatients].slice(0, measure.selected);
+  const selectedIds = new Set(baseSelection.map((patient) => patient.patient));
+  const addedPatients = validationAddedPatientsForMeasure(measure.id)
+    .filter((patient) => !selectedIds.has(patient.patient))
+    .map((patient) => ({
+      lockedDate: patient.lockedDate || validationLockDateForSeed(patientNumericSeed(patient), 3),
+      lockedState: patient.lockedState || patient.priorState || patient.currentState,
+      ...patient,
+      added: true,
+      generated: false,
+    }));
+  return [...baseSelection, ...addedPatients].sort((first, second) => {
     const order = { numerator: 0, denominator: 1, exclusion: 2 };
+    if (first.added !== second.added) return Number(second.added) - Number(first.added);
     return order[patientOutcomeCategory(first)] - order[patientOutcomeCategory(second)]
       || first.patient.localeCompare(second.patient);
   });
 }
 
 function qualityTargetGapBadge(measureId) {
-  const gap = currentTrendValue(measureId) - qualityTargetFor(measureId);
+  const gap = qualityTargetGapValue(measureId);
   return visionBadge(gap >= 0 ? `+${gap}%` : `${gap}%`, gap >= 0 ? "good" : "warn");
+}
+
+function qualityTargetGapValue(measureId) {
+  return currentTrendValue(measureId) - qualityTargetFor(measureId);
+}
+
+function qualityTargetGapText(measureId) {
+  const gap = qualityTargetGapValue(measureId);
+  return gap >= 0 ? `+${gap}%` : `${gap}%`;
+}
+
+function qualityTargetGapTone(measureId) {
+  return qualityTargetGapValue(measureId) >= 0 ? "good" : "warn";
+}
+
+function validationPopulationRateSummary(measure) {
+  const counts = patientValidationFilterCounts(measure);
+  const scoredPatients = counts.numerator + counts.denominator;
+  const rate = scoredPatients ? Math.round((counts.numerator / scoredPatients) * 100) : 0;
+  const totalRate = currentTrendValue(measure.id);
+  const delta = rate - totalRate;
+  return {
+    counts,
+    delta,
+    rate,
+    rateText: `${rate}%`,
+    deltaText: `${delta >= 0 ? "+" : ""}${delta} pts vs total`,
+    deltaTone: Math.abs(delta) <= 5 ? "good" : delta > 0 ? "warn" : "bad",
+    denominatorText: `${counts.numerator} numerator / ${counts.denominator} denominator / ${counts.exclusion} exclusion`,
+  };
 }
 
 function trendChartScale(trend, target) {
@@ -3412,23 +4140,19 @@ function renderVisionStrategyAssumptionsTab() {
 function renderVisionPerformanceScreen() {
   const selected = selectedValidationMeasure();
   const tabs = [
-    { id: "trending-quality", label: "Trending Quality Over Time" },
-    { id: "patient-opportunities", label: "Patient Opportunities" },
-    { id: "patient-level", label: "Patient Level Validation" },
+    { id: "quality-performance", label: "Quality Performance" },
+    { id: "validation-tracking", label: "Validation Population Tracking" },
   ];
   const activeTab = normalizeVisionPerformanceTab(state.visionPerformanceTab);
-  const tabContent = activeTab === "patient-opportunities"
-    ? renderVisionNearMissTab()
-    : activeTab === "trending-quality"
-      ? renderVisionTrendingQualityTab()
-      : activeTab === "patient-level"
-        ? renderVisionSelectedPatientsTab()
-        : renderVisionTrendingQualityTab();
+  state.visionPerformanceTab = activeTab;
+  const tabContent = activeTab === "validation-tracking"
+    ? renderVisionValidationTrackingTab()
+    : renderVisionQualityPerformanceTab();
   return renderVisionScreenFrame({
     id: "performance",
-    crumb: "Quality Workbench",
-    title: "Quality Workbench",
-    subtitle: "Monitor measure movement, work patient opportunities, and validate selected patient outcomes from one place.",
+    crumb: "Quality & Validation",
+    title: "Quality & Validation Workbench",
+    subtitle: "Monitor measure movement, validate selected populations, and explain patient outcomes before submission approval.",
     filters: `<span>Focused measure: ${selected.measure}</span><span>Score refresh: Today 6:10 AM</span><span>Prior comparison: ${validationPriorSnapshotLabel} -> ${validationCurrentSnapshotLabel}</span>`,
     body: `
       ${renderVisionTabs(tabs, "visionPerformanceTab")}
@@ -3438,128 +4162,1023 @@ function renderVisionPerformanceScreen() {
 }
 
 function renderVisionNearMissTab() {
-  const selected = selectedValidationMeasure();
+  return renderVisionQualityPerformanceTab();
+}
+
+
+function qualityOpportunityForMeasure(measureId) {
+  return visionMeasureOpportunityRows.find((row) => row.measureId === measureId) || {
+    measureId,
+    nearMiss: 0,
+    lift: "+0.0 pts",
+    issue: "No high-impact opportunity modeled",
+    focus: "Monitor",
+    representativePatient: selectedValidationPatient(validationMeasureById(measureId)).patient,
+    benchmark: "N/A",
+    closeness: "N/A",
+  };
+}
+
+const qualityPopulationTotals = {
+  cms349: { total: 4366, numerator: 3231, denominator: 1129, exclusion: 6, nearMiss: 428, changed: 86 },
+  cms2: { total: 8057, numerator: 6761, denominator: 1058, exclusion: 238, nearMiss: 112, changed: 57 },
+  cms153: { total: 102, numerator: 8, denominator: 87, exclusion: 7, nearMiss: 39, changed: 12 },
+  cms165: { total: 2660, numerator: 1012, denominator: 1380, exclusion: 268, nearMiss: 96, changed: 44 },
+  cms130: { total: 4872, numerator: 3492, denominator: 1211, exclusion: 169, nearMiss: 84, changed: 31 },
+  cms122: { total: 17807, numerator: 5680, denominator: 10342, exclusion: 1785, nearMiss: 73, changed: 58 },
+};
+
+const qualityPopulationChangeDates = ["08/29", "08/22", "08/15", "08/06", "07/18", "06/28", "06/10", "05/30"];
+
+function selectedQualityPopulationMeasure() {
+  return validationMeasureById(state.openQualityPopulationMeasure || state.selectedValidationMeasure);
+}
+
+function qualityPopulationCounts(measure) {
+  const opportunity = qualityOpportunityForMeasure(measure.id);
+  return qualityPopulationTotals[measure.id] || {
+    total: 1000,
+    numerator: 620,
+    denominator: 330,
+    exclusion: 50,
+    nearMiss: Number(opportunity.nearMiss) || 0,
+    changed: Math.max(8, Math.round((Number(opportunity.nearMiss) || 0) * 0.14)),
+  };
+}
+
+function qualityPopulationFilterCount(measure, filter) {
+  const counts = qualityPopulationCounts(measure);
+  const filterMap = {
+    all: counts.total,
+    "near-miss": counts.nearMiss,
+    changed: counts.changed,
+    numerator: counts.numerator,
+    denominator: counts.denominator,
+    exclusion: counts.exclusion,
+  };
+  return filterMap[filter] ?? counts.total;
+}
+
+function qualityPopulationFilterLabel(filter) {
+  const labels = {
+    all: "All patients",
+    "near-miss": "Near misses",
+    changed: "Status changed",
+    numerator: "Numerator",
+    denominator: "Denominator",
+    exclusion: "Exclusion",
+  };
+  return labels[filter] || "All population";
+}
+
+function qualityPopulationStatusForIndex(measure, filter, index) {
+  if (filter === "numerator") return "Numerator";
+  if (filter === "exclusion") return "Exclusion";
+  if (filter === "near-miss" || filter === "denominator") return "Denominator";
+  if (filter === "changed") {
+    const sequence = ["Denominator", "Numerator", "Exclusion", "Denominator", "Numerator"];
+    return sequence[index % sequence.length];
+  }
+  const counts = qualityPopulationCounts(measure);
+  if (state.qualityPopulationSort === "opportunity-first" && index < counts.nearMiss) return "Denominator";
+  if (index % 17 === 0 && index < counts.nearMiss + counts.changed) return "Denominator";
+  if (index % 19 === 0) return "Exclusion";
+  if (index % 5 === 0) return "Denominator";
+  return "Numerator";
+}
+
+function qualityPopulationPatientId(measure, index) {
+  const measureIndex = Math.max(0, visionValidationPatientMeasures.findIndex((candidate) => candidate.id === measure.id));
+  return `HY-${30000 + measureIndex * 3000 + index}`;
+}
+
+function qualityPopulationSeedPatient(measure, filter, index) {
+  const opportunity = qualityOpportunityForMeasure(measure.id);
+  if (index > 0) return null;
+  const validationPatients = validationPatientsForMeasure(measure);
+  if (filter === "changed") {
+    const signal = validationSignalForMeasure(measure);
+    return validationPatients.find((patient) => patient.patient === signal.spotlightPatient)
+      || validationPatients.find(patientHasStatusChange)
+      || null;
+  }
+  if (filter === "near-miss" || filter === "all") {
+    const representative = validationPatients.find((patient) => patient.patient === opportunity.representativePatient);
+    if (representative && (filter === "all" || patientIsNearMiss(representative))) return representative;
+    return validationPatients.find(patientIsNearMiss) || representative || null;
+  }
+  return validationPatients.find((patient) => patientOutcomeCategory(patient) === filter) || null;
+}
+
+function qualityPopulationPatientForIndex(measure, filter, index) {
+  const seeded = qualityPopulationSeedPatient(measure, filter, index);
+  if (seeded) {
+    return {
+      ...seeded,
+      qualityPopulationIndex: index,
+      qualityPopulation: true,
+      opportunitySignal: patientIsNearMiss(seeded) ? "Near miss" : patientOpportunityLabel(seeded),
+      source: patientDataSources(seeded),
+    };
+  }
+
+  const status = qualityPopulationStatusForIndex(measure, filter, index);
+  const providerBase = measure.patients[index % measure.patients.length] || { provider: "Quality Clinician, MD", specialty: "Primary Care" };
+  const patient = qualityPopulationPatientId(measure, index + 1);
+  const seed = patientNumericSeed({ patient });
+  const changeDate = qualityPopulationChangeDates[index % qualityPopulationChangeDates.length];
+  const hasStatusChange = filter === "changed" || (state.qualityPopulationSort === "status-changed-first" && index < qualityPopulationCounts(measure).changed) || index % 13 === 0;
+  const nearMiss = filter === "near-miss" || (status === "Denominator" && (state.qualityPopulationSort === "opportunity-first" ? index < qualityPopulationCounts(measure).nearMiss : index % 4 === 0));
+  const priorStatus = status === "Numerator" ? "Denominator" : status === "Exclusion" ? "Numerator" : index % 2 === 0 ? "Initial population" : "Numerator";
+  const focus = qualityOpportunityForMeasure(measure.id).focus;
+  const evidence = nearMiss
+    ? `${focus}: one numerator criterion needs review before this patient can move to numerator.`
+    : status === "Numerator"
+      ? `${measure.code} numerator evidence, attribution, and qualifying encounter are present.`
+      : status === "Exclusion"
+        ? `${measure.code} denominator exclusion evidence is accepted in the current calculation.`
+        : `${measure.code} denominator criteria are met; numerator evidence is missing from accepted sources.`;
+  return {
+    patient,
+    provider: providerBase.provider,
+    specialty: providerBase.specialty,
+    currentState: status,
+    opportunity: nearMiss ? "Near miss" : status === "Denominator" ? "Opportunity" : "",
+    priorState: hasStatusChange ? priorStatus : status,
+    lockedState: hasStatusChange ? priorStatus : status,
+    lockedDate: validationLockDateForSeed(seed, index),
+    change: hasStatusChange ? `${priorStatus} moved to ${status}` : "No status change",
+    closeness: nearMiss ? `${72 + (index % 18)}%` : status === "Numerator" ? "100%" : "N/A",
+    evidence,
+    review: nearMiss ? "Performance opportunity" : "Population row",
+    sources: index % 5 === 0 ? ["EHR", "Claims"] : index % 3 === 0 ? ["Lab", "EHR"] : ["EHR"],
+    qualityPopulation: true,
+    opportunitySignal: nearMiss ? "Near miss" : status === "Denominator" ? "Open opportunity" : "Monitor",
+    statusHistory: hasStatusChange ? [
+      { date: validationLockDateForSeed(seed, index), status: priorStatus, label: "Population baseline", detail: "Patient status when population tracking began for this measure.", source: "Calculated population", version: "Baseline" },
+      { date: changeDate, status, label: `${priorStatus} moved to ${status}`, detail: evidence, source: patientDataSources({ evidence, sources: index % 5 === 0 ? ["EHR", "Claims"] : ["EHR"] }), version: `Outcome refresh ${index + 41}` },
+    ] : [],
+    qualityPopulationIndex: index,
+  };
+}
+
+function qualityPopulationPatientById(measure, patientId, index = null) {
+  const validationPatient = validationPatientsForMeasure(measure).find((patient) => patient.patient === patientId);
+  if (validationPatient) return {
+    ...validationPatient,
+    qualityPopulation: true,
+    opportunitySignal: patientIsNearMiss(validationPatient) ? "Near miss" : patientOpportunityLabel(validationPatient),
+  };
+  const parsedIndex = Number.isFinite(Number(index))
+    ? Number(index)
+    : Math.max(0, patientNumericSeed({ patient: patientId }) - (30000 + Math.max(0, visionValidationPatientMeasures.findIndex((candidate) => candidate.id === measure.id)) * 3000) - 1);
+  return qualityPopulationPatientForIndex(measure, state.qualityPopulationFilter || "all", parsedIndex);
+}
+
+function sortedQualityPopulationIndex(measure, filter, index) {
+  const counts = qualityPopulationCounts(measure);
+  if (state.qualityPopulationSort === "status-changed-first" && filter === "all") {
+    return index < counts.changed ? index : index + counts.nearMiss;
+  }
+  if (state.qualityPopulationSort === "patient-name") return index * 7;
+  return index;
+}
+
+function qualityPopulationPageInfo(measure) {
+  const filter = state.qualityPopulationFilter || "all";
+  const total = qualityPopulationFilterCount(measure, filter);
+  const totalPages = Math.max(1, Math.ceil(total / qualityPopulationPageSize));
+  const page = Math.min(Math.max(Number(state.qualityPopulationPage) || 1, 1), totalPages);
+  const start = (page - 1) * qualityPopulationPageSize;
+  const end = Math.min(start + qualityPopulationPageSize, total);
+  const rows = Array.from({ length: Math.max(0, end - start) }, (_, rowIndex) =>
+    qualityPopulationPatientForIndex(measure, filter, sortedQualityPopulationIndex(measure, filter, start + rowIndex)));
+  return { end, page, rows, start, total, totalPages };
+}
+
+function renderQualityPopulationFilterButton(filter, measure) {
+  const active = state.qualityPopulationFilter === filter;
+  return `<button class="${active ? "active" : ""}" data-quality-population-filter="${filter}" type="button">${qualityPopulationFilterLabel(filter)}<strong>${qualityPopulationFilterCount(measure, filter).toLocaleString()}</strong></button>`;
+}
+
+function patientPopulationStatusSummaryLabel(patient) {
+  const latestMovement = patientLatestStatusMovement(patient);
+  return latestMovement ? latestMovement.movement : "Current status";
+}
+
+function patientPopulationStatusSummarySubline(patient) {
+  const latestMovement = patientLatestStatusMovement(patient);
+  return latestMovement ? `${latestMovement.date} | ${latestMovement.label}` : "No status movement";
+}
+
+function patientPopulationStatusTimelineText(patient) {
+  const movementRows = patientStatusTimelineRows(patient).filter((event) => event.changed);
+  if (!movementRows.length) return `${validationCurrentSnapshotLabel}: Current status ${patientCurrentOutcome(patient)}`;
+  return movementRows.map((event) => `${event.date}: ${event.movement}`).join("; ");
+}
+
+function renderQualityPopulationStatusPanel(patient, measure) {
+  return renderMeasureJourneyDetail(patient, measure, {
+    contextClass: "quality-measure-journey",
+    includeAccept: false,
+    includeLocking: false,
+  });
+}
+
+function renderQualityPopulationPane(measure) {
+  const pageInfo = qualityPopulationPageInfo(measure);
+  const opportunity = qualityOpportunityForMeasure(measure.id);
+  const activeFilter = state.qualityPopulationFilter || "all";
+  const rangeStart = pageInfo.total ? pageInfo.start + 1 : 0;
+  return `
+    <tr class="quality-population-detail-row">
+      <td colspan="8">
+        <section class="quality-population-pane">
+          <div class="quality-population-header">
+            <div>
+              <span class="vision-kicker">Measure population</span>
+              <h4>${measure.measure}</h4>
+              <p>${qualityPopulationCounts(measure).total.toLocaleString()} calculated patients · ${opportunity.nearMiss} near misses · ${attestationTrendFor(measure.id).wowChange} WoW movement</p>
+            </div>
+          </div>
+          <div class="validation-worklist-controls quality-population-controls">
+            <div class="validation-filter-group" aria-label="Measure population filters">
+              ${["all", "near-miss", "changed", "numerator", "denominator", "exclusion"].map((filter) => renderQualityPopulationFilterButton(filter, measure)).join("")}
+            </div>
+            <label class="validation-sort-control">
+              <span>Sort</span>
+              <select data-quality-population-sort>
+                <option value="opportunity-first" ${state.qualityPopulationSort === "opportunity-first" ? "selected" : ""}>Opportunities first</option>
+                <option value="status-changed-first" ${state.qualityPopulationSort === "status-changed-first" ? "selected" : ""}>Status changed first</option>
+                <option value="patient-name" ${state.qualityPopulationSort === "patient-name" ? "selected" : ""}>Patient name</option>
+              </select>
+            </label>
+          </div>
+          <table class="vision-table quality-population-table resizable-data-grid">
+            <thead><tr><th>Patient</th><th>MRN</th><th>Provider</th><th>Specialty</th><th>Current status</th><th>Change date</th><th>Status summary</th><th>Opportunity signal</th><th>Evidence gap / source signal</th></tr></thead>
+            <tbody>
+              ${pageInfo.rows.map((patient) => `
+                <tr class="${patientIsNearMiss(patient) ? "near-miss-row" : ""} ${patientHasStatusChange(patient) ? "state-changed" : ""} ${state.expandedQualityPopulationPatient === patient.patient ? "selected-patient-row" : ""}">
+                  <td><strong>${patientDisplayName(patient)}</strong><span class="subline">${patient.patient}</span></td>
+                  <td><strong>${patientMrn(patient)}</strong></td>
+                  <td><strong>${patient.provider}</strong></td>
+                  <td>${patient.specialty}</td>
+                  <td><strong>${patientCurrentOutcome(patient)}</strong>${patientIsNearMiss(patient) ? `<span class="subline">Near miss</span>` : ""}</td>
+                  <td><strong>${patientLatestStatusChangeDate(patient) || "-"}</strong><span class="subline">${patientHasStatusChange(patient) ? "Status changed" : "No change"}</span></td>
+                  <td><button class="grid-link status-movement-link ${state.expandedQualityPopulationPatient === patient.patient ? "active" : ""}" data-quality-population-status="${measure.id}:${patient.patient}:${patient.qualityPopulationIndex ?? ""}" title="${escapeHtml(patientPopulationStatusTimelineText(patient))}" type="button">${patientPopulationStatusSummaryLabel(patient)}</button><span class="subline">${patientPopulationStatusSummarySubline(patient)}</span></td>
+                  <td><strong>${patient.opportunitySignal}</strong><span class="subline">${patient.closeness || "N/A"} criteria proximity</span></td>
+                  <td><span class="evidence-summary">${patient.evidence}</span><span class="subline">Sources: ${patientDataSources(patient)}</span></td>
+                </tr>
+                ${state.expandedQualityPopulationPatient === patient.patient ? `
+                  <tr class="patient-outcome-detail-row quality-population-status-detail-row">
+                    <td colspan="9">
+                      ${renderQualityPopulationStatusPanel(patient, measure)}
+                    </td>
+                  </tr>
+                ` : ""}
+              `).join("")}
+            </tbody>
+          </table>
+          <div class="patient-table-pager">
+            <span>Showing ${rangeStart}-${pageInfo.end} of ${pageInfo.total.toLocaleString()} ${qualityPopulationFilterLabel(activeFilter).toLowerCase()} patients</span>
+            <div>
+              <button class="vision-row-button" data-quality-population-page="${pageInfo.page - 1}" ${pageInfo.page <= 1 ? "disabled" : ""} type="button">Previous</button>
+              <button class="vision-row-button" data-quality-population-page="${pageInfo.page + 1}" ${pageInfo.page >= pageInfo.totalPages ? "disabled" : ""} type="button">Next</button>
+            </div>
+          </div>
+        </section>
+      </td>
+    </tr>
+  `;
+}
+
+
+function renderVisionQualityPerformanceTab() {
   const totalNearMisses = visionMeasureOpportunityRows.reduce((sum, row) => sum + Number(row.nearMiss), 0);
   const totalLift = "5.5";
+  const belowTarget = visionValidationPatientMeasures.filter((measure) => currentTrendValue(measure.id) < qualityTargetFor(measure.id)).length;
   return `
     <div class="workbench-summary-row">
       <div>
-        <span class="vision-kicker">Patient opportunities</span>
-        <strong>${totalNearMisses} near-miss patients · +${totalLift} pts modeled lift</strong>
-        <em>Focused on submitted measures where evidence, workflow, or mapping changes could move performance.</em>
-      </div>
-      <div class="inline-action-group">
-        <button class="vision-row-button" data-validation-measure="${selected.id}" type="button">Open ${selected.measure} patients</button>
-        <button class="vision-row-button" data-workbench-trend-measure="${selected.id}" type="button">View trend</button>
+        <span class="vision-kicker">Quality performance</span>
+        <strong>${belowTarget} measures below target · ${totalNearMisses} near-miss patients · +${totalLift} pts modeled lift</strong>
+        <em>Population-level quality movement, week-over-week change, trend, and the highest-value opportunities to improve performance.</em>
       </div>
     </div>
-    <article class="vision-card spaced">
+    <article class="vision-card spaced quality-performance-workspace">
       <div class="vision-section-title compact">
-        <span class="vision-kicker">Performance lift</span>
-        <h3>Measures ranked by actionable opportunity</h3>
+        <span class="vision-kicker">Selected Measure Population</span>
       </div>
-      <table class="vision-table">
-        <thead><tr><th>Measure</th><th>Current / target</th><th>Patient signal</th><th>Modeled lift</th><th>Likely reason</th><th></th></tr></thead>
+      <table class="vision-table quality-performance-table resizable-data-grid">
+        <thead><tr><th>Measure</th><th>Current</th><th>Target</th><th>Gap</th><th>WoW</th><th>Trend</th><th>Near misses</th><th>Primary opportunity</th></tr></thead>
         <tbody>
-          ${visionMeasureOpportunityRows.map((row) => `
-            <tr class="${row.measureId === selected.id ? "selected" : ""}">
-              <td><strong>${row.measure}</strong><span class="subline">${row.id} / ${row.subgroup}</span></td>
-              <td><strong>${attestationTrendFor(row.measureId).current}</strong><span class="subline">Target ${qualityTargetFor(row.measureId)}% · benchmark ${row.benchmark}</span></td>
-              <td><strong>${row.nearMiss}</strong><span class="subline">${row.closeness} close · ${changedPatientCountForMeasure(validationMeasureById(row.measureId))} status changes</span></td>
-              <td>${visionBadge(row.lift, row.lift.includes("3.4") ? "bad" : row.lift.includes("1.2") ? "good" : "warn")}</td>
-              <td><strong>${row.focus}</strong><span class="subline">${row.issue}</span></td>
+          ${visionValidationPatientMeasures.map((measure) => {
+            const trend = attestationTrendFor(measure.id);
+            const target = qualityTargetFor(measure.id);
+            const opportunity = qualityOpportunityForMeasure(measure.id);
+            const isPopulationOpen = state.openQualityPopulationMeasure === measure.id;
+            return `
+            <tr class="${isPopulationOpen ? "selected" : ""}" data-quality-population-row="${measure.id}" tabindex="0" aria-expanded="${isPopulationOpen ? "true" : "false"}" title="${isPopulationOpen ? "Collapse measure population" : "Open measure population"}">
               <td>
-                <div class="row-action-stack">
-                  <button class="vision-row-button" data-opportunity-patients="${row.measureId}" type="button">Open patients</button>
-                  <button class="vision-row-button" data-opportunity-explain="${row.measureId}:${row.representativePatient}" type="button">Explain example</button>
+                <div class="measure-row-entry">
+                  <span class="row-disclosure" aria-hidden="true"></span>
+                  <div>
+                    <strong>${measure.measure}</strong>
+                    <span class="subline">${measure.code} / ${measure.mvp}</span>
+                  </div>
                 </div>
               </td>
+              <td class="numeric"><strong>${trend.current}</strong></td>
+              <td class="numeric">
+                <label class="grid-number-cell">
+                  <input type="number" min="50" max="100" value="${target}" data-quality-target="${measure.id}" aria-label="${measure.measure} customer target" />
+                  <span>%</span>
+                </label>
+              </td>
+              <td class="numeric"><strong class="gap-text ${qualityTargetGapTone(measure.id)}" data-quality-gap="${measure.id}">${qualityTargetGapText(measure.id)}</strong></td>
+              <td class="numeric wow-grid-cell">${renderWowChangeHeat(trend.wowChange, trend.wowTone)}</td>
+              <td>${renderAttestationTrendChart(measure, { table: true })}</td>
+              <td class="numeric"><button class="grid-link metric-link" data-quality-population="${measure.id}" data-quality-filter="near-miss" type="button">${opportunity.nearMiss}</button><span class="subline">${opportunity.closeness} close</span></td>
+              <td><strong>${opportunity.focus}</strong><span class="subline">${opportunity.issue}</span></td>
             </tr>
-          `).join("")}
+            ${isPopulationOpen ? renderQualityPopulationPane(measure) : ""}
+          `;
+          }).join("")}
         </tbody>
       </table>
     </article>
   `;
 }
 
-function renderVisionValidationScreen() {
-  return renderVisionPerformanceScreen();
+
+function renderVisionPopulationValidationTab() {
+  return renderVisionQualityPerformanceTab();
+}
+
+function renderVisionAttestationTrendsTab() {
+  return renderVisionPopulationValidationTab();
+}
+
+function renderVisionTrendingQualityTab() {
+  return renderVisionPopulationValidationTab();
+}
+
+const validationPatientNames = {
+  "HY-10482": { name: "Lambert, Mike", dob: "Nov 20, 1977" },
+  "HY-10731": { name: "Chen, Alana", dob: "Jan 12, 1984" },
+  "HY-10977": { name: "Morrison, Gail", dob: "May 5, 1948" },
+  "HY-11106": { name: "Ortiz, Renee", dob: "Aug 2, 1969" },
+  "HY-11248": { name: "Delgado, Marcus", dob: "Oct 18, 1985" },
+  "HY-11645": { name: "Powers, Frederick", dob: "Mar 4, 1968" },
+  "HY-12214": { name: "Watkins, Simone", dob: "Jun 17, 1991" },
+  "HY-11790": { name: "Jackson, Terry", dob: "Sep 9, 1975" },
+  "HY-11842": { name: "Ibrahim, Layla", dob: "Feb 7, 1979" },
+  "HY-11903": { name: "Santos, Elena", dob: "May 19, 1982" },
+  "HY-12372": { name: "Wells, Morgan", dob: "Dec 2, 1990" },
+  "HY-12944": { name: "Patel, Rina", dob: "Apr 30, 1971" },
+  "HY-12104": { name: "Dawson, Emily", dob: "Feb 14, 1998" },
+  "HY-12466": { name: "Reed, Claire", dob: "Oct 6, 2001" },
+  "HY-12812": { name: "Kim, Nora", dob: "Jul 22, 1999" },
+  "HY-13077": { name: "Moore, Helen", dob: "Nov 3, 1987" },
+  "HY-13218": { name: "Lambert, Mike", dob: "Nov 20, 1977" },
+  "HY-13540": { name: "Brooks, Martin", dob: "Jan 8, 1964" },
+  "HY-13822": { name: "Grant, Luis", dob: "Jun 11, 1970" },
+  "HY-14013": { name: "Rivera, Ana", dob: "Aug 19, 1960" },
+  "HY-14355": { name: "Miller, Jordan", dob: "Mar 27, 1958" },
+  "HY-14729": { name: "Foster, Denise", dob: "Dec 1, 1949", mrn: "MRN-4114729" },
+  "HY-15086": { name: "Bennett, Paul", dob: "Apr 3, 1966" },
+  "HY-15319": { name: "Harris, Olivia", dob: "Sep 16, 1973" },
+  "HY-15602": { name: "Nguyen, Alex", dob: "Jan 25, 1980" },
+};
+
+const generatedPatientLastNames = ["Adler", "Baxter", "Carter", "Diaz", "Ellis", "Franklin", "Gibson", "Holland", "Irwin", "Keller", "Lawson", "Morgan", "Novak", "Olsen", "Porter", "Quinn", "Russell", "Sawyer", "Taylor", "Valdez"];
+const generatedPatientFirstNames = ["Avery", "Blair", "Casey", "Dana", "Elliot", "Finley", "Harper", "Jordan", "Kai", "Leslie", "Marlowe", "Noel", "Parker", "Quinn", "Reese", "Sage", "Taylor", "Val", "Wren", "Zion"];
+
+
+function patientNumericSeed(patient) {
+  return Number.parseInt(String(patient.patient).replace(/\D/g, "").slice(-5), 10) || 10482;
+}
+
+function patientDisplayName(patient) {
+  if (validationPatientNames[patient.patient]?.name) return validationPatientNames[patient.patient].name;
+  const seed = patientNumericSeed(patient);
+  const lastName = generatedPatientLastNames[seed % generatedPatientLastNames.length];
+  const firstName = generatedPatientFirstNames[Math.floor(seed / 3) % generatedPatientFirstNames.length];
+  return `${lastName}, ${firstName}`;
+}
+
+function patientMrn(patient) {
+  if (validationPatientNames[patient.patient]?.mrn) return validationPatientNames[patient.patient].mrn;
+  return `MRN-${String(4100000 + patientNumericSeed(patient)).slice(-7)}`;
+}
+
+function patientDob(patient) {
+  if (validationPatientNames[patient.patient]?.dob) return validationPatientNames[patient.patient].dob;
+  const numericId = patientNumericSeed(patient) % 100;
+  const year = 1955 + (numericId % 45);
+  const month = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][numericId % 12];
+  return `${month} ${(numericId % 27) + 1}, ${year}`;
+}
+
+function patientOverallResult(patient) {
+  const current = patientCurrentOutcome(patient);
+  if (current === "Numerator") return { label: "Met", tone: "met" };
+  if (current === "Exclusion") return { label: "Excluded", tone: "excluded" };
+  if (current === "Initial population") return { label: "No Data", tone: "neutral" };
+  return { label: "Not Achieved", tone: "not-met" };
 }
 
 function patientOutcomeAnswer(patient, measure) {
-  if (patient.satisfaction === "Satisfied") {
-    return `This patient satisfies ${measure.code}. The numerator evidence, qualifying encounter, and attribution are all present in the active calculation.`;
+  const current = patientCurrentOutcome(patient);
+  if (patient.sourceIssue?.expectedFix) {
+    return `Current calculation is Excluded because ${patient.sourceIssue.fact.toLowerCase()} is being accepted as denominator-exclusion evidence for ${measure.code}. The supporting source detail indicates the hospice fact is likely attached to the wrong record, while the colorectal screening evidence is valid. ${patient.sourceIssue.expectedFix}`;
   }
-  if (patient.satisfaction === "Excluded") {
-    return `This patient is excluded from ${measure.code}. The exclusion evidence is present and should be kept in the validation sample as a control record.`;
+  if (patientHasNumeratorFallout(patient)) {
+    const removed = removedNumeratorEvidenceForMeasure(measure, patient);
+    return `Patient still meets initial population and denominator criteria for ${measure.code}, but fell out of the numerator because ${removed.shortReason}. The current evidence supports Denominator / Not Achieved.`;
   }
-  if (patient.currentState.toLowerCase().includes("near miss")) {
-    return `This patient is close to satisfying ${measure.code}, but one evidence or mapping condition is still blocking the numerator.`;
+  if (current === "Numerator") {
+    return `Patient meets denominator and numerator criteria for ${measure.code}. The qualifying encounter, attribution, and numerator evidence are all present, so the evidence supports Met.`;
   }
-  return `This patient is included in the denominator for ${measure.code}, but the numerator evidence is not currently sufficient.`;
+  if (current === "Exclusion") {
+    return `Patient has denominator exclusion evidence for ${measure.code}. The patient remains in the selected validation population as an exclusion control, and the evidence supports Excluded.`;
+  }
+  if (patientIsNearMiss(patient)) {
+    return `Patient meets initial population and denominator criteria for ${measure.code}, but one numerator criterion is not achieved. The regulatory outcome remains Denominator / Not Achieved; the near-miss flag shows criteria progress, not a status change.`;
+  }
+  return `Patient meets initial population and denominator criteria for ${measure.code}, but the numerator evidence is not currently achieved. The evidence supports Denominator / Not Achieved.`;
 }
 
-function patientOutcomeRows(patient, measure) {
-  const category = patientOutcomeCategory(patient);
+function measureNumeratorCriteria(measure) {
+  const label = measure.measure.toLowerCase();
+  if (label.includes("hiv")) {
+    return [
+      "Has HIV screening result during the measurement period",
+      "Screening result is mapped to an accepted LOINC/result concept",
+    ];
+  }
+  if (label.includes("depression")) {
+    return [
+      "Depression screening completed with accepted instrument",
+      "Follow-up plan documented when screening is positive",
+    ];
+  }
+  if (label.includes("chlamydia")) {
+    return [
+      "Chlamydia screening lab performed during eligible window",
+      "Lab result is linked to the qualifying encounter",
+    ];
+  }
+  if (label.includes("blood pressure")) {
+    return [
+      "Has systolic blood pressure less than 140 mmHg",
+      "Has diastolic blood pressure less than 90 mmHg",
+    ];
+  }
+  if (label.includes("colorectal")) {
+    return [
+      "Has accepted colorectal screening event",
+      "Screening date is within the allowed lookback window",
+    ];
+  }
+  if (label.includes("glycemic")) {
+    return [
+      "Glycemic assessment performed during measurement period",
+      "Result value is mapped to the accepted lab concept",
+    ];
+  }
+  return [
+    "Has qualifying numerator event",
+    "Numerator event is linked to accepted source evidence",
+  ];
+}
+
+function criterionResultBadge(result) {
+  const tone = result === "Satisfied"
+    ? "satisfied"
+    : result === "Not satisfied" ? "not-satisfied" : result === "Partial" ? "partial" : result === "Excluded" ? "excluded" : "not-evidenced";
+  const label = result === "Satisfied"
+    ? "Met"
+    : result === "Not satisfied" || result === "Partial"
+      ? "Not Achieved"
+      : result === "Excluded" ? "Excluded" : "No Data";
+  return `<span class="criterion-result ${tone}">${label}</span>`;
+}
+
+function criterionRow(criteria, evidence, result) {
+  return { criteria, evidence, result };
+}
+
+
+function patientHasNumeratorFallout(patient) {
+  const latestMovement = patientLatestStatusMovement(patient);
+  return latestMovement?.from === "Numerator" && latestMovement.status === "Denominator";
+}
+
+function removedNumeratorEvidenceForMeasure(measure, patient) {
+  const label = measure.measure.toLowerCase();
+  const suffix = String(patient.patient || "00000").replace(/\D/g, "").slice(-3) || "000";
+  if (label.includes("hiv")) {
+    return {
+      criteria: "Screening result is mapped to an accepted LOINC/result concept",
+      title: "Removed HIV screening mapping",
+      shortReason: "the previously accepted HIV screening result lost its accepted LOINC/result mapping",
+      details: [
+        ["Previously accepted evidence", `HIV screening observation OBS-HIV-${suffix}`],
+        ["Removed on", "2026-08-10"],
+        ["Dropped condition", "LOINC 75622-1 no longer maps to an accepted HIV screening result"],
+        ["Source", "External lab interface"],
+      ],
+      note: "Denominator criteria are still met. The dropped numerator mapping is what moved the patient from Numerator to Denominator.",
+      marker: "The accepted HIV screening code/mapping was removed, so the numerator criterion is no longer satisfied.",
+      source: "Lab + EHR",
+      version: "Outcome refresh v43",
+    };
+  }
+  if (label.includes("depression")) {
+    return {
+      criteria: "Follow-up plan documented when screening is positive",
+      title: "Removed follow-up plan concept",
+      shortReason: "the follow-up-plan code no longer qualifies as accepted numerator evidence",
+      details: [
+        ["Previously accepted evidence", `Follow-up plan concept BH-FUP-${suffix}`],
+        ["Removed on", "2026-08-10"],
+        ["Dropped condition", "SNOMED follow-up plan mapping removed from accepted numerator value set"],
+        ["Source", "EHR behavioral health note"],
+      ],
+      note: "The screening still places the patient in denominator. The removed follow-up-plan concept is what caused the numerator fall-out.",
+      marker: "The follow-up-plan code was removed from accepted numerator evidence, so this criterion is no longer satisfied.",
+      source: "EHR",
+      version: "Context refresh v19",
+    };
+  }
+  if (label.includes("chlamydia")) {
+    return {
+      criteria: "Lab result is linked to the qualifying encounter",
+      title: "Removed lab-result linkage",
+      shortReason: "the screening lab is no longer linked to the qualifying encounter",
+      details: [
+        ["Previously accepted evidence", `Chlamydia NAAT result LAB-CT-${suffix}`],
+        ["Removed on", "2026-08-10"],
+        ["Dropped condition", "Result-to-encounter link no longer accepted"],
+        ["Source", "Lab interface"],
+      ],
+      note: "The patient remains denominator eligible, but the numerator lab linkage dropped from the current calculation.",
+      marker: "The lab-result linkage was removed, so the numerator criterion is no longer satisfied.",
+      source: "Lab + EHR",
+      version: "Outcome refresh v43",
+    };
+  }
+  if (label.includes("blood pressure")) {
+    return {
+      criteria: "Has diastolic blood pressure less than 90 mmHg",
+      title: "Removed controlled blood pressure evidence",
+      shortReason: "the controlled blood pressure reading is no longer attributed to the qualifying encounter",
+      details: [
+        ["Previously accepted evidence", `BP reading VITAL-${suffix}`],
+        ["Removed on", "2026-08-10"],
+        ["Dropped condition", "Controlled BP value no longer tied to an attributed encounter"],
+        ["Source", "Vitals feed"],
+      ],
+      note: "The diagnosis and denominator encounter still qualify. The removed controlled BP evidence caused the numerator fall-out.",
+      marker: "The controlled BP evidence was removed from accepted numerator evidence, so this criterion is no longer satisfied.",
+      source: "Vitals + Claims",
+      version: "Attribution refresh v43",
+    };
+  }
+  if (label.includes("colorectal")) {
+    return {
+      criteria: "Screening date is within the allowed lookback window",
+      title: "Removed colorectal screening evidence",
+      shortReason: "the accepted colorectal screening event no longer qualifies in the current calculation",
+      details: [
+        ["Previously accepted evidence", `Colorectal screening event CRC-${suffix}`],
+        ["Removed on", "2026-08-10"],
+        ["Dropped condition", "Screening event no longer linked to accepted registry/EHR evidence"],
+        ["Source", "EHR + Registry"],
+      ],
+      note: "The denominator remains valid, but the accepted numerator screening evidence dropped from the current calculation.",
+      marker: "The colorectal screening evidence was removed, so this criterion is no longer satisfied.",
+      source: "EHR + Registry",
+      version: "Registry reconciliation v43",
+    };
+  }
+  if (label.includes("glycemic")) {
+    return {
+      criteria: "Result value is mapped to the accepted lab concept",
+      title: "Removed A1c result mapping",
+      shortReason: "the A1c result value no longer maps to the accepted lab concept",
+      details: [
+        ["Previously accepted evidence", `A1c result LAB-A1C-${suffix}`],
+        ["Removed on", "2026-08-10"],
+        ["Dropped condition", "A1c result-value mapping no longer accepted"],
+        ["Source", "Lab interface"],
+      ],
+      note: "The assessment still places the patient in denominator. The removed lab-value mapping caused the numerator fall-out.",
+      marker: "The A1c result mapping was removed from accepted numerator evidence, so this criterion is no longer satisfied.",
+      source: "Lab + EHR",
+      version: "Lab mapping refresh v43",
+    };
+  }
+  const [, secondCriterion] = measureNumeratorCriteria(measure);
+  return {
+    criteria: secondCriterion,
+    title: "Removed numerator evidence",
+    shortReason: "previously accepted numerator evidence is no longer present in the calculation",
+    details: [
+      ["Previously accepted evidence", `Numerator evidence ${suffix}`],
+      ["Removed on", "2026-08-10"],
+      ["Dropped condition", "Accepted numerator evidence removed from current outcome calculation"],
+      ["Source", patientDataSources(patient)],
+    ],
+    note: "The patient remains denominator eligible, but the removed numerator evidence caused the numerator fall-out.",
+    marker: "Previously accepted numerator evidence was removed, so this criterion is no longer satisfied.",
+    source: patientDataSources(patient),
+    version: "Outcome refresh v43",
+  };
+}
+
+function statusMovementLabelForPatient(patient, fromStatus, toStatus) {
+  if (patient.statusMovementLabel) return patient.statusMovementLabel;
+  if (fromStatus === "Numerator" && toStatus === "Denominator") return "Numerator evidence removed";
+  if (fromStatus === "Denominator" && toStatus === "Numerator") return "Numerator evidence accepted";
+  if (toStatus === "Exclusion") return "Exclusion evidence accepted";
+  if (fromStatus === "Initial population" && toStatus === "Denominator") return "Denominator evidence accepted";
+  return patient.change === "No change" ? "Interim recalculation" : patient.change;
+}
+
+function statusMovementDetailForPatient(patient, fromStatus, toStatus) {
+  if (patient.statusMovementDetail) return patient.statusMovementDetail;
+  if (fromStatus === "Numerator" && toStatus === "Denominator") {
+    return "Previously accepted numerator evidence was removed or no longer maps to accepted measure logic; denominator criteria still pass.";
+  }
+  if (fromStatus === "Denominator" && toStatus === "Numerator") {
+    return "Numerator evidence was accepted into the current calculation and moved the patient to numerator.";
+  }
+  if (toStatus === "Exclusion") return patient.evidence || "Accepted exclusion evidence moved the patient out of denominator reporting.";
+  if (fromStatus === "Initial population" && toStatus === "Denominator") return patient.evidence || "Denominator evidence was accepted after the cohort was locked.";
+  return patient.evidence || `Status moved from ${fromStatus} to ${toStatus}.`;
+}
+
+function statusMovementSourceForPatient(patient, fallbackSource) {
+  return patient.statusMovementSource || fallbackSource;
+}
+
+function statusMovementVersionForPatient(patient, fallbackVersion) {
+  return patient.statusMovementVersion || fallbackVersion;
+}
+
+function patientOutcomeChangeHighlight(patient, measure) {
+  const latestMovement = patientLatestStatusMovement(patient);
+  if (!latestMovement) return null;
+  const current = patientCurrentOutcome(patient);
+  const label = measure.measure.toLowerCase();
+  if (patient.sourceIssue || current === "Exclusion") {
+    return {
+      sectionId: "exclusions",
+      criteria: "Hospice services rendered",
+      marker: `${latestMovement.date} - ${latestMovement.movement}. This exclusion evidence changed the calculated status.`,
+    };
+  }
+  if (latestMovement.from === "Numerator" && latestMovement.status === "Denominator") {
+    const removed = removedNumeratorEvidenceForMeasure(measure, patient);
+    return {
+      sectionId: "numerator",
+      criteria: removed.criteria,
+      marker: `${latestMovement.date} - ${latestMovement.movement}. ${removed.marker}`,
+    };
+  }
+  if (current === "Numerator" && label.includes("depression")) {
+    return {
+      sectionId: "numerator",
+      criteria: "Follow-up plan documented when screening is positive",
+      marker: `${latestMovement.date} - ${latestMovement.movement}. This clinical evidence satisfied this numerator criterion.`,
+    };
+  }
+  if (current === "Numerator") {
+    return {
+      sectionId: "numerator",
+      criteria: measureNumeratorCriteria(measure)[1],
+      marker: `${latestMovement.date} - ${latestMovement.movement}. This numerator evidence changed the calculated status.`,
+    };
+  }
+  if (current === "Denominator") {
+    return {
+      sectionId: "denominator",
+      criteria: "Patient qualifies for denominator population",
+      marker: `${latestMovement.date} - ${latestMovement.movement}. This denominator evidence changed the calculated status.`,
+    };
+  }
+  return null;
+}
+
+function evidenceDetailMarkup(title, details = [], note = "") {
+  return `
+    <div class="source-evidence-detail">
+      <strong>${escapeHtml(title)}</strong>
+      <dl>
+        ${details.map(([label, value]) => `
+          <dt>${escapeHtml(label)}</dt>
+          <dd>${escapeHtml(value)}</dd>
+        `).join("")}
+      </dl>
+      ${note ? `<p>${escapeHtml(note)}</p>` : ""}
+    </div>
+  `;
+}
+
+function sourceIssueEvidenceMarkup(patient) {
+  const issue = patient.sourceIssue;
+  if (!issue) return "";
+  return evidenceDetailMarkup(issue.fact, [
+    ["Source", issue.source],
+    ["Claim / source ID", issue.sourceId],
+    ["Service date", issue.serviceDate],
+    ["Received", issue.received],
+    ["Rendering organization", issue.organization],
+    ["Code", issue.code],
+    ["Match logic", issue.matchReason],
+  ], issue.issue);
+}
+
+function numeratorCriterionRows(patient, measure) {
+  const [firstCriterion, secondCriterion] = measureNumeratorCriteria(measure);
+  const current = patientCurrentOutcome(patient);
+  if (patientHasNumeratorFallout(patient)) {
+    const removed = removedNumeratorEvidenceForMeasure(measure, patient);
+    const priorEvidence = "Previously satisfied at lock, but no accepted numerator event remains in the current calculation.";
+    return [
+      criterionRow(firstCriterion, removed.criteria === firstCriterion ? evidenceDetailMarkup(removed.title, removed.details, removed.note) : priorEvidence, removed.criteria === firstCriterion ? "Not satisfied" : "Not evidenced"),
+      criterionRow(secondCriterion, removed.criteria === secondCriterion ? evidenceDetailMarkup(removed.title, removed.details, removed.note) : "No accepted evidence supplied.", removed.criteria === secondCriterion ? "Not satisfied" : "Not evidenced"),
+    ];
+  }
+  if (patient.numeratorEvidence?.length) {
+    return [
+      criterionRow(firstCriterion, numeratorEvidenceForMeasure(measure, patient, 0), "Satisfied"),
+      criterionRow(secondCriterion, numeratorEvidenceForMeasure(measure, patient, 1), "Satisfied"),
+    ];
+  }
+  if (current === "Numerator") {
+    return [
+      criterionRow(firstCriterion, numeratorEvidenceForMeasure(measure, patient, 0), "Satisfied"),
+      criterionRow(secondCriterion, numeratorEvidenceForMeasure(measure, patient, 1), "Satisfied"),
+    ];
+  }
+  if (patientIsNearMiss(patient)) {
+    return [
+      criterionRow(firstCriterion, nearMissEvidenceForMeasure(measure, patient), "Satisfied"),
+      criterionRow(secondCriterion, patient.evidence, "Not satisfied"),
+    ];
+  }
+  return [
+    criterionRow(firstCriterion, "No accepted evidence supplied.", "Not evidenced"),
+    criterionRow(secondCriterion, patient.evidence || "No accepted evidence supplied.", "Not satisfied"),
+  ];
+}
+
+function numeratorEvidenceForMeasure(measure, patient, index) {
+  if (patient.numeratorEvidence?.[index]) {
+    const evidence = patient.numeratorEvidence[index];
+    return evidenceDetailMarkup(evidence.title, evidence.details, evidence.note);
+  }
+  const label = measure.measure.toLowerCase();
+  if (label.includes("hiv")) return index === 0 ? "HIV screening result on 2026-05-14" : "LOINC 75622-1 mapped to accepted screening result";
+  if (label.includes("depression")) return index === 0 ? "PHQ-9 screening on 2026-04-08" : "Follow-up plan SNOMED evidence on 2026-04-08";
+  if (label.includes("chlamydia")) return index === 0 ? "Chlamydia NAAT result on 2026-03-22" : "Result linked to qualifying outpatient encounter";
+  if (label.includes("blood pressure")) return index === 0 ? "Systolic blood pressure = 135 mmHg on 2026-03-26" : "Diastolic blood pressure = 85 mmHg on 2026-03-26";
+  if (label.includes("colorectal")) return index === 0 ? "FIT-DNA result in EHR registry source" : "Screening date within accepted lookback";
+  if (label.includes("glycemic")) return index === 0 ? "A1c assessment documented on 2026-06-12" : "A1c result value mapped to accepted lab concept";
+  return index === 0 ? patient.evidence : "Accepted source evidence linked to measure logic";
+}
+
+function nearMissEvidenceForMeasure(measure, patient) {
+  const label = measure.measure.toLowerCase();
+  if (label.includes("hiv")) return "External lab screening evidence found";
+  if (label.includes("depression")) return "Screening evidence present";
+  if (label.includes("chlamydia")) return "Lab evidence found";
+  if (label.includes("blood pressure")) return "Controlled BP value found under related encounter";
+  if (label.includes("colorectal")) return "Registry screening event found";
+  if (label.includes("glycemic")) return "Assessment event present";
+  return patient.evidence || "One numerator criterion is evidenced";
+}
+
+function patientCriteriaSections(patient, measure) {
+  const current = patientCurrentOutcome(patient);
+  const isExcluded = current === "Exclusion";
+  const isNumerator = current === "Numerator";
+  const isNearMiss = patientIsNearMiss(patient);
+  const potentialExclusion = patient.opportunity === "Potential exclusion";
+  const numeratorRows = numeratorCriterionRows(patient, measure);
+  const numeratorSatisfied = numeratorRows.length > 0 && numeratorRows.every((row) => row.result === "Satisfied");
+  const exclusionEvidence = patient.sourceIssue
+    ? sourceIssueEvidenceMarkup(patient)
+    : isExcluded
+      ? "Hospice services documented and coded"
+      : "No accepted evidence supplied.";
   return [
     {
-      check: "Patient attribution",
-      detail: `${patient.provider} / ${patient.specialty}`,
-      result: visionBadge("Confirmed", "good"),
+      id: "initial",
+      title: "Initial population",
+      logicOperator: "AND",
+      status: "Satisfied",
+      count: "3 / 3 criteria satisfied",
+      tone: "satisfied",
+      open: current === "Initial population",
+      rows: [
+        criterionRow("Patient age is within measure range", `DOB ${patientDob(patient)}; age is in measurement range`, "Satisfied"),
+        criterionRow("Has qualifying encounter during measurement period", `Qualifying encounter attributed to ${patient.provider}`, "Satisfied"),
+        criterionRow("Meets submitted specialty and program attribution", `${patient.specialty} / ${measure.mvp}`, "Satisfied"),
+      ],
     },
     {
-      check: "Outcome population",
-      detail: `${measure.subgroup}; this record is counted in the ${patientOutcomeCategoryName(category).toLowerCase()} population.`,
-      result: patientOutcomeBadge(patient),
+      id: "denominator",
+      title: "Denominator",
+      logicOperator: "AND",
+      status: current === "Initial population" ? "Not evidenced" : "Satisfied",
+      count: current === "Initial population" ? "0 / 1 criteria satisfied" : "1 / 1 criteria satisfied",
+      tone: current === "Initial population" ? "not-evidenced" : "satisfied",
+      open: false,
+      rows: [
+        criterionRow("Patient qualifies for denominator population", current === "Initial population" ? "Denominator-specific evidence is not present." : `${measure.code} denominator criteria are met.`, current === "Initial population" ? "Not evidenced" : "Satisfied"),
+      ],
     },
     {
-      check: "Current calculation evidence",
-      detail: patient.evidence,
-      result: visionBadge(patient.currentState, patient.satisfactionTone),
+      id: "exclusions",
+      title: "Denominator exclusions",
+      logicOperator: "OR",
+      status: isExcluded ? "Excluded" : potentialExclusion ? "Not satisfied" : "Not evidenced",
+      count: isExcluded ? "1 / 6 criteria satisfied" : "0 / 6 criteria satisfied",
+      tone: isExcluded ? "excluded" : potentialExclusion ? "not-satisfied" : "not-evidenced",
+      open: isExcluded || potentialExclusion,
+      rows: [
+        criterionRow("Hospice services rendered", exclusionEvidence, isExcluded ? "Satisfied" : "Not evidenced"),
+        criterionRow("Pregnancy or renal diagnosis", "No accepted evidence supplied.", "Not evidenced"),
+        criterionRow("Advanced illness, frailty, or nursing home criteria", "No accepted evidence supplied.", "Not evidenced"),
+        criterionRow("Palliative care in measurement period", potentialExclusion ? patient.evidence : "No accepted evidence supplied.", potentialExclusion ? "Not satisfied" : "Not evidenced"),
+      ],
     },
     {
-      check: `Prior snapshot comparison (${validationPriorSnapshotLabel} -> ${validationCurrentSnapshotLabel})`,
-      detail: `Prior state was ${patient.priorState.toLowerCase()}. Current state is ${patient.currentState.toLowerCase()}.`,
-      result: visionBadge(patient.change, patient.changeTone),
-    },
-    {
-      check: "Source data used",
-      detail: patientDataSources(patient),
-      result: visionBadge("Available", "info"),
+      id: "numerator",
+      title: "Numerator",
+      logicOperator: "AND",
+      status: numeratorSatisfied ? "Satisfied" : isNearMiss ? "Partial" : "Not evidenced",
+      count: numeratorSatisfied ? "2 / 2 criteria satisfied" : isNearMiss ? "1 / 2 criteria satisfied" : "0 / 2 criteria satisfied",
+      tone: numeratorSatisfied ? "satisfied" : isNearMiss ? "partial" : "not-evidenced",
+      open: numeratorSatisfied || current === "Denominator" || isNearMiss,
+      rows: numeratorRows,
     },
   ];
 }
 
-function renderVisionPatientOutcomePanel(measure, patient, options = {}) {
+function renderPatientCriteriaSection(section, options = {}) {
+  const highlight = options.highlight;
+  const sectionOpen = section.open || highlight?.sectionId === section.id;
   return `
-    <aside class="patient-outcome-panel ${options.standalone ? "standalone" : ""}">
-      <div class="patient-outcome-header">
-        <span class="vision-kicker">Outcome explainability</span>
-        <h3>${patient.patient} / ${measure.code}</h3>
-        <p>${measure.measure} · ${measure.mvp}</p>
-      </div>
-      <div class="patient-outcome-metrics">
-        <div><span>Current state</span><strong>${patient.currentState}</strong></div>
-        <div><span>Prior state</span><strong>${patient.priorState}</strong></div>
-        <div><span>Change</span><strong>${patient.change}</strong></div>
-      </div>
-      ${renderPatientStatusTimeline(patient)}
-      <div class="patient-outcome-answer">
-        <strong>Why is this patient in this outcome state?</strong>
-        <p>${patientOutcomeAnswer(patient, measure)}</p>
-      </div>
-      <table class="vision-table compact outcome-explainability-table">
-        <thead><tr><th>Validation question</th><th>Evidence found</th><th>Outcome</th></tr></thead>
+    <details class="smart-criteria-section ${section.tone} ${highlight?.sectionId === section.id ? "status-change-section" : ""}" ${sectionOpen ? "open" : ""}>
+      <summary>
+        <span>${section.title}</span>
+        ${criterionResultBadge(section.status)}
+        <strong>${section.count}</strong>
+      </summary>
+      <table class="smart-criteria-table">
+        <colgroup>
+          <col class="criteria-col" />
+          <col class="evidence-col" />
+          <col class="result-col" />
+        </colgroup>
+        <thead><tr><th>Specification criteria</th><th>Patient evidence</th><th>Result</th></tr></thead>
         <tbody>
-          ${patientOutcomeRows(patient, measure).map((row) => `
-            <tr>
-              <td><strong>${row.check}</strong></td>
-              <td>${row.detail}</td>
-              <td>${row.result}</td>
+          ${section.rows.map((row, index) => {
+            const isHighlighted = highlight?.sectionId === section.id && row.criteria === highlight.criteria;
+            return `
+            ${index > 0 ? `<tr class="criteria-logic-divider" aria-label="${section.logicOperator}"><td colspan="3"><span>${section.logicOperator}</span></td></tr>` : ""}
+            <tr class="${isHighlighted ? "status-change-evidence-row" : ""}">
+              <td>${row.criteria}</td>
+              <td>${row.evidence}${isHighlighted ? `<span class="status-change-marker">${highlight.marker}</span>` : ""}</td>
+              <td>${criterionResultBadge(row.result)}</td>
             </tr>
-          `).join("")}
+          `;
+          }).join("")}
         </tbody>
       </table>
+    </details>
+  `;
+}
+
+function renderNearMissExplanation(patient, measure) {
+  const statusChange = patientStatusChangeLabel(patient);
+  return `
+    <div class="smart-near-miss-panel">
+      <div>
+        <span class="vision-kicker">Regulatory outcome</span>
+        <strong>${patientCurrentOutcome(patient)}</strong>
+        <p>This patient is still counted as ${patientCurrentOutcome(patient).toLowerCase()} for ${measure.code}.</p>
+      </div>
+      <div>
+        <span class="vision-kicker">Near-miss signal</span>
+        <strong>${patientCriteriaProgress(patient)}</strong>
+        <p>${patient.evidence}</p>
+      </div>
+      <div>
+        <span class="vision-kicker">Status change logic</span>
+        <strong>${statusChange}</strong>
+        <p>Near miss reflects criteria progress inside the same outcome population. It only becomes a status change if the patient moves to Numerator, Exclusion, Initial population, or a different population bucket.</p>
+      </div>
+    </div>
+    ${renderPatientCriteriaSection(patientCriteriaSections(patient, measure).find((section) => section.id === "numerator"))}
+  `;
+}
+
+function renderSmartInsightsSideRail(patient, measure) {
+  const sources = patientDataSources(patient).split(",").map((source) => source.trim()).filter(Boolean);
+  return `
+    <aside class="smart-insights-side">
+      <details class="smart-side-section legend" aria-label="Legend">
+        <summary>Legend</summary>
+        <div class="smart-legend-row">${criterionResultBadge("Satisfied")}<span>Evidence meets the criterion</span></div>
+        <div class="smart-legend-row">${criterionResultBadge("Not satisfied")}<span>Evidence does not meet the criterion</span></div>
+        <div class="smart-legend-row">${criterionResultBadge("Not evidenced")}<span>No evidence found</span></div>
+      </details>
+      <details class="smart-side-section">
+        <summary>Key patient data</summary>
+        <div class="smart-side-facts">
+          <span>Patient ID</span><strong>${patient.patient}</strong>
+          <span>MRN</span><strong>${patientMrn(patient)}</strong>
+          <span>Provider</span><strong>${patient.provider}</strong>
+          <span>Specialty</span><strong>${patient.specialty}</strong>
+          <span>Program</span><strong>${measure.mvp}</strong>
+        </div>
+      </details>
+      <details class="smart-side-section">
+        <summary>Data sources</summary>
+        <div class="source-chip-list">
+          ${sources.map((source) => `<span>${source}</span>`).join("")}
+        </div>
+      </details>
+      ${patient.sourceIssue ? renderSourceIssueSideSection(patient) : ""}
+    </aside>
+  `;
+}
+
+function renderSourceIssueSideSection(patient) {
+  const issue = patient.sourceIssue;
+  return `
+    <details class="smart-side-section source-issue-section" open>
+      <summary>Source issue</summary>
+      <div class="smart-side-facts issue-details">
+        <span>Incorrect fact</span><strong>${escapeHtml(issue.fact)}</strong>
+        <span>Source</span><strong>${escapeHtml(issue.source)}</strong>
+        <span>Service date</span><strong>${escapeHtml(issue.serviceDate)}</strong>
+        <span>Source ID</span><strong>${escapeHtml(issue.sourceId)}</strong>
+        <span>Why flagged</span><strong>${escapeHtml(issue.matchReason)}</strong>
+        <span>Expected fix</span><strong>${escapeHtml(issue.expectedFix)}</strong>
+      </div>
+    </details>
+  `;
+}
+
+
+function renderVisionPatientOutcomePanel(measure, patient, options = {}) {
+  const result = patientOverallResult(patient);
+  const activeTab = patientIsNearMiss(patient) && state.outcomeExplainTab === "near-miss" ? "near-miss" : "logic";
+  return `
+    <aside class="patient-outcome-panel smart-insights-panel ${options.standalone ? "standalone" : ""}">
+      <div class="smart-insights-titlebar">
+        <strong>Smart Insights</strong>
+        ${options.dismissible ? `<button class="smart-close-button" data-close-outcome-explanation type="button" aria-label="Close outcome explanation">&times;</button>` : ""}
+      </div>
+      <div class="smart-insights-summary">
+        <div>
+          <strong>${patientDisplayName(patient)}</strong>
+          <span>DOB: ${patientDob(patient)} · MRN: ${patientMrn(patient)}</span>
+        </div>
+        <div>
+          <span>Measure</span>
+          <strong>${measure.code}</strong>
+          <em>(${measure.code}) - ${measure.measure}</em>
+        </div>
+        <div class="smart-overall-result">
+          <span>Overall Result</span>
+          <strong><span class="smart-result-badge ${result.tone}">${result.label}</span></strong>
+          <em>Last Evaluated: 2026-${validationCurrentSnapshotLabel.replace("/", "-")}</em>
+        </div>
+      </div>
+      <div class="patient-outcome-answer final-interpretation">
+        <strong>Final Interpretation</strong>
+        <p>${patientOutcomeAnswer(patient, measure)}</p>
+      </div>
+      <div class="outcome-explain-tabs" role="tablist">
+        <button class="${activeTab === "logic" ? "active" : ""}" data-outcome-tab="logic" type="button">Outcome logic</button>
+        ${patientIsNearMiss(patient) ? `<button class="${activeTab === "near-miss" ? "active" : ""}" data-outcome-tab="near-miss" type="button">Near-miss detail</button>` : ""}
+      </div>
+      <div class="smart-insights-body">
+        <div class="smart-criteria-stack">
+          ${activeTab === "near-miss"
+            ? renderNearMissExplanation(patient, measure)
+            : patientCriteriaSections(patient, measure).map(renderPatientCriteriaSection).join("")}
+        </div>
+        ${renderSmartInsightsSideRail(patient, measure)}
+      </div>
       <div class="vision-action-row">
         <button class="vision-btn secondary" data-toast="Patient chart opened" type="button">View chart</button>
         <button class="vision-btn secondary" data-toast="Outcome explanation exported" type="button">Export explanation</button>
@@ -3575,33 +5194,59 @@ function patientValidationRowsForMeasure(measure) {
 
 function sortPatientValidationRows(patients) {
   const sort = state.patientValidationSort || "changed-first";
-  const round = activeValidationRound();
+  const changeDateDirection = sort === "change-date" && state.patientValidationSortDirection === "asc" ? "asc" : "desc";
   const rows = [...patients];
-  const outcomeOrder = { numerator: 0, denominator: 1, exclusion: 2 };
+  const outcomeOrder = { numerator: 0, denominator: 1, exclusion: 2, initial: 3 };
+  const expandedPatient = state.expandedOutcomePatient;
+  const expandedStatusPatient = state.expandedStatusPatient;
+  const expandedSort = (first, second) =>
+    Number(second.patient === expandedPatient || second.patient === expandedStatusPatient)
+    - Number(first.patient === expandedPatient || first.patient === expandedStatusPatient);
+  const changeDateSort = (first, second) => {
+    const firstDate = patientLatestStatusChangeDate(first);
+    const secondDate = patientLatestStatusChangeDate(second);
+    if (Boolean(firstDate) !== Boolean(secondDate)) return firstDate ? -1 : 1;
+    const firstValue = statusDateSortValue(firstDate);
+    const secondValue = statusDateSortValue(secondDate);
+    return changeDateDirection === "asc" ? firstValue - secondValue : secondValue - firstValue;
+  };
   if (sort === "patient-id") {
-    return rows.sort((first, second) => first.patient.localeCompare(second.patient));
+    return rows.sort((first, second) =>
+      expandedSort(first, second)
+      || patientDisplayName(first).localeCompare(patientDisplayName(second))
+      || first.patient.localeCompare(second.patient));
   }
   if (sort === "outcome") {
     return rows.sort((first, second) =>
-      outcomeOrder[patientOutcomeCategoryAtRound(first, round)] - outcomeOrder[patientOutcomeCategoryAtRound(second, round)]
+      expandedSort(first, second)
+      || outcomeOrder[patientOutcomeCategory(first)] - outcomeOrder[patientOutcomeCategory(second)]
+      || first.patient.localeCompare(second.patient),
+    );
+  }
+  if (sort === "change-date") {
+    return rows.sort((first, second) =>
+      expandedSort(first, second)
+      || changeDateSort(first, second)
+      || Number(patientHasStateChange(second)) - Number(patientHasStateChange(first))
       || first.patient.localeCompare(second.patient),
     );
   }
   return rows.sort((first, second) =>
-    Number(patientStatusChangedAtRound(second, round)) - Number(patientStatusChangedAtRound(first, round))
+    expandedSort(first, second)
+    || Number(patientHasStateChange(second)) - Number(patientHasStateChange(first))
+    || changeDateSort(first, second)
     || first.patient.localeCompare(second.patient),
   );
 }
 
 function patientValidationFilterCounts(measure) {
-  if (state.patientValidationScope === "all") return fullPopulationFilterCounts(measure);
   const patients = validationPatientsForMeasure(measure);
   return {
     all: patients.length,
-    changed: patients.filter((patient) => patientStatusChangedAtRound(patient)).length,
-    numerator: patients.filter((patient) => patientOutcomeCategoryAtRound(patient) === "numerator").length,
-    denominator: patients.filter((patient) => patientOutcomeCategoryAtRound(patient) === "denominator").length,
-    exclusion: patients.filter((patient) => patientOutcomeCategoryAtRound(patient) === "exclusion").length,
+    changed: patients.filter(patientHasStateChange).length,
+    numerator: patients.filter((patient) => patientOutcomeCategory(patient) === "numerator").length,
+    denominator: patients.filter((patient) => patientOutcomeCategory(patient) === "denominator").length,
+    exclusion: patients.filter((patient) => patientOutcomeCategory(patient) === "exclusion").length,
   };
 }
 
@@ -3610,206 +5255,797 @@ function renderPatientValidationFilterButton(filter, label, count, showCount = f
   return `<button class="${active ? "active" : ""}" data-validation-filter="${filter}" type="button">${label}${showCount ? `<strong>${count}</strong>` : ""}</button>`;
 }
 
-function renderVisionSelectedPatientsTab() {
-  const selected = selectedValidationMeasure();
-  const activeRound = activeValidationRound();
-  const priorRound = previousValidationRound(activeRound);
-  const selectedPatient = selectedValidationPatient(selected);
-  const searchValue = escapeHtml(state.patientValidationSearch);
-  const visiblePatients = patientValidationRowsForMeasure(selected);
-  const filterCounts = patientValidationFilterCounts(selected);
-  const activeFilter = state.patientValidationFilter || "all";
-  const selectedTotal = state.patientValidationScope === "all" ? fullPopulationCountForMeasure(selected) : validationPatientsForMeasure(selected).length;
-  const populationLabel = state.patientValidationScope === "all" ? "entire eligible population" : "selected validation patients";
+function expandedValidationPatient(measure) {
+  if (!state.expandedOutcomePatient) return null;
+  return validationPatientsForMeasure(measure).find((patient) => patient.patient === state.expandedOutcomePatient) || null;
+}
+
+function patientValidationPageInfo(patients) {
+  const pageSize = selectedPatientValidationPageSize();
+  const total = patients.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const page = Math.min(Math.max(Number(state.patientValidationPage) || 1, 1), totalPages);
+  const start = (page - 1) * pageSize;
+  const end = Math.min(start + pageSize, total);
+  return {
+    end,
+    page,
+    pageSize,
+    rows: patients.slice(start, end),
+    start,
+    total,
+    totalPages,
+  };
+}
+
+function selectedPatientValidationPageSize() {
+  const size = Number(state.patientValidationPageSize) || defaultPatientValidationPageSize;
+  return patientValidationPageSizeOptions.includes(size) ? size : defaultPatientValidationPageSize;
+}
+
+function patientValidationChangeDateOptions(measure) {
+  return [...new Set(validationPatientsForMeasure(measure)
+    .map(patientLatestStatusChangeDate)
+    .filter(Boolean))]
+    .sort((first, second) => statusDateSortValue(second) - statusDateSortValue(first));
+}
+
+function selectedPatientValidationChangeDate(measure = selectedValidationMeasure()) {
+  const selectedDate = state.patientValidationChangeDate || "all";
+  if (selectedDate === "all") return "all";
+  return patientValidationChangeDateOptions(measure).includes(selectedDate) ? selectedDate : "all";
+}
+
+function patientValidationFilterLabel(filter) {
+  if (filter === "all") return "selected patients";
+  if (filter === "changed") return "patients with status changes";
+  return `${patientOutcomeCategoryName(filter).toLowerCase()} patients`;
+}
+
+function renderAddValidationPatientPanel(measure) {
+  const searchValue = escapeHtml(state.addPatientSearch || "");
   return `
-    <article class="vision-card patient-validation-workspace compact-patient-validation">
-      <div class="validation-worklist-header compact">
-        <div>
-          <span class="vision-kicker">Patient level validation</span>
-          <h3>Validate entire patient populations</h3>
-          <p>Filter the entire eligible measure population by outcome or state change, then open explainability for any patient.</p>
-        </div>
-        <div class="selected-patient-actions">
-          <div class="patient-search-bar">
-            <label>
-              <span>Open patient</span>
-              <input type="search" data-patient-search value="${searchValue}" placeholder="HY-10482, provider, specialty..." />
-            </label>
-            <button class="vision-btn secondary" data-patient-search-action type="button">Search</button>
-          </div>
-          <div class="inline-action-group">
-            <button class="vision-row-button" data-workbench-trend-measure="${selected.id}" type="button">Trend</button>
-            <button class="vision-row-button" data-workbench-opportunities="${selected.id}" type="button">Opportunities</button>
+    <div class="validation-add-patient-panel">
+      <div class="validation-add-copy">
+        <strong>Add validation patient</strong>
+        <span>Search the calculated ${measure.code} population by patient name, MRN, patient ID, provider, status, or evidence source.</span>
+      </div>
+      <div class="validation-add-controls">
+        <input type="search" data-add-validation-patient-search value="${searchValue}" placeholder="Morrison, MRN, HY-10977, provider..." />
+        <button class="vision-row-button primary" data-add-validation-patient-action="${measure.id}" type="button">Add patient</button>
+      </div>
+    </div>
+  `;
+}
+
+function statusDateDisplay(dateText, includeYear = false) {
+  const [month, day] = String(dateText || "").split("/").map((part) => Number.parseInt(part, 10));
+  const monthName = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][Math.max(0, Math.min(11, (month || 1) - 1))];
+  return includeYear ? `${monthName} ${day || 1}, 2026` : `${monthName} ${day || 1}`;
+}
+
+function statusDateFull(dateText) {
+  return `${dateText}/2026`;
+}
+
+function statusDateDayOfYear(dateText) {
+  const [month, day] = String(dateText || "").split("/").map((part) => Number.parseInt(part, 10));
+  const daysByMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  const safeMonth = Math.max(1, Math.min(12, month || 1));
+  const priorDays = daysByMonth.slice(0, safeMonth - 1).reduce((sum, days) => sum + days, 0);
+  return priorDays + Math.max(1, Math.min(daysByMonth[safeMonth - 1], day || 1));
+}
+
+function statusDateFromDayOfYear(dayOfYear) {
+  const daysByMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  let remaining = Math.max(1, Math.min(365, dayOfYear));
+  let month = 1;
+  while (remaining > daysByMonth[month - 1] && month < 12) {
+    remaining -= daysByMonth[month - 1];
+    month += 1;
+  }
+  return `${String(month).padStart(2, "0")}/${String(remaining).padStart(2, "0")}`;
+}
+
+function statusDateOffset(dateText, days) {
+  return statusDateFromDayOfYear(statusDateDayOfYear(dateText) + days);
+}
+
+function measureJourneyRangeConfig() {
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  if (state.journeyTimelineRange === "full-year") {
+    return {
+      id: "full-year",
+      months,
+      startDate: "01/01",
+      endDate: "12/31",
+      startValue: 1,
+      endValue: 365,
+      label: "Jan 1 - Dec 31, 2026",
+    };
+  }
+
+  const [currentMonth] = validationCurrentSnapshotLabel.split("/").map((part) => Number.parseInt(part, 10));
+  const startMonth = Math.max(1, currentMonth - 5);
+  const startDate = `${String(startMonth).padStart(2, "0")}/01`;
+  return {
+    id: "six-months",
+    months: months.slice(startMonth - 1, currentMonth),
+    startDate,
+    endDate: validationCurrentSnapshotLabel,
+    startValue: statusDateDayOfYear(startDate),
+    endValue: statusDateDayOfYear(validationCurrentSnapshotLabel),
+    label: `${months[startMonth - 1]} 1 - ${statusDateDisplay(validationCurrentSnapshotLabel)}, 2026`,
+  };
+}
+
+function statusDateRangePercent(dateText, range) {
+  const value = statusDateDayOfYear(dateText);
+  const span = Math.max(1, range.endValue - range.startValue);
+  return Math.max(3, Math.min(97, 3 + ((value - range.startValue) / span) * 94));
+}
+
+function measureJourneyStatusClass(status) {
+  const canonical = canonicalOutcomeState(status);
+  if (canonical === "Numerator") return "met";
+  if (canonical === "Exclusion") return "excluded";
+  if (canonical === "Initial population") return "neutral";
+  return "open";
+}
+
+function measureJourneyStatusText(status) {
+  const canonical = canonicalOutcomeState(status);
+  if (canonical === "Numerator") return "Numerator";
+  if (canonical === "Exclusion") return "Excluded";
+  if (canonical === "Initial population") return "Initial population";
+  return "Denominator";
+}
+
+function measureJourneyDotLabel(event) {
+  if (event.locked) return "L";
+  if (event.accepted) return "✓";
+  return event.changed ? "" : "•";
+}
+
+function measureJourneyEvents(patient, options = {}) {
+  const includeLocking = options.includeLocking !== false;
+  return measureJourneyTimelineRows(patient, { includeLocking })
+    .filter((event, index) => index === 0 || event.changed || (includeLocking && (event.locked || event.accepted)))
+    .map((event) => includeLocking ? event : { ...event, accepted: false, locked: false });
+}
+
+function measureJourneyTimelineRows(patient, options = {}) {
+  const includeLocking = options.includeLocking !== false;
+  const rows = patientStatusTimelineRows(patient);
+  if (!includeLocking || !rows[0]?.locked) return rows;
+
+  const lockEvent = rows[0];
+  const lockStatus = canonicalOutcomeState(lockEvent.status);
+  const baselineDate = statusDateOffset(lockEvent.date, -56);
+  const denominatorDate = statusDateOffset(lockEvent.date, -28);
+  const baseline = {
+    date: baselineDate,
+    status: "Initial population",
+    label: "Measurement-period baseline",
+    detail: "Patient was present in the attributed population before denominator criteria were met.",
+    source: "Attribution roster",
+    version: "Outcome baseline",
+    locked: false,
+    accepted: false,
+    changed: false,
+    from: "Initial population",
+    movement: "Measurement baseline",
+  };
+  const denominator = {
+    date: denominatorDate,
+    status: "Denominator",
+    label: "Denominator criteria met",
+    detail: "Qualifying denominator evidence moved the patient from initial population to denominator.",
+    source: patientDataSources(patient),
+    version: "Pre-lock outcome snapshot",
+    locked: false,
+    accepted: false,
+    changed: true,
+    from: "Initial population",
+    movement: "Initial population -> Denominator",
+  };
+  const prefix = [baseline, denominator];
+  let priorStatus = "Denominator";
+
+  if (lockStatus !== "Denominator") {
+    const preLockDate = statusDateOffset(lockEvent.date, -14);
+    prefix.push({
+      date: preLockDate,
+      status: lockStatus,
+      label: `${measureJourneyStatusText(lockStatus)} criteria met`,
+      detail: `Accepted evidence moved the patient from Denominator to ${measureJourneyStatusText(lockStatus)} before validation lock.`,
+      source: patientDataSources(patient),
+      version: "Pre-lock outcome snapshot",
+      locked: false,
+      accepted: false,
+      changed: true,
+      from: priorStatus,
+      movement: `${priorStatus} -> ${lockStatus}`,
+    });
+    priorStatus = lockStatus;
+  }
+
+  return [
+    ...prefix,
+    { ...lockEvent, changed: priorStatus !== lockStatus, from: priorStatus },
+    ...rows.slice(1),
+  ];
+}
+
+function measureJourneySegments(patient, range, options = {}) {
+  const currentValue = statusDateDayOfYear(validationCurrentSnapshotLabel);
+  const dataEndValue = Math.min(range.endValue, currentValue);
+  const dataEndDate = dataEndValue === range.endValue ? range.endDate : validationCurrentSnapshotLabel;
+  const statusEvents = measureJourneyTimelineRows(patient, options).filter((event, index) => index === 0 || event.changed);
+  const beforeRange = [...statusEvents].reverse().find((event) => statusDateDayOfYear(event.date) <= range.startValue);
+  const visibleEvents = statusEvents.filter((event) => {
+    const value = statusDateDayOfYear(event.date);
+    return value > range.startValue && value <= dataEndValue;
+  });
+  const starts = beforeRange
+    ? [{ ...beforeRange, date: range.startDate, boundary: true }, ...visibleEvents]
+    : visibleEvents;
+  const segments = [];
+
+  if (!beforeRange && starts.length && statusDateDayOfYear(starts[0].date) > range.startValue) {
+    segments.push({ startDate: range.startDate, endDate: starts[0].date, status: "No snapshot", label: "No snapshot", tone: "neutral" });
+  }
+
+  starts.forEach((event, index) => {
+    const next = starts[index + 1];
+    segments.push({
+      startDate: event.date,
+      endDate: next?.date || dataEndDate,
+      status: event.status,
+      label: measureJourneyStatusText(event.status),
+      tone: measureJourneyStatusClass(event.status),
+    });
+  });
+  if (dataEndValue < range.endValue) {
+    segments.push({ startDate: validationCurrentSnapshotLabel, endDate: range.endDate, status: "Not yet observed", label: "Not yet observed", tone: "future" });
+  }
+  return segments;
+}
+
+function measureJourneyEventSubtitle(event) {
+  if (event.locked) return measureJourneyStatusText(event.status);
+  if (event.accepted) return "Accepted baseline";
+  return event.label || event.movement;
+}
+
+function measureJourneyTimelineEventLabel(event, index) {
+  if (event.locked) return "Locked";
+  if (event.accepted) return "Accepted";
+  if (event.changed) return String(event.movement || "Status changed").replace(/ -> /g, " &rarr; ");
+  return index === 0 ? "Baseline" : measureJourneyStatusText(event.status);
+}
+
+function renderMeasureJourneyTimeline(patient, options = {}) {
+  const range = measureJourneyRangeConfig();
+  const includeLocking = options.includeLocking !== false;
+  const events = measureJourneyEvents(patient, { includeLocking }).filter((event) => {
+    const value = statusDateDayOfYear(event.date);
+    return value >= range.startValue && value <= range.endValue;
+  });
+  const segments = measureJourneySegments(patient, range, { includeLocking });
+  const hasCurrentBoundarySegment = segments.some((segment) =>
+    segment.startDate === validationCurrentSnapshotLabel && segment.tone !== "future");
+  const latestMovement = [...events].reverse().find((event) => event.changed) || null;
+  const changeCount = events.filter((event) => event.changed).length;
+  return `
+    <section class="measure-journey-timeline-panel">
+      <div class="measure-journey-panel-header">
+        <h4>Status changes</h4>
+        <div class="measure-journey-range-controls">
+          <span>${range.label}</span>
+          <div class="measure-journey-range-toggle" role="group" aria-label="Timeline range">
+            <button class="${range.id === "six-months" ? "active" : ""}" data-journey-range="six-months" type="button">Last 6 months</button>
+            <button class="${range.id === "full-year" ? "active" : ""}" data-journey-range="full-year" type="button">Full measurement period</button>
           </div>
         </div>
       </div>
-      <div class="patient-validation-measure-table-wrap">
-        <table class="vision-table patient-validation-measure-table compact">
-          <thead><tr><th>Measure</th><th>Program</th><th>Eligible patients</th><th>Satisfaction rate</th><th>WoW change</th><th>Target</th><th></th></tr></thead>
-          <tbody>
-            ${visionValidationPatientMeasures.map((measure) => {
-              const trend = attestationTrendFor(measure.id);
-              const target = qualityTargetFor(measure.id);
-              return `
-                <tr class="${measure.id === selected.id ? "selected" : ""}">
-                  <td><strong>${measure.measure}</strong><span class="subline">${measure.code}</span></td>
-                  <td>${measure.mvp}</td>
-                  <td><strong>${state.patientValidationScope === "all" ? fullPopulationCountForMeasure(measure) : validationPatientsForMeasure(measure).length}</strong></td>
-                  <td><strong>${trend.current}</strong></td>
-                  <td>${visionBadge(trend.wowChange, trend.wowTone)}<span class="subline">${validationPriorSnapshotLabel} -> ${validationCurrentSnapshotLabel}</span></td>
-                  <td>${target}%</td>
-                  <td><button class="vision-row-button" data-validation-measure="${measure.id}" type="button">${measure.id === selected.id ? "Open" : "Open population"}</button></td>
-                </tr>
-              `;
-            }).join("")}
-          </tbody>
-        </table>
+      <div class="measure-journey-timeline" aria-label="Patient status changes from ${range.label}">
+        <div class="measure-journey-months" style="--journey-month-count:${range.months.length}" aria-hidden="true">
+          ${range.months.map((month) => `<span>${month}</span>`).join("")}
+        </div>
+        <div class="measure-journey-track" style="--journey-month-count:${range.months.length}">
+          ${segments.map((segment) => {
+            const isCurrentEnd = range.id === "six-months" && segment.endDate === validationCurrentSnapshotLabel;
+            const isCurrentSegment = isCurrentEnd && segment.startDate === validationCurrentSnapshotLabel && segment.tone !== "future";
+            const start = isCurrentSegment ? 91.5 : statusDateRangePercent(segment.startDate, range);
+            const end = isCurrentSegment || (isCurrentEnd && !hasCurrentBoundarySegment)
+              ? 100
+              : isCurrentEnd ? 91.5 : statusDateRangePercent(segment.endDate, range);
+            const width = Math.max(2.5, end - start);
+            const contextLabel = segment.status === "No snapshot"
+              ? "No earlier snapshot"
+              : segment.status === "Not yet observed" ? segment.label : "";
+            return `<span class="measure-journey-segment ${segment.tone}" style="left:${start}%;width:${width}%" title="${segment.label}">${contextLabel ? `<span class="measure-journey-segment-label">${contextLabel}</span>` : ""}</span>`;
+          }).join("")}
+          ${events.map((event, index) => {
+            const isLatest = latestMovement && event.changed && event.date === latestMovement.date && event.status === latestMovement.status;
+            const position = range.id === "six-months" && event.date === validationCurrentSnapshotLabel
+              ? 91.5
+              : statusDateRangePercent(event.date, range);
+            const edgeClass = position < 5 ? "edge-start" : position > 95 ? "edge-end" : "";
+            const markerTone = event.locked ? "lock" : measureJourneyStatusClass(event.status);
+            const eventLabel = measureJourneyTimelineEventLabel(event, index);
+            const laneClass = event.locked || (!event.changed && !isLatest) ? "upper" : isLatest ? "lower" : index % 2 ? "lower" : "upper";
+            return `
+              <div class="measure-journey-event ${laneClass} ${event.locked ? "lock-event" : ""} ${isLatest ? "latest" : ""} ${event.changed ? "status-change" : "context-event"} ${edgeClass}" style="left:${position}%">
+                ${isLatest ? `<span class="measure-journey-transition-status incoming">${measureJourneyStatusText(event.from)}</span><span class="measure-journey-transition-status outgoing">${measureJourneyStatusText(event.status)}</span>` : ""}
+                <span class="measure-journey-dot ${markerTone}">${isLatest ? "" : measureJourneyDotLabel(event)}</span>
+                ${isLatest
+                  ? `<button class="measure-journey-event-copy measure-journey-event-link measure-journey-selected-link" data-jump-to-changed-criteria type="button" aria-label="Open evidence for ${event.movement} on ${statusDateDisplay(event.date)}"><strong>${statusDateDisplay(event.date)}</strong><em>${eventLabel}</em><span>Evidence &darr;</span></button>`
+                  : event.changed
+                    ? `<button class="measure-journey-event-copy measure-journey-event-link" data-toast="Supporting evidence opened" type="button" aria-label="Open evidence for ${event.movement} on ${statusDateDisplay(event.date)}"><strong>${statusDateDisplay(event.date)}</strong><em>${eventLabel}</em><span>Evidence &darr;</span></button>`
+                    : `<span class="measure-journey-event-copy" title="${event.movement || measureJourneyEventSubtitle(event)}"><strong>${statusDateDisplay(event.date)}</strong><em>${eventLabel}</em></span>`}
+              </div>
+            `;
+          }).join("")}
+        </div>
       </div>
-    </article>
-    <article class="vision-card spaced selected-patient-pane">
-      <div class="selected-patient-header">
+      <div class="measure-journey-legend">
+        <span><i class="open"></i>Denominator</span>
+        <span><i class="met"></i>Numerator</span>
+        <span><i class="excluded"></i>Excluded</span>
+        ${range.id === "full-year" ? `<span><i class="future"></i>Not yet observed</span>` : ""}
+        <strong>${changeCount} status ${changeCount === 1 ? "change" : "changes"} tracked</strong>
+      </div>
+    </section>
+  `;
+}
+
+function compactCriteriaCount(count) {
+  return String(count || "").replace(" criteria satisfied", "").trim();
+}
+
+function measureJourneySectionCount(section, highlight, movement) {
+  if (!highlight || highlight.sectionId !== section.id || !movement) return compactCriteriaCount(section.count);
+  if (section.id === "numerator" && movement.from === "Denominator" && movement.status === "Numerator") return "1 / 2 -> 2 / 2";
+  if (section.id === "numerator" && movement.from === "Numerator" && movement.status === "Denominator") return "2 / 2 -> 1 / 2";
+  if (section.id === "exclusions" && movement.status === "Exclusion") return "0 / 6 -> 1 / 6";
+  if (section.id === "denominator" && movement.from === "Initial population" && movement.status === "Denominator") return "0 / 1 -> 1 / 1";
+  return compactCriteriaCount(section.count);
+}
+
+function renderMeasureJourneyCriteriaSection(section, options = {}) {
+  const { highlight, movement } = options;
+  const isChangedSection = highlight?.sectionId === section.id;
+  const sectionOpen = section.open || isChangedSection;
+  return `
+    <details class="journey-criteria-section ${section.tone} ${isChangedSection ? "changed" : ""}" ${sectionOpen ? "open" : ""}>
+      <summary>
+        <span class="journey-chevron" aria-hidden="true">›</span>
+        <strong>${section.title}</strong>
+        ${isChangedSection ? `<span class="journey-change-chip"><span>1</span>Changed ${movement?.date || "today"}</span>` : ""}
+        ${criterionResultBadge(section.status)}
+        <span class="journey-section-count">${measureJourneySectionCount(section, highlight, movement)}</span>
+      </summary>
+      <table class="journey-criteria-table">
+        <thead><tr><th>Measure criterion</th><th>Patient evidence</th><th>Result</th></tr></thead>
+        <tbody>
+          ${section.rows.map((row, index) => {
+            const isHighlighted = isChangedSection && row.criteria === highlight.criteria;
+            return `
+              ${index > 0 ? `<tr class="criteria-logic-divider" aria-label="${section.logicOperator}"><td colspan="3"><span>${section.logicOperator}</span></td></tr>` : ""}
+              <tr class="${isHighlighted ? "caused-change" : ""}">
+                <td>${isHighlighted ? `<span class="journey-caused-label"><span>1</span>Status changed here</span>` : ""}${row.criteria}</td>
+                <td>${row.evidence}${isHighlighted ? `<button class="grid-link journey-supporting-evidence" data-toast="Supporting evidence opened" type="button">View supporting evidence</button>` : ""}</td>
+                <td>${criterionResultBadge(row.result)}</td>
+              </tr>
+            `;
+          }).join("")}
+        </tbody>
+      </table>
+    </details>
+  `;
+}
+
+function renderMeasureJourneySelectedChange(patient, measure, options = {}) {
+  const includeAccept = options.includeAccept !== false;
+  const includeLocking = options.includeLocking !== false;
+  const movement = patientLatestStatusMovement(patient);
+  const activeChange = includeAccept ? patientLatestStatusChange(patient) : null;
+  const accepted = includeLocking ? acceptedValidationChangeForPatient(patient) : null;
+  const hasSelectedChange = Boolean(accepted || movement);
+  const selectedMovement = accepted
+    ? { date: accepted.acceptedDate, movement: `${accepted.originalLockedState} -> ${accepted.status}`, detail: accepted.reason, status: accepted.status }
+    : movement || { date: validationCurrentSnapshotLabel, movement: `Current status: ${patientCurrentOutcome(patient)}`, detail: "Current calculation matches the tracked status.", status: patientCurrentOutcome(patient) };
+  const highlight = patientOutcomeChangeHighlight(patient, measure);
+  const sections = patientCriteriaSections(patient, measure);
+  return `
+    <section class="measure-journey-change-panel">
+      <div class="measure-journey-change-heading">
+        <div class="measure-journey-change-title">
+          ${hasSelectedChange ? `<span class="measure-journey-change-index" aria-hidden="true">1</span>` : ""}
           <div>
-            <span class="vision-kicker">Entire patient population</span>
-            <h3>${selected.measure}</h3>
-            <p>${selected.code} · ${selected.mvp} · showing ${visiblePatients.length} representative rows of ${selectedTotal} ${populationLabel}${activeFilter === "all" ? "" : ` filtered to ${patientOutcomeCategoryName(activeFilter).toLowerCase()}`}</p>
+            <h4>${hasSelectedChange ? `${selectedMovement.date} · ${selectedMovement.movement}` : `Current status · ${patientCurrentOutcome(patient)}`}</h4>
           </div>
-          <div class="validation-snapshot-note">
-            <span>Active round</span>
-            <strong>${activeRound.label}</strong>
-            <small>${activeRound.phase}</small>
-          </div>
+        </div>
+        <div class="measure-journey-change-actions">
+          <button class="grid-link" data-expand-journey-criteria type="button">Expand all</button>
+          ${includeAccept && activeChange
+            ? `<button class="vision-row-button primary" data-accept-status-change="${measure.id}:${patient.patient}" type="button">Accept change</button>`
+            : includeAccept && accepted ? `${visionBadge("Accepted", "good")}` : ""}
+        </div>
       </div>
-      ${renderPatientStatusTimeline(selectedPatient)}
+      <div class="journey-criteria-stack">
+        ${sections.map((section) => renderMeasureJourneyCriteriaSection(section, { highlight, movement })).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderPatientStatusTimelinePanel(patient, measure = selectedValidationMeasure()) {
+  const rows = patientStatusTimelineRows(patient).filter((event, index) => index === 0 || event.changed || event.locked || event.accepted);
+  const activeChange = patientLatestStatusChange(patient);
+  const latestMovement = patientLatestStatusMovement(patient);
+  const highlight = patientOutcomeChangeHighlight(patient, measure);
+  const result = patientOverallResult(patient);
+  return `
+    <div class="status-history-panel compact-status-history">
+      <div class="status-history-label">
+        <strong>Status history through measurement period</strong>
+        <span>Baseline, validation lock, true status changes, and accepted baselines only.</span>
+      </div>
+      <table class="status-history-table">
+        <thead>
+          <tr><th>Date</th><th>Calculated status</th><th>Status change</th><th>Reason</th><th>Source / version</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+          ${rows.map((event) => {
+            const isLatestMovement = latestMovement && event.changed && event.date === latestMovement.date && event.status === latestMovement.status;
+            return `
+            <tr class="${event.accepted ? "accepted" : event.changed ? "changed" : ""} ${isLatestMovement ? "latest-change" : ""}">
+              <td><strong>${event.date}</strong></td>
+              <td>${visionBadge(event.status, outcomeStatusTone(event.status))}</td>
+              <td><strong>${event.movement}</strong></td>
+              <td>${event.label}<span class="subline">${event.detail}</span></td>
+              <td>${event.source}<span class="subline">${event.version}</span></td>
+              <td>
+                ${activeChange && event.date === activeChange.date && event.status === activeChange.status
+                  ? `<button class="grid-link primary" data-accept-status-change="${measure.id}:${patient.patient}" type="button">Accept change</button>`
+                  : event.accepted ? `${visionBadge("Accepted", "good")}<span class="subline">New locked status</span>` : ""}
+              </td>
+            </tr>
+            ${isLatestMovement ? `
+              <tr class="status-change-context-row">
+                <td colspan="6">
+                  <div class="status-change-context-card">
+                    <div class="status-change-context-heading">
+                      <div>
+                        <span class="vision-kicker">Current outcome explainability</span>
+                        <strong>${measure.code} - ${measure.measure}</strong>
+                        <em>${patientDisplayName(patient)} · ${patientMrn(patient)} · Evaluated ${validationCurrentSnapshotLabel}</em>
+                      </div>
+                      <span class="smart-result-badge ${result.tone}">${result.label}</span>
+                    </div>
+                    <div class="smart-criteria-stack status-change-criteria-stack">
+                      ${patientCriteriaSections(patient, measure)
+                        .map((section) => renderPatientCriteriaSection(section, { highlight }))
+                        .join("")}
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            ` : ""}
+          `;
+          }).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderValidationStatusDrawerHeader(patient, measure, result) {
+  const latestMovement = patientLatestStatusMovement(patient);
+  const accepted = acceptedValidationChangeForPatient(patient);
+  const latestDate = accepted ? accepted.acceptedDate : latestMovement?.date || validationCurrentSnapshotLabel;
+  const latestMovementLabel = accepted
+    ? `${accepted.originalLockedState} -> ${accepted.status}`
+    : latestMovement?.movement || "No status change";
+  const latestDetail = accepted
+    ? accepted.reason
+    : latestMovement?.detail || "Current calculation matches the locked validation status.";
+  const latestSource = accepted
+    ? accepted.acceptedBy || "Quality manager"
+    : latestMovement?.source || patientDataSources(patient);
+  const latestVersion = accepted
+    ? "Accepted validation baseline"
+    : latestMovement?.version || "Current outcome snapshot";
+  return `
+    <div class="status-drawer-summary">
+      <div class="status-drawer-identity">
+        <span class="vision-kicker">Patient status detail</span>
+        <strong>${patientDisplayName(patient)} / ${patientMrn(patient)}</strong>
+        <em>${patient.patient} · ${measure.code} - ${measure.measure}</em>
+      </div>
+      <div class="status-change-focus ${latestMovement || accepted ? "changed" : ""}">
+        <span>${accepted ? "Accepted status change" : latestMovement ? "Latest status change" : "Current status"}</span>
+        <strong>${latestDate} · ${latestMovementLabel}</strong>
+        <em>${latestDetail}</em>
+        ${patientStatusMovementFlag(patient)}
+      </div>
+      <div class="status-drawer-actions">
+        <span class="smart-result-badge ${result.tone}">${result.label}</span>
+        <button class="smart-close-button quality-detail-dismiss" data-close-outcome-explanation type="button" aria-label="Collapse patient detail" title="Collapse patient detail">&times;</button>
+      </div>
+    </div>
+    <div class="status-lock-strip">
+      <div>
+        <span>Locked</span>
+        <strong>${patientOriginalLockedSnapshot(patient)}</strong>
+        <em>${patientOriginalLockedOutcome(patient)}</em>
+      </div>
+      <div>
+        <span>Current</span>
+        <strong>${validationCurrentSnapshotLabel}</strong>
+        <em>${patientCurrentOutcome(patient)}</em>
+      </div>
+      <div>
+        <span>Source / version</span>
+        <strong>${latestSource}</strong>
+        <em>${latestVersion}</em>
+      </div>
+    </div>
+  `;
+}
+
+function renderMeasureJourneyDetail(patient, measure, options = {}) {
+  const contextClass = options.contextClass || "";
+  const includeAccept = options.includeAccept !== false;
+  const includeLocking = options.includeLocking !== false;
+  return `
+    <div class="status-movement-review-panel validation-status-drawer measure-journey-detail ${contextClass}">
+      <section class="measure-journey-hero">
+        <div>
+          <h3>${measure.measure}</h3>
+          <p>${measure.code} · ${patientDisplayName(patient)} · ${patientMrn(patient)}</p>
+        </div>
+        <div class="measure-journey-current">
+          <span>Illustrative data</span>
+          <strong class="${measureJourneyStatusClass(patientCurrentOutcome(patient))}">${measureJourneyStatusText(patientCurrentOutcome(patient))}</strong>
+          <em>Current as of ${statusDateFull(validationCurrentSnapshotLabel)}</em>
+        </div>
+        <button class="smart-close-button quality-detail-dismiss" data-close-outcome-explanation type="button" aria-label="Collapse patient detail" title="Collapse patient detail">&times;</button>
+      </section>
+      ${renderMeasureJourneyTimeline(patient, { includeLocking })}
+      ${renderMeasureJourneySelectedChange(patient, measure, { includeAccept, includeLocking })}
+    </div>
+  `;
+}
+
+function renderStatusMovementExplainabilityPanel(patient, measure = selectedValidationMeasure()) {
+  return renderMeasureJourneyDetail(patient, measure);
+}
+
+function renderPatientValidationSortHeader(sortKey, label) {
+  const active = state.patientValidationSort === sortKey;
+  const direction = state.patientValidationSortDirection === "asc" ? "ascending" : "descending";
+  const indicator = active ? (state.patientValidationSortDirection === "asc" ? "↑" : "↓") : "↕";
+  return `
+    <button
+      class="table-sort-button ${active ? "active" : ""}"
+      data-validation-sort-column="${sortKey}"
+      type="button"
+      aria-label="Sort ${label} ${active && direction === "descending" ? "ascending" : "descending"}"
+    >
+      <span>${label}</span>
+      <span class="sort-indicator" aria-hidden="true">${indicator}</span>
+    </button>
+  `;
+}
+
+function renderInlinePatientValidationPane(selected, visiblePatients, filterCounts, activeFilter, selectedTotal) {
+  const expandedStatusPatient = validationPatientsForMeasure(selected).find((patient) => patient.patient === state.expandedStatusPatient);
+  const changeDateOptions = patientValidationChangeDateOptions(selected);
+  const activeChangeDate = selectedPatientValidationChangeDate(selected);
+  const pageInfo = patientValidationPageInfo(visiblePatients);
+  const pageRows = pageInfo.rows;
+  const rangeStart = pageInfo.total ? pageInfo.start + 1 : 0;
+  const rangeLabel = `${rangeStart}-${pageInfo.end} of ${pageInfo.total}`;
+  return `
+    <div class="inline-patient-validation-pane" aria-live="polite">
+      <div class="selected-patient-header inline">
+        <div>
+          <span class="vision-kicker">Selected patient population</span>
+          <h3>${selected.measure}</h3>
+          <p>${selected.code} · ${selected.mvp} · ${selectedTotal} patients selected for validation</p>
+        </div>
+        <div class="validation-snapshot-note">
+          <span>Frozen cohorts</span>
+          <strong>May-Jul baselines</strong>
+          <em>Status changes through ${validationCurrentSnapshotLabel}</em>
+        </div>
+      </div>
+      ${renderAddValidationPatientPanel(selected)}
       <div class="validation-worklist-controls">
         <div class="validation-filter-group" aria-label="Patient validation filters">
-          ${renderPatientValidationFilterButton("all", "All patients", filterCounts.all, true)}
+          ${renderPatientValidationFilterButton("all", "All selected", filterCounts.all, true)}
           ${renderPatientValidationFilterButton("changed", "Status changed", filterCounts.changed, true)}
           ${renderPatientValidationFilterButton("numerator", "Numerator", filterCounts.numerator, true)}
           ${renderPatientValidationFilterButton("denominator", "Denominator", filterCounts.denominator, true)}
           ${renderPatientValidationFilterButton("exclusion", "Exclusion", filterCounts.exclusion, true)}
         </div>
-        <div class="validation-sort-control">
-          <span>Sort</span>
-          <select data-validation-sort>
-            <option value="changed-first" ${state.patientValidationSort === "changed-first" ? "selected" : ""}>Status changed first</option>
-            <option value="outcome" ${state.patientValidationSort === "outcome" ? "selected" : ""}>Outcome population</option>
-            <option value="patient-id" ${state.patientValidationSort === "patient-id" ? "selected" : ""}>Patient ID</option>
-          </select>
+        <div class="validation-table-controls">
           <label class="validation-sort-control">
-            <span>Round</span>
-            <select data-validation-round>
-              ${validationRounds.map((round) => `<option value="${round.id}" ${activeRound.id === round.id ? "selected" : ""}>${round.label} · ${round.phase}</option>`).join("")}
+            <span>Change date</span>
+            <select data-validation-change-date>
+              <option value="all" ${activeChangeDate === "all" ? "selected" : ""}>All dates</option>
+              ${changeDateOptions.map((date) => `<option value="${date}" ${activeChangeDate === date ? "selected" : ""}>${date}</option>`).join("")}
+            </select>
+          </label>
+          <label class="validation-sort-control">
+            <span>Rows</span>
+            <select data-validation-page-size>
+              ${patientValidationPageSizeOptions.map((size) => `<option value="${size}" ${selectedPatientValidationPageSize() === size ? "selected" : ""}>${size}</option>`).join("")}
+            </select>
+          </label>
+          <label class="validation-sort-control">
+            <span>Sort</span>
+            <select data-validation-sort>
+              <option value="changed-first" ${state.patientValidationSort === "changed-first" ? "selected" : ""}>Status changed first</option>
+              <option value="change-date" ${state.patientValidationSort === "change-date" ? "selected" : ""}>Change date</option>
+              <option value="outcome" ${state.patientValidationSort === "outcome" ? "selected" : ""}>Outcome population</option>
+              <option value="patient-id" ${state.patientValidationSort === "patient-id" ? "selected" : ""}>Patient name</option>
             </select>
           </label>
         </div>
       </div>
-      <table class="vision-table selected-patient-table validation-queue-table">
-        <thead><tr><th>Patient</th><th>Provider / specialty</th><th>Period status</th><th>Outcome</th><th>Status (${activeRound.label})</th><th>Prior (${priorRound.label})</th><th>State change</th><th>Evidence summary</th><th>Sources</th><th></th></tr></thead>
-        <tbody>
-          ${visiblePatients.length ? visiblePatients.map((row) => `
-              <tr class="${patientStatusChangedAtRound(row, activeRound) ? "state-changed" : ""}">
-                <td><strong>${row.patient}</strong><span class="subline">${selected.code}</span></td>
-                <td><strong>${row.provider}</strong><span class="subline">${row.specialty}</span></td>
-                <td>${renderPatientTimelineCompact(row)}</td>
-                <td>${patientOutcomeBadge(row, activeRound)}</td>
-                <td><strong>${escapeHtml(patientStatusAtRound(row, activeRound))}</strong></td>
-                <td>${escapeHtml(patientStatusAtRound(row, priorRound))}</td>
-                <td>${patientStatusChangedAtRound(row, activeRound) ? visionBadge(`${patientStatusAtRound(row, priorRound)} → ${patientStatusAtRound(row, activeRound)}`, row.changeTone) : visionBadge("No change", "info")}</td>
-                <td>${row.evidence}</td>
-                <td>${patientDataSources(row)}</td>
-                <td><button class="vision-row-button" data-open-patient-explanation="${row.patient}" type="button">Explain</button></td>
+      <div class="inline-patient-table-scroll">
+        <table class="vision-table selected-patient-table validation-queue-table resizable-data-grid">
+          <thead><tr><th>Patient</th><th>MRN</th><th>Provider</th><th>Specialty</th><th>Locked status</th><th>Current status</th><th>${renderPatientValidationSortHeader("change-date", "Change date")}</th><th>Status summary</th><th>Evidence summary</th></tr></thead>
+          <tbody>
+            ${pageRows.length ? pageRows.map((row) => {
+              const changeDateDisplay = patientValidationChangeDateDisplay(row);
+              return `
+                <tr class="${patientHasStateChange(row) ? "state-changed" : ""} ${expandedStatusPatient?.patient === row.patient ? "selected-patient-row" : ""}">
+                  <td><strong title="${escapeHtml(patientDisplayName(row))}">${patientDisplayName(row)}</strong><span class="subline">${row.patient}${row.added ? " · Added" : ""}</span></td>
+                  <td><strong>${patientMrn(row)}</strong></td>
+                  <td><strong title="${escapeHtml(row.provider)}">${row.provider}</strong></td>
+                  <td><span title="${escapeHtml(row.specialty)}">${row.specialty}</span></td>
+                  <td><strong>${patientLockedOutcome(row)}</strong><span class="subline">${patientLockedStatusSubline(row)}</span></td>
+                  <td><strong>${patientCurrentOutcome(row)}</strong>${patientIsNearMiss(row) ? `<span class="subline">Near miss</span>` : ""}<span class="subline">${validationCurrentSnapshotLabel}</span></td>
+                  <td><strong>${changeDateDisplay.date}</strong><span class="subline">${changeDateDisplay.label}</span></td>
+                  <td><button class="grid-link status-movement-link ${state.expandedStatusPatient === row.patient ? "active" : ""}" data-open-status-movement="${row.patient}" title="${escapeHtml(patientStatusTimelineText(row))}" type="button">${patientStatusChangeLabel(row)}</button>${patientStatusMovementFlag(row)}<span class="subline">${patientStatusMovementSubline(row)}</span></td>
+                  <td><span class="evidence-summary" title="${escapeHtml(row.evidence)}">${row.evidence}</span><span class="subline" title="${escapeHtml(patientDataSources(row))}">Sources: ${patientDataSources(row)}</span></td>
+                </tr>
+                ${expandedStatusPatient?.patient === row.patient ? `
+                  <tr class="patient-status-detail-row">
+                    <td colspan="9">
+                      ${renderStatusMovementExplainabilityPanel(row, selected)}
+                    </td>
+                  </tr>
+                ` : ""}
+            `;
+            }).join("") : `
+              <tr><td colspan="9"><div class="empty-state">No patients match this outcome filter.</div></td></tr>
+            `}
+          </tbody>
+        </table>
+      </div>
+      <div class="patient-table-pager">
+        <span>Showing ${rangeLabel} ${patientValidationFilterLabel(activeFilter)} · ${pageInfo.pageSize} rows/page</span>
+        <div>
+          <button class="vision-row-button" data-validation-page="${pageInfo.page - 1}" ${pageInfo.page <= 1 ? "disabled" : ""} type="button">Previous</button>
+          <button class="vision-row-button" data-validation-page="${pageInfo.page + 1}" ${pageInfo.page >= pageInfo.totalPages ? "disabled" : ""} type="button">Next</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderValidationMeasurePicker(selected) {
+  return `
+    <label class="validation-measure-picker">
+      <span>Measure</span>
+      <select data-validation-measure-select>
+        ${visionValidationPatientMeasures.map((measure) => `
+          <option value="${measure.id}" ${measure.id === selected.id ? "selected" : ""}>${measure.measure} (${measure.code})</option>
+        `).join("")}
+      </select>
+    </label>
+  `;
+}
+
+function renderValidationMeasureOverviewTable() {
+  const activeFilter = state.patientValidationFilter || "all";
+  return `
+    <table class="vision-table validation-measure-overview-table resizable-data-grid">
+      <thead>
+        <tr>
+          <th>Measure</th>
+          <th>Selected</th>
+          <th>Status changes</th>
+          <th>Numerator</th>
+          <th>Denominator</th>
+          <th>Exclusion</th>
+          <th>Latest change</th>
+          <th>Primary validation focus</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${visionValidationPatientMeasures.map((measure) => {
+          const counts = patientValidationFilterCounts(measure);
+          const signal = validationSignalForMeasure(measure);
+          const latestChangeDate = patientValidationChangeDateOptions(measure)[0] || "-";
+          const isExpanded = state.expandedValidationMeasure === measure.id;
+          const visiblePatients = isExpanded ? patientValidationRowsForMeasure(measure) : [];
+          return `
+            <tr class="${isExpanded ? "selected" : ""}" data-validation-measure-row="${measure.id}" tabindex="0" aria-expanded="${isExpanded ? "true" : "false"}" title="${isExpanded ? "Collapse validation population" : "Open validation population"}">
+              <td>
+                <div class="measure-row-entry">
+                  <button class="row-disclosure-button" data-validation-measure-toggle="${measure.id}" type="button" aria-label="${isExpanded ? "Collapse" : "Open"} ${measure.measure}" aria-expanded="${isExpanded ? "true" : "false"}">
+                    <span class="row-disclosure" aria-hidden="true"></span>
+                  </button>
+                  <div>
+                    <strong>${measure.measure}</strong>
+                    <span class="subline">${measure.code} / ${measure.mvp}</span>
+                  </div>
+                </div>
+              </td>
+              <td class="numeric"><strong>${counts.all}</strong></td>
+              <td class="numeric"><strong>${counts.changed}</strong></td>
+              <td class="numeric">${counts.numerator}</td>
+              <td class="numeric">${counts.denominator}</td>
+              <td class="numeric">${counts.exclusion}</td>
+              <td><strong>${latestChangeDate}</strong><span class="subline">${counts.changed ? "Status movement" : "No movement"}</span></td>
+              <td><strong>${signal.risk}</strong><span class="subline">${signal.rationale}</span></td>
+            </tr>
+            ${isExpanded ? `
+              <tr class="validation-measure-detail-row">
+                <td colspan="8">
+                  ${renderInlinePatientValidationPane(measure, visiblePatients, counts, activeFilter, counts.all)}
+                </td>
               </tr>
-          `).join("") : `
-            <tr><td colspan="10"><div class="empty-state">No patients match this outcome filter.</div></td></tr>
-          `}
-        </tbody>
-      </table>
+            ` : ""}
+          `;
+        }).join("")}
+      </tbody>
+    </table>
+  `;
+}
+
+function renderVisionValidationTrackingTab() {
+  return `
+    <article class="vision-card patient-validation-workspace validation-tracking-workspace compact-patient-validation">
+      <div class="validation-tracking-topbar">
+        <div>
+          <span class="vision-kicker">Validation population tracking</span>
+          <h3>Selected patients by measure</h3>
+          <p>Track the locked validation cohort, filter by outcome status or status movement, add known patients, and explain any patient outcome.</p>
+        </div>
+      </div>
+      ${renderValidationMeasureOverviewTable()}
     </article>
   `;
 }
 
-function renderVisionTrendingQualityTab() {
-  const belowTarget = visionValidationPatientMeasures.filter((measure) => currentTrendValue(measure.id) < qualityTargetFor(measure.id)).length;
-  const totalChanged = visionValidationPatientMeasures.reduce((sum, measure) => sum + changedPatientCountForMeasure(measure), 0);
-  const totalSelected = visionValidationPatientMeasures.reduce((sum, measure) => sum + (state.patientValidationScope === "all" ? fullPopulationCountForMeasure(measure) : validationPatientsForMeasure(measure).length), 0);
-  const largestMove = visionValidationPatientMeasures.reduce((largest, measure) => {
-    const currentChange = Math.abs(Number.parseFloat(attestationTrendFor(measure.id).wowChange));
-    const largestChange = Math.abs(Number.parseFloat(attestationTrendFor(largest.id).wowChange));
-    return currentChange > largestChange ? measure : largest;
-  }, visionValidationPatientMeasures[0]);
-  const largestMoveTrend = attestationTrendFor(largestMove.id);
-  return `
-    <div class="workbench-summary-row">
-      <div>
-        <span class="vision-kicker">Population validation</span>
-        <strong>${visionValidationPatientMeasures.length} measures · ${belowTarget} below target · ${totalChanged} changed patient outcomes</strong>
-        <em>Largest WoW movement is ${largestMoveTrend.wowChange} on ${largestMove.measure}; the full eligible populations contain ${totalSelected.toLocaleString()} patients.</em>
-      </div>
-      <div class="inline-action-group">
-        <button class="vision-row-button" data-validation-changes="${largestMove.id}" type="button">Review largest change</button>
-        <button class="vision-row-button" data-validation-measure="${selectedValidationMeasure().id}" type="button">Open selected patients</button>
-      </div>
-    </div>
-    <article class="vision-card spaced quality-trend-workspace">
-      <div class="vision-section-title compact">
-        <span class="vision-kicker">Measure trends</span>
-        <h3>Trending quality over time</h3>
-      </div>
-      <table class="vision-table quality-trend-table">
-        <thead>
-          <tr>
-            <th>Measure</th>
-            <th>Current quality</th>
-            <th>WoW change</th>
-            <th>Customer target</th>
-            <th>Gap to target</th>
-            <th>Trend</th>
-            <th>Changed outcomes</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-      ${visionValidationPatientMeasures.map((measure) => {
-        const trend = attestationTrendFor(measure.id);
-        const target = qualityTargetFor(measure.id);
-        return `
-          <tr class="${measure.id === selectedValidationMeasure().id ? "selected" : ""}">
-            <td><strong>${measure.measure}</strong><span class="subline">${measure.code} / ${measure.mvp}</span></td>
-            <td><strong>${trend.current}</strong><span class="subline">${(state.patientValidationScope === "all" ? fullPopulationCountForMeasure(measure) : validationPatientsForMeasure(measure).length).toLocaleString()} eligible patients</span></td>
-            <td><span class="wow-change-badge ${trend.wowTone}">${trend.wowChange}</span></td>
-            <td>
-              <label class="quality-target-control">
-                <input type="number" min="50" max="100" value="${target}" data-quality-target="${measure.id}" aria-label="${measure.measure} customer target" />
-                <span>%</span>
-              </label>
-            </td>
-            <td data-quality-gap="${measure.id}">${qualityTargetGapBadge(measure.id)}</td>
-            <td>${renderAttestationTrendChart(measure, { table: true })}</td>
-            <td>
-              <button class="vision-row-button" data-validation-changes="${measure.id}" type="button">${changedPatientCountForMeasure(measure)} changed</button>
-              <span class="subline">${validationPriorSnapshotLabel} -> ${validationCurrentSnapshotLabel}</span>
-            </td>
-            <td>
-              <div class="row-action-stack">
-                <button class="vision-row-button" data-validation-measure="${measure.id}" type="button">Patients</button>
-                <button class="vision-row-button" data-workbench-opportunities="${measure.id}" type="button">Opportunities</button>
-              </div>
-            </td>
-          </tr>
-        `;
-      }).join("")}
-        </tbody>
-      </table>
-    </article>
-  `;
+function renderVisionSelectedPatientsTab() {
+  return renderVisionValidationTrackingTab();
+}
+
+function renderVisionPopulationValidationTab() {
+  return renderVisionQualityPerformanceTab();
 }
 
 function renderVisionAttestationTrendsTab() {
-  return renderVisionTrendingQualityTab();
+  return renderVisionPopulationValidationTab();
 }
 
+function renderVisionTrendingQualityTab() {
+  return renderVisionPopulationValidationTab();
+}
+
+
 function renderVisionValidationPlanTab() {
-  const totalSelected = visionValidationPatientMeasures.reduce((sum, measure) => sum + (state.patientValidationScope === "all" ? fullPopulationCountForMeasure(measure) : validationPatientsForMeasure(measure).length), 0);
+  const totalSelected = visionValidationPatientMeasures.reduce((sum, measure) => sum + validationPatientsForMeasure(measure).length, 0);
   const belowTarget = visionValidationPatientMeasures.filter((measure) => currentTrendValue(measure.id) < qualityTargetFor(measure.id)).length;
   return `
     <div class="vision-grid-4">
@@ -3836,7 +6072,7 @@ function renderVisionValidationPlanTab() {
               <tr>
                 <td><strong>${measure.measure}</strong><span class="subline">${measure.code}</span></td>
                 <td>${measure.mvp}</td>
-                <td>${(state.patientValidationScope === "all" ? fullPopulationCountForMeasure(measure) : validationPatientsForMeasure(measure).length).toLocaleString()}</td>
+                <td>${validationPatientsForMeasure(measure).length.toLocaleString()}</td>
                 <td><strong>${trend.current}</strong></td>
                 <td>${visionBadge(trend.wowChange, trend.wowTone)}<span class="subline">${validationPriorSnapshotLabel} -> ${validationCurrentSnapshotLabel}</span></td>
                 <td>${target}%</td>
@@ -4861,24 +7097,132 @@ function renderDesignLab() {
     button.addEventListener("click", () => {
       focusValidationMeasure(button.dataset.validationMeasure, { filter: "all" });
       state.visionValidationTab = "patient-level";
-      state.visionPerformanceTab = "patient-level";
+      state.visionPerformanceTab = "validation-tracking";
       state.visionRoute = "performance";
       render();
+      scrollExpandedOutcomeIntoView();
     });
   });
   content.querySelectorAll("[data-validation-changes]").forEach((button) => {
     button.addEventListener("click", () => {
-      focusValidationMeasure(button.dataset.validationChanges, { filter: "changed" });
+      const signal = validationSignalForMeasure(button.dataset.validationChanges);
+      focusValidationMeasure(button.dataset.validationChanges, {
+        filter: "changed",
+        patientId: signal.spotlightPatient,
+        openStatus: Boolean(signal.spotlightPatient),
+      });
       state.visionValidationTab = "patient-level";
-      state.visionPerformanceTab = "patient-level";
+      state.visionPerformanceTab = "validation-tracking";
       state.visionRoute = "performance";
       render();
+      if (state.expandedStatusPatient) scrollExpandedOutcomeIntoView();
+    });
+  });
+  content.querySelectorAll("[data-quality-population]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const measureId = button.dataset.qualityPopulation;
+      state.openQualityPopulationMeasure = measureId;
+      state.selectedValidationMeasure = measureId;
+      state.qualityPopulationFilter = button.dataset.qualityFilter || state.qualityPopulationFilter || "all";
+      state.qualityPopulationPage = 1;
+      state.expandedQualityPopulationPatient = "";
+      state.expandedOutcomePatient = "";
+      state.expandedStatusPatient = "";
+      state.visionPerformanceTab = "quality-performance";
+      state.visionRoute = "performance";
+      render();
+    });
+  });
+  content.querySelectorAll("[data-quality-population-row]").forEach((row) => {
+    const selectMeasure = () => {
+      const measureId = row.dataset.qualityPopulationRow;
+      const isOpen = state.openQualityPopulationMeasure === measureId;
+      state.openQualityPopulationMeasure = isOpen ? "" : measureId;
+      state.selectedValidationMeasure = measureId;
+      state.qualityPopulationFilter = "all";
+      state.qualityPopulationPage = 1;
+      state.expandedQualityPopulationPatient = "";
+      state.expandedOutcomePatient = "";
+      state.expandedStatusPatient = "";
+      state.visionPerformanceTab = "quality-performance";
+      state.visionRoute = "performance";
+      render();
+    };
+    row.addEventListener("click", (event) => {
+      if (event.target.closest("button, input, select, a, label")) return;
+      selectMeasure();
+    });
+    row.addEventListener("keydown", (event) => {
+      if (event.target.closest("button, input, select, a, label")) return;
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      selectMeasure();
+    });
+  });
+  content.querySelectorAll("[data-close-quality-population]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.openQualityPopulationMeasure = "";
+      state.expandedQualityPopulationPatient = "";
+      state.visionPerformanceTab = "quality-performance";
+      state.visionRoute = "performance";
+      render();
+    });
+  });
+  content.querySelectorAll("[data-quality-population-filter]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.qualityPopulationFilter = button.dataset.qualityPopulationFilter;
+      state.qualityPopulationPage = 1;
+      state.expandedQualityPopulationPatient = "";
+      state.visionPerformanceTab = "quality-performance";
+      state.visionRoute = "performance";
+      render();
+    });
+  });
+  content.querySelectorAll("[data-quality-population-sort]").forEach((select) => {
+    select.addEventListener("change", () => {
+      state.qualityPopulationSort = select.value;
+      state.qualityPopulationPage = 1;
+      state.expandedQualityPopulationPatient = "";
+      state.visionPerformanceTab = "quality-performance";
+      state.visionRoute = "performance";
+      render();
+    });
+  });
+  content.querySelectorAll("[data-quality-population-page]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.qualityPopulationPage = Number(button.dataset.qualityPopulationPage) || 1;
+      state.visionPerformanceTab = "quality-performance";
+      state.visionRoute = "performance";
+      render();
+    });
+  });
+  content.querySelectorAll("[data-quality-population-status]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const [measureId, patientId, index] = button.dataset.qualityPopulationStatus.split(":");
+      const measure = validationMeasureById(measureId);
+      const patient = qualityPopulationPatientById(measure, patientId, index);
+      const fromPopulationPane = Boolean(button.closest(".quality-population-pane"));
+      state.openQualityPopulationMeasure = measureId;
+      state.selectedValidationMeasure = measureId;
+      state.selectedValidationPatient = patient.patient;
+      if (!fromPopulationPane) {
+        state.qualityPopulationFilter = "all";
+        state.qualityPopulationPage = 1;
+      }
+      state.expandedQualityPopulationPatient = state.expandedQualityPopulationPatient === patient.patient ? "" : patient.patient;
+      state.expandedOutcomePatient = "";
+      state.expandedStatusPatient = "";
+      state.outcomeExplainTab = "logic";
+      state.visionPerformanceTab = "quality-performance";
+      state.visionRoute = "performance";
+      render();
+      if (state.expandedQualityPopulationPatient) scrollExpandedOutcomeIntoView();
     });
   });
   content.querySelectorAll("[data-workbench-opportunities]").forEach((button) => {
     button.addEventListener("click", () => {
       focusValidationMeasure(button.dataset.workbenchOpportunities, { filter: "all" });
-      state.visionPerformanceTab = "patient-opportunities";
+      state.visionPerformanceTab = "quality-performance";
       state.visionRoute = "performance";
       render();
     });
@@ -4886,16 +7230,19 @@ function renderDesignLab() {
   content.querySelectorAll("[data-workbench-trend-measure]").forEach((button) => {
     button.addEventListener("click", () => {
       focusValidationMeasure(button.dataset.workbenchTrendMeasure, { filter: "all" });
-      state.visionPerformanceTab = "trending-quality";
+      state.visionPerformanceTab = "quality-performance";
       state.visionRoute = "performance";
       render();
     });
   });
   content.querySelectorAll("[data-opportunity-patients]").forEach((button) => {
     button.addEventListener("click", () => {
-      focusValidationMeasure(button.dataset.opportunityPatients, { filter: "all" });
-      state.visionValidationTab = "patient-level";
-      state.visionPerformanceTab = "patient-level";
+      state.openQualityPopulationMeasure = button.dataset.opportunityPatients;
+      state.selectedValidationMeasure = button.dataset.opportunityPatients;
+      state.qualityPopulationFilter = "near-miss";
+      state.qualityPopulationPage = 1;
+      state.expandedQualityPopulationPatient = "";
+      state.visionPerformanceTab = "quality-performance";
       state.visionRoute = "performance";
       render();
     });
@@ -4903,24 +7250,131 @@ function renderDesignLab() {
   content.querySelectorAll("[data-opportunity-explain]").forEach((button) => {
     button.addEventListener("click", () => {
       const [measureId, patientId] = button.dataset.opportunityExplain.split(":");
-      focusValidationMeasure(measureId, { patientId, filter: "all" });
-      state.visionPerformanceTab = "patient-level";
-      state.visionRoute = "patient-evidence";
+      state.openQualityPopulationMeasure = measureId;
+      state.selectedValidationMeasure = measureId;
+      state.qualityPopulationFilter = "all";
+      state.qualityPopulationPage = 1;
+      state.expandedQualityPopulationPatient = patientId;
+      state.selectedValidationPatient = patientId;
+      state.visionPerformanceTab = "quality-performance";
+      state.visionRoute = "performance";
       render();
     });
   });
   content.querySelectorAll("[data-validation-filter]").forEach((button) => {
     button.addEventListener("click", () => {
       state.patientValidationFilter = button.dataset.validationFilter;
-      state.visionPerformanceTab = "patient-level";
+      state.patientValidationChangeDate = "all";
+      state.patientValidationPage = 1;
+      state.expandedOutcomePatient = "";
+      state.expandedStatusPatient = "";
+      state.outcomeExplainTab = "logic";
+      state.visionPerformanceTab = "validation-tracking";
+      state.visionRoute = "performance";
+      render();
+    });
+  });
+  content.querySelectorAll("[data-validation-measure-select]").forEach((select) => {
+    select.addEventListener("change", () => {
+      focusValidationMeasure(select.value, { filter: "all" });
+      state.visionPerformanceTab = "validation-tracking";
+      state.visionRoute = "performance";
+      render();
+    });
+  });
+  content.querySelectorAll("[data-validation-measure-row]").forEach((row) => {
+    const toggleMeasure = () => {
+      const measureId = row.dataset.validationMeasureRow;
+      if (state.expandedValidationMeasure === measureId) {
+        state.expandedValidationMeasure = "";
+      } else {
+        focusValidationMeasure(measureId, { filter: "all" });
+      }
+      state.expandedOutcomePatient = "";
+      state.expandedStatusPatient = "";
+      state.visionPerformanceTab = "validation-tracking";
+      state.visionRoute = "performance";
+      render();
+    };
+    row.addEventListener("click", (event) => {
+      if (event.target.closest("button, input, select, a, label")) return;
+      toggleMeasure();
+    });
+    row.addEventListener("keydown", (event) => {
+      if (event.target.closest("button, input, select, a, label")) return;
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      toggleMeasure();
+    });
+  });
+  content.querySelectorAll("[data-validation-measure-toggle]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const row = button.closest("[data-validation-measure-row]");
+      if (!row) return;
+      const measureId = button.dataset.validationMeasureToggle;
+      if (state.expandedValidationMeasure === measureId) {
+        state.expandedValidationMeasure = "";
+      } else {
+        focusValidationMeasure(measureId, { filter: "all" });
+      }
+      state.expandedOutcomePatient = "";
+      state.expandedStatusPatient = "";
+      state.visionPerformanceTab = "validation-tracking";
       state.visionRoute = "performance";
       render();
     });
   });
   content.querySelectorAll("[data-validation-sort]").forEach((select) => {
     select.addEventListener("change", () => {
+      if (select.value === "change-date" && state.patientValidationSort !== "change-date") {
+        state.patientValidationSortDirection = "desc";
+      }
       state.patientValidationSort = select.value;
-      state.visionPerformanceTab = "patient-level";
+      state.patientValidationPage = 1;
+      state.visionPerformanceTab = "validation-tracking";
+      state.visionRoute = "performance";
+      render();
+    });
+  });
+  content.querySelectorAll("[data-validation-sort-column]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const sortKey = button.dataset.validationSortColumn;
+      if (state.patientValidationSort === sortKey) {
+        state.patientValidationSortDirection = state.patientValidationSortDirection === "asc" ? "desc" : "asc";
+      } else {
+        state.patientValidationSort = sortKey;
+        state.patientValidationSortDirection = "desc";
+      }
+      state.patientValidationPage = 1;
+      state.visionPerformanceTab = "validation-tracking";
+      state.visionRoute = "performance";
+      render();
+    });
+  });
+  content.querySelectorAll("[data-validation-change-date]").forEach((select) => {
+    select.addEventListener("change", () => {
+      state.patientValidationChangeDate = select.value;
+      state.patientValidationPage = 1;
+      state.expandedOutcomePatient = "";
+      state.expandedStatusPatient = "";
+      state.visionPerformanceTab = "validation-tracking";
+      state.visionRoute = "performance";
+      render();
+    });
+  });
+  content.querySelectorAll("[data-validation-page-size]").forEach((select) => {
+    select.addEventListener("change", () => {
+      state.patientValidationPageSize = Number(select.value) || defaultPatientValidationPageSize;
+      state.patientValidationPage = 1;
+      state.visionPerformanceTab = "validation-tracking";
+      state.visionRoute = "performance";
+      render();
+    });
+  });
+  content.querySelectorAll("[data-validation-page]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.patientValidationPage = Number(button.dataset.validationPage) || 1;
+      state.visionPerformanceTab = "validation-tracking";
       state.visionRoute = "performance";
       render();
     });
@@ -4928,7 +7382,7 @@ function renderDesignLab() {
   content.querySelectorAll("[data-validation-round]").forEach((select) => {
     select.addEventListener("change", () => {
       state.patientValidationRound = select.value;
-      state.visionPerformanceTab = "patient-level";
+      state.visionPerformanceTab = "validation-tracking";
       state.visionRoute = "performance";
       render();
     });
@@ -4940,16 +7394,16 @@ function renderDesignLab() {
       state.patientValidationSearch = query;
       const match = patientValidationSearchMatch(query);
       if (match) {
-        state.selectedValidationMeasure = match.measure.id;
-        state.selectedValidationPatient = match.patient.patient;
-        state.visionRoute = "patient-evidence";
+        focusValidationMeasure(match.measure.id, { patientId: match.patient.patient, filter: "all", openStatus: true });
+        state.visionRoute = "performance";
         showToast(`${match.patient.patient} opened`);
       } else {
         state.visionRoute = "performance";
         showToast("No matching patient found");
       }
-      state.visionPerformanceTab = "patient-level";
+      state.visionPerformanceTab = "validation-tracking";
       render();
+      if (state.expandedStatusPatient) scrollExpandedOutcomeIntoView();
     });
   });
   content.querySelectorAll("[data-patient-search]").forEach((input) => {
@@ -4960,13 +7414,127 @@ function renderDesignLab() {
       }
     });
   });
+  content.querySelectorAll("[data-add-validation-patient-action]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const measureId = button.dataset.addValidationPatientAction;
+      const measure = validationMeasureById(measureId);
+      const input = button.closest(".validation-add-patient-panel")?.querySelector("[data-add-validation-patient-search]");
+      const query = input?.value || "";
+      state.addPatientSearch = query;
+      if (!query.trim()) {
+        showToast("Search for a patient first");
+        render();
+        return;
+      }
+      const match = validationCandidateSearchMatch(query, measure);
+      if (!match) {
+        showToast("No matching patient found");
+        render();
+        return;
+      }
+      const result = addPatientToValidationMeasure(measureId, match.patient);
+      state.visionValidationTab = "patient-level";
+      state.visionPerformanceTab = "validation-tracking";
+      state.visionRoute = "performance";
+      render();
+      scrollExpandedOutcomeIntoView();
+      showToast(result.added ? `${result.patient.patient} added to ${measure.code}` : `${result.patient.patient} already selected`);
+    });
+  });
+  content.querySelectorAll("[data-add-validation-patient-search]").forEach((input) => {
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        input.closest(".validation-add-patient-panel")?.querySelector("[data-add-validation-patient-action]")?.click();
+      }
+    });
+  });
   content.querySelectorAll("[data-open-patient-explanation]").forEach((button) => {
     button.addEventListener("click", () => {
-      state.selectedValidationPatient = button.dataset.openPatientExplanation;
-      state.patientValidationSearch = button.dataset.openPatientExplanation;
-      state.visionPerformanceTab = "patient-level";
-      state.visionRoute = "patient-evidence";
+      const patientId = button.dataset.openPatientExplanation;
+      state.selectedValidationPatient = patientId;
+      state.patientValidationSearch = patientId;
+      state.patientValidationPage = 1;
+      state.expandedStatusPatient = state.expandedStatusPatient === patientId ? "" : patientId;
+      state.expandedOutcomePatient = "";
+      state.outcomeExplainTab = "logic";
+      state.visionPerformanceTab = "validation-tracking";
+      state.visionRoute = "performance";
       render();
+      if (state.expandedStatusPatient) scrollExpandedOutcomeIntoView();
+    });
+  });
+  content.querySelectorAll("[data-close-outcome-explanation]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const wasQualityPopulation = Boolean(state.expandedQualityPopulationPatient);
+      state.expandedOutcomePatient = "";
+      state.expandedStatusPatient = "";
+      state.expandedQualityPopulationPatient = "";
+      state.outcomeExplainTab = "logic";
+      state.visionPerformanceTab = wasQualityPopulation ? "quality-performance" : "validation-tracking";
+      state.visionRoute = "performance";
+      render();
+    });
+  });
+  content.querySelectorAll("[data-open-status-movement]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const patientId = button.dataset.openStatusMovement;
+      state.selectedValidationPatient = patientId;
+      state.patientValidationSearch = patientId;
+      state.patientValidationPage = 1;
+      state.expandedStatusPatient = state.expandedStatusPatient === patientId ? "" : patientId;
+      state.expandedOutcomePatient = "";
+      state.visionPerformanceTab = "validation-tracking";
+      state.visionRoute = "performance";
+      render();
+    });
+  });
+  content.querySelectorAll("[data-accept-status-change]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const [measureId, patientId] = button.dataset.acceptStatusChange.split(":");
+      const result = acceptValidationStatusChange(measureId, patientId);
+      state.visionPerformanceTab = "validation-tracking";
+      state.visionRoute = "performance";
+      render();
+      showToast(result.accepted
+        ? `${result.patient.patient} status change accepted; locked status updated`
+        : "No unresolved status change to accept");
+    });
+  });
+  content.querySelectorAll("[data-expand-journey-criteria]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const panel = button.closest(".measure-journey-change-panel");
+      const sections = [...(panel?.querySelectorAll(".journey-criteria-section") || [])];
+      const shouldOpen = sections.some((section) => !section.open);
+      sections.forEach((section) => {
+        section.open = shouldOpen;
+      });
+      button.textContent = shouldOpen ? "Collapse all" : "Expand all";
+    });
+  });
+  content.querySelectorAll("[data-journey-range]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.journeyTimelineRange = button.dataset.journeyRange;
+      render();
+      scrollExpandedOutcomeIntoView();
+    });
+  });
+  content.querySelectorAll("[data-jump-to-changed-criteria]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const panel = button.closest(".measure-journey-detail");
+      const changedSection = panel?.querySelector(".journey-criteria-section.changed");
+      if (!changedSection) return;
+      changedSection.open = true;
+      changedSection.scrollIntoView({ block: "center", inline: "nearest", behavior: "smooth" });
+    });
+  });
+  content.querySelectorAll("[data-outcome-tab]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.outcomeExplainTab = button.dataset.outcomeTab;
+      state.visionPerformanceTab = "validation-tracking";
+      state.visionRoute = state.expandedOutcomePatient ? "performance" : state.visionRoute;
+      render();
+      if (state.expandedOutcomePatient) scrollExpandedOutcomeIntoView();
     });
   });
   content.querySelectorAll("[data-quality-target]").forEach((input) => {
