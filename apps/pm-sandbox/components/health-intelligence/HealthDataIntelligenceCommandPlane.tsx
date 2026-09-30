@@ -12,6 +12,7 @@ import PortfolioExecutiveSummary from "@/components/health-intelligence/Portfoli
 import ProgramOverview from "@/components/health-intelligence/ProgramOverview";
 import HdiContractDetail from "@/components/health-intelligence/HdiContractDetail";
 import SharedMeasureExplorer from "@/components/health-intelligence/SharedMeasureExplorer";
+import MeasureImpactMetrics from "@/components/health-intelligence/MeasureImpactMetrics";
 import { sharedMeasureFamilies, type SharedMeasureFamily, type MeasureObligation } from "@/data/synthetic/sharedMeasures";
 
 type HdiView = "overview" | "program" | "contract" | "worklist" | "action";
@@ -345,7 +346,8 @@ export default function HealthDataIntelligenceCommandPlane({ onOpenDataSubmissio
 
     {measureContext && (view === "program" || view === "contract") && <aside className="rounded-xl border border-[#b5d1ca] bg-[#f5fbf8] p-4">
       <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-wide text-[#28737a]">Shared measure context</p><p className="mt-1 text-base font-bold text-slate-900">{measureContext.family.name} · {measureContext.obligation.definitionId}</p><p className="mt-1 text-xs text-slate-600">{measureContext.obligation.label} · illustrative MY 2026 mapping</p></div><button type="button" onClick={returnToSharedMeasures} className="rounded-lg border border-[#b5d1ca] bg-white px-3 py-2 text-xs font-semibold text-[#176b75]">← Back to shared measures</button></div>
-      <p className="mt-3 text-sm text-slate-700"><strong>Next step:</strong> {measureContext.family.nextAction}</p><p className="mt-1 text-xs leading-5 text-slate-500">You are viewing the full {view === "contract" ? "contract" : "program"} overview. Its existing scorecards and patient lists are not filtered to this measure.</p>
+      <MeasureImpactMetrics impact={measureContext.obligation.impact} direction={measureContext.family.definitions.find(item => item.id === measureContext.obligation.definitionId)!.direction} />
+      <p className="mt-3 text-sm text-slate-700"><strong>Action:</strong> {measureContext.family.nextAction}</p><p className="mt-1 text-xs leading-5 text-slate-500">Full {view === "contract" ? "contract" : "program"} overview; patient lists are not filtered to this measure.</p>
     </aside>}
 
     {view === "program" && <ProgramOverview obligation={selected} opportunities={opportunitiesFor(selected.id)} onBack={closeProgram} onWorklist={openWorklist} onOpenDataSubmissions={selected.id === "mips-mvp" ? openMipsDashboard : undefined} onOpenPatientWorklist={openPatientWorklist} onOpenContract={openContract} />}
